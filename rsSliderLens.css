@@ -1,0 +1,18 @@
+#sliderH {
+    display: inline-block;
+    position: absolute;
+    top: 10px;
+    left: 100px;
+    height: 30px;
+    background-color: green;
+    z-index: 5;
+}
+
+#sliderV {
+    display: inline-block;
+    position: absolute;
+    top: 170px;
+    left: 100px;
+    width: 10px;
+    background-color: green;
+}
