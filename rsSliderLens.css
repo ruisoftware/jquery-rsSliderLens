@@ -1,7 +1,7 @@
 #sliderH {
     display: inline-block;
     position: absolute;
-    top: 10px;
+    top: 50px;
     left: 100px;
     height: 30px;
     background-color: green;
@@ -11,8 +11,17 @@
 #sliderV {
     display: inline-block;
     position: absolute;
-    top: 170px;
+    top: 150px;
     left: 100px;
     width: 10px;
     background-color: green;
+}
+
+.sliderlens-range {
+    background-color: red;
+    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
+    filter: alpha(opacity=50);
+    -moz-opacity: 0.5;
+    -khtml-opacity: 0.5;
+    opacity: 0.5;
 }
