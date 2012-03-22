@@ -20,14 +20,18 @@
 (function ($) {
     var SliderLensClass = function ($origBar, opts) {
         var elemOrig = {
-            pos: $origBar.position(),
-            width: $origBar.width(),
-            height: $origBar.height()
-        },
+                pos: $origBar.position(),
+                width: $origBar.width(),
+                height: $origBar.height(),
+                outerWidth: 0,
+                outerHeight: 0,
+                init: function () {
+                    this.outerWidth = $origBar.outerWidth() - util.toInt($origBar.css('border-left-width')) - util.toInt($origBar.css('border-right-width'));
+                    this.outerHeight = $origBar.outerHeight() - util.toInt($origBar.css('border-top-width')) - util.toInt($origBar.css('border-bottom-width'));
+                }
+            },
             elemRange = {
                 $elem: null,
-                width: elemOrig.width * opts.handle.zoom,
-                height: elemOrig.height * opts.handle.zoom,
                 init: function () {
                     if (opts.highlightRange && info.isRangeDefined) {
                         this.$elem = $("<div>").css({
@@ -36,17 +40,17 @@
                         }).addClass(opts.style.classHighlightRange);
                         if (info.isHoriz) {
                             this.$elem.css({
-                                'left': (elemOrig.pos.left + info.fromPixel) + 'px',
+                                'left': (elemOrig.pos.left + info.fromPixel + util.toInt($origBar.css('margin-left'))) + 'px',
                                 'top': elemOrig.pos.top + 'px',
-                                'width': (info.toPixel - info.fromPixel + 1) + 'px',
+                                'width': (info.toPixel - info.fromPixel) + 'px',
                                 'height': elemOrig.height + 'px'
                             });
                         } else {
                             this.$elem.css({
                                 'left': elemOrig.pos.left + 'px',
-                                'top': (elemOrig.pos.top + info.fromPixel) + 'px',
+                                'top': (elemOrig.pos.top + info.fromPixel + util.toInt($origBar.css('margin-top'))) + 'px',
                                 'width': elemOrig.width + 'px',
-                                'height': (info.toPixel - info.fromPixel + 1) + 'px'
+                                'height': (info.toPixel - info.fromPixel) + 'px'
                             });
                         }
                     }
@@ -55,13 +59,14 @@
             elemMagnif = {
                 $elem1st: null,
                 $elem2nd: null,
+                $elemRange1st: null,
+                $elemRange2nd: null,
                 width: elemOrig.width * opts.handle.zoom,
                 height: elemOrig.height * opts.handle.zoom,
                 init: function () {
-                    var scale = 'scale(' + opts.handle.zoom + ')',
-                        paddingHandle = opts.handle.size / opts.handle.zoom / (info.useDoubleHandlers ? 1 : 2);
-                    this.$elem1st = $origBar.clone().removeAttr('id').css({
-                        'position': 'static',
+                    var scale = 'scale(' + opts.handle.zoom + ')';
+                    this.$elem1st = $origBar.clone().removeAttr('id').removeAttr('class').css({
+                        'position': 'absolute',
                         '-webkit-transform-origin': '0 0',
                         '-moz-transform-origin': '0 0',
                         '-o-transform-origin': '0 0',
@@ -74,43 +79,65 @@
                         'transform': scale,
                         'filter': "progid:DXImageTransform.Microsoft.Matrix(M11=" + opts.handle.zoom + ", M12=0, M21=0, M22=" + opts.handle.zoom + ", DX=0, Dy=0, SizingMethod='auto expand');",
                         'z-index': util.toInt($origBar.css('z-index')) + 2,
-                        // paddingHandle * 2 is an extra space that Safari needs for a max bounds scroll position, but doesn't harm other browsers
-                        'width': (info.isHoriz ? this.width + paddingHandle * 2: elemOrig.width) + 'px',
-                        'height': (info.isHoriz ? elemOrig.height : this.height + paddingHandle * 2) + 'px'
+                        'width': elemOrig.width + 'px',
+                        'height': elemOrig.height + 'px',
+                        'left': 0,
+                        'top': 0,
+'background-color': '#bfb'
                     });
+
                     if (info.useDoubleHandlers) {
                         this.$elem2nd = this.$elem1st.clone();
-                        if (info.isHoriz) {
-                            this.$elem1st.css('padding-left', paddingHandle + 'px');
-                            this.$elem2nd.css('padding-right', paddingHandle + 'px');
-                        } else {
-                            this.$elem1st.css('padding-top', paddingHandle + 'px');
-                            this.$elem2nd.css('padding-bottom', paddingHandle + 'px');
-                        }
-                    } else {
-                        if (info.isHoriz) {
-                            this.$elem1st.css({
-                                'padding-left': paddingHandle + 'px',
-                                'padding-right': paddingHandle + 'px'
+                    }
+                    this.initRanges(scale);
+                },
+                initRanges: function (scale) {
+                    if (opts.highlightRange && info.isRangeDefined) {
+                        var createMagnifRange = function (isFirst) {
+                            return elemRange.$elem.clone().removeAttr('id').css({
+                                '-webkit-transform-origin': '0 0',
+                                '-moz-transform-origin': '0 0',
+                                '-o-transform-origin': '0 0',
+                                'msTransformOrigin': '0 0',
+                                'transform-origin': '0 0',
+                                '-webkit-transform': scale,
+                                '-moz-transform': scale,
+                                '-o-transform': scale,
+                                'msTransform': scale,
+                                'transform': scale,
+                                'z-index': util.toInt($origBar.css('z-index')) + 2,
+                                'left': 0,
+                                'top': 0
                             });
-                        } else {
-                            this.$elem1st.css({
-                                'padding-top': paddingHandle + 'px',
-                                'padding-bottom': paddingHandle + 'px'
-                            });
+                        };
+                        
+                        this.$elemRange1st = createMagnifRange(true);
+                        if (info.useDoubleHandlers) {
+                            this.$elemRange2nd = createMagnifRange(false);
                         }
+                    }
+                },
+                move: function (isFirst, offset) {
+                    (isFirst ? this.$elem1st : this.$elem2nd).css(info.isHoriz? 'left' : 'top', offset + 'px');
+                    if (opts.highlightRange && info.isRangeDefined) {
+                        (isFirst ? this.$elemRange1st : this.$elemRange2nd).css(info.isHoriz? 'left' : 'top', (offset + info.fromPixel * opts.handle.zoom) + 'px');
                     }
                 }
             },
             elemHandler = {
                 $elem1st: null,
                 $elem2nd: null,
-                width: elemOrig.width * opts.handle.zoom,
-                height: elemOrig.height * opts.handle.zoom,
+                width: 0,
+                height: 0,
                 init: function () {
+                    this.width = elemOrig.outerWidth * opts.handle.zoom;
+                    this.height = elemOrig.outerHeight * opts.handle.zoom;
                     var cssCommon = {
-                        'border': '1px black solid',
+                        'background-color': '#ddd',
+                        //'border': '1px blue solid',
                         'overflow': 'hidden',
+                        'opacity': 0.8,
+                        
                         'position': 'absolute',
                         'z-index': util.toInt($origBar.css('z-index')) + 2
                     }, cssOrient;
@@ -128,17 +155,18 @@
                             'left': (elemOrig.pos.left - (elemMagnif.width - elemOrig.width) * opts.handle.relativePos) + 'px'
                         };
                     }
-                    this.$elem1st = elemMagnif.$elem1st.wrap("<div>").parent().css(cssCommon).css(cssOrient);
+                    this.$elem1st = elemMagnif.$elem1st.add(elemMagnif.$elemRange1st).wrapAll("<div>").parent().css(cssCommon).css(cssOrient);
                     if (info.useDoubleHandlers) {
-                        this.$elem2nd = elemMagnif.$elem2nd.wrap("<div>").parent().css(cssCommon).css(cssOrient);
+                        this.$elem2nd = elemMagnif.$elem2nd.add(elemMagnif.$elemRange2nd).wrapAll("<div>").parent().css(cssCommon).css(cssOrient);
                     }
                 }
             },
 
             info = {
                 currValue: [0, 0], // Values for both handlers. When only one handler is used, the currValue[1] is ignored
-                ticksStep: Math.max(elemOrig.width, elemOrig.height) / (opts.max - opts.min),
+                ticksStep: 0,
                 isHoriz: elemOrig.width >= elemOrig.height,
+                initialMargin: 0,
                 fromPixel: 0,
                 toPixel: 0,
                 useDoubleHandlers: !!opts.value && (typeof opts.value === 'object') && opts.value.length === 2,
@@ -197,17 +225,20 @@
                 },
                 init: function () {
                     this.checkBounds();
-                    this.fromPixel = info.isRangeDefined ? (opts.range[0] - opts.min) * this.ticksStep : 0;
-                    this.toPixel = ((info.isRangeDefined ? opts.range[1] : opts.max) - opts.min) * this.ticksStep;
+                    this.ticksStep = (Math.max(elemOrig.outerWidth, elemOrig.outerHeight) - opts.beginOffset - opts.endOffset) / (opts.max - opts.min);
+                    this.fromPixel = (info.isRangeDefined ? opts.range[0] - opts.min : 0) * this.ticksStep + opts.beginOffset;
+                    this.toPixel = ((info.isRangeDefined ? opts.range[1] : opts.max) - opts.min) * this.ticksStep + opts.beginOffset/* - opts.endOffset*/;
+                    this.initialMargin = (this.isHoriz ? util.toInt($origBar.css('margin-left')) : util.toInt($origBar.css('margin-top')));
                 }
             },
 
             init = function () {
+                elemOrig.init();
                 info.init();
                 elemRange.init();
                 elemMagnif.init();
                 elemHandler.init();
-                $origBar.after(elemRange.$elem).after(elemHandler.$elem1st).after(elemHandler.$elem2nd);
+                $origBar.after(elemHandler.$elem2nd).after(elemHandler.$elem1st).after(elemRange.$elem);
 
                 // disable user text selection
                 $origBar.add(elemRange.$elem).
@@ -236,51 +267,79 @@
                     elemHandler.$elem2nd.mousedown(panUtil.startDragFromHandle2nd).mouseup(panUtil.stopDrag);
                 }
             },
-            getPosHandler = function (valueNoMin, $handlerElem) {
-                var valuePixel = (opts.step > 0.00005 ? Math.round(valueNoMin * info.ticksStep / opts.step) * opts.step : valueNoMin * info.ticksStep);
+            getHandlerOffset = function ($handlerElem) {
                 if (info.useDoubleHandlers) {
                     if ($handlerElem === elemHandler.$elem1st) {
                         // top/left handler: measure point is located on the handle bottom/right side
-                        return valuePixel - opts.handle.size;
+                        return opts.handle.size;
                     } else {
                         // bottom/right handler: measure point is located on the handle up/left side
-                        return valuePixel;
+                        return 0;
                     }
-                } else {
-                    // one handler: measure point is located on the handle center
-                    return valuePixel - opts.handle.size / 2;
                 }
+                // one handler: measure point is located on the handle center
+                return opts.handle.size / 2;
+            },
+            getHandlerPos = function (valuePixel, $handlerElem) {
+                return valuePixel + info.initialMargin - getHandlerOffset($handlerElem);
             },
             setValuePixel = function (value, $handlerElem) { // value is a zero based pixel value
-                var canSet = function () {
+                var canSet = function (v) {
                     if (info.useDoubleHandlers) {
                         if ($handlerElem === elemHandler.$elem1st) {
-                            return value >= info.fromPixel && value <= info.currValue[1] * info.ticksStep;
+                            return v >= info.fromPixel && v <= info.currValue[1] * info.ticksStep + opts.beginOffset;
                         } else {
-                            return value >= info.currValue[0] * info.ticksStep && value <= info.toPixel;
+                            return v >= (info.currValue[0] * info.ticksStep + opts.beginOffset) && v <= info.toPixel + opts.endOffset;
                         }
                     } else {
-                        return value >= info.fromPixel && value <= info.toPixel;
+                        return v >= info.fromPixel && v <= info.toPixel + opts.endOffset;
                     }
                 };
-                if (canSet()) {
-                    setValueTicks(value / info.ticksStep, $handlerElem);
+                if (canSet(value + opts.beginOffset)) {
+                    setValueTicks(value / info.ticksStep + opts.min, $handlerElem);
                 }
+            },
+            checkLimits = function (value) {
+                if (info.isRangeDefined) {
+                    if (value < opts.range[0]) {
+                        return opts.range[0];
+                    } else {
+                        if (value > opts.range[1]) {
+                            return opts.range[1];
+                        }
+                    }
+                } else {
+                    if (value < opts.min) {
+                        return opts.min;
+                    } else {
+                        if (value > opts.max) {
+                            return opts.max;
+                        }
+                    }
+                }
+                return value;
             },
             setValueTicks = function (value, $handlerElem) {
                 var valueNoMin = value - opts.min;
+                valueNoMin = opts.step > 0.00005 ? Math.round(valueNoMin / opts.step) * opts.step : valueNoMin;
+                valueNoMin = checkLimits(valueNoMin + opts.min) - opts.min;
+                
+                var valuePixel = valueNoMin * info.ticksStep,
+                    $magnifElem = $handlerElem === elemHandler.$elem1st? elemMagnif.$elem1st : elemMagnif.$elem2nd;
                 if (info.isHoriz) {
                     $handlerElem.css({
-                        'left': (elemOrig.pos.left + getPosHandler(valueNoMin, $handlerElem)) + 'px'
-                    }).scrollLeft(valueNoMin * opts.handle.zoom * info.ticksStep);
+                        'left': (elemOrig.pos.left + opts.beginOffset + getHandlerPos(valuePixel, $handlerElem)) + 'px'
+                    });
+                    elemMagnif.move($handlerElem === elemHandler.$elem1st, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
                 } else {
                     $handlerElem.css({
-                        'top': (elemOrig.pos.top + getPosHandler(valueNoMin, $handlerElem)) + 'px'
-                    }).scrollTop(valueNoMin * opts.handle.zoom * info.ticksStep);
+                        'top': (elemOrig.pos.top + opts.beginOffset + getHandlerPos(valuePixel, $handlerElem)) + 'px'
+                    });
+                    elemMagnif.move($handlerElem === elemHandler.$elem1st, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
                 }
-                info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0] = value;
+                info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0] = valueNoMin + opts.min;
                 if (opts.events.onChange) {
-                    opts.events.onChange($origBar, info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0], $handlerElem === elemHandler.$elem1st);
+                    opts.events.onChange($origBar, info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0], $handlerElem === elemHandler.$elem1st, valuePixel);
                 }
             },
             util = {
@@ -397,14 +456,21 @@
 
     // public access to the default input parameters
     $.fn.rsSliderLens.defaults = {
-        value: 16, // number or a two number array. When a single number is used, only a single handle is shown. When an array is used (e.g. [5, 20]) two handles are shown.
+        value: 0, // number or a two number array. When a single number is used, only a single handle is shown. When an array is used (e.g. [5, 20]) two handles are shown.
         min: 0,
         max: 16,
         step: 0,
+        beginOffset: 0,
+        endOffset: 0,
         range: null, // Two number array that defines the range of values that the user can select. For example, if range=[20, 80] and min=0, max=100 the slider 
         // renders all scale from 0 to 100, but only the 20-80 range is selectable.
         // If you want everything to be selectable, then do not specify range, or use range=null or even use range=[0, 100].
 
+        // false - no range
+        // true - between value[0] and value[1]
+        // "min" - between 0 and value[0]
+        // "max" - between value[1] (or value[0], for single handler) to max
+        
         highlightRange: true, // If true, a highlight bar shows up to indicate the range location. This parameter is ignored if range parameter is undefined or null.
         // The style of this bar is defined by the classHighlightRange parameter
         style: {
@@ -419,7 +485,7 @@
             animation: 200
         },
         events: {
-            onChange: null // function ($origBar, value, isFirstHandle)
+            onChange: null // function ($origBar, value, isFirstHandle, pixelValue)
         }
     };
 
