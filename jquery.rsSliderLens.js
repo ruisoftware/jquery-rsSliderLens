@@ -33,25 +33,43 @@
             elemRange = {
                 $elem: null,
                 init: function () {
-                    if (opts.highlightRange && info.isRangeDefined) {
+                    if (!!opts.range) {
                         this.$elem = $("<div>").css({
                             'position': 'absolute',
                             'z-index': util.toInt($origBar.css('z-index')) + 1
                         }).addClass(opts.style.classHighlightRange);
                         if (info.isHoriz) {
                             this.$elem.css({
-                                'left': (elemOrig.pos.left + info.fromPixel + util.toInt($origBar.css('margin-left'))) + 'px',
                                 'top': elemOrig.pos.top + 'px',
-                                'width': (info.toPixel - info.fromPixel) + 'px',
                                 'height': elemOrig.height + 'px'
                             });
+                            switch (opts.range) {
+                                case 'min': this.$elem.css('left', (elemOrig.pos.left + info.initialMargin + opts.beginOffset) + 'px');
+                                            break;
+                                default:
+                                    if (info.isRangeDefined) {
+                                        this.$elem.css({
+                                            'left': (elemOrig.pos.left + info.fromPixel + info.initialMargin) + 'px',
+                                            'width': (info.toPixel - info.fromPixel) + 'px'
+                                        });
+                                    }
+                            }
                         } else {
                             this.$elem.css({
                                 'left': elemOrig.pos.left + 'px',
-                                'top': (elemOrig.pos.top + info.fromPixel + util.toInt($origBar.css('margin-top'))) + 'px',
-                                'width': elemOrig.width + 'px',
-                                'height': (info.toPixel - info.fromPixel) + 'px'
+                                'width': elemOrig.width + 'px'
                             });
+                            switch (opts.range) {
+                                case 'min': this.$elem.css('top', (elemOrig.pos.top + info.initialMargin + opts.beginOffset) + 'px');
+                                            break;
+                                default:
+                                    if (info.isRangeDefined) {
+                                        this.$elem.css({
+                                            'top': (elemOrig.pos.top + info.fromPixel + info.initialMargin) + 'px',
+                                            'height': (info.toPixel - info.fromPixel) + 'px'
+                                        });
+                                    }
+                            }
                         }
                     }
                 }
@@ -63,7 +81,7 @@
                 $elemRange2nd: null,
                 width: elemOrig.width * opts.handle.zoom,
                 height: elemOrig.height * opts.handle.zoom,
-                init: function () {
+                initClone: function () {
                     var scale = 'scale(' + opts.handle.zoom + ')';
                     this.$elem1st = $origBar.clone().removeAttr('id').removeAttr('class').css({
                         'position': 'absolute',
@@ -91,8 +109,37 @@
                     }
                     this.initRanges(scale);
                 },
+                
+                initCanvasHandler: function () {
+                    this.$elem1st = $("<canvas>").attr({
+                        'width': this.width + 'px',
+                        'height': this.height + 'px'
+                    });
+                    if (opts.handle.onDrawRuler) {
+                        opts.handle.onDrawRuler($origBar, this.$elem1st[0], this.width, this.height);
+                    } else {
+                        if (this.$elem1st[0].getContext) {
+                            util.initCanvas(this.$elem1st[0].getContext('2d'), this.width, this.height, opts.handle.zoom);
+                        }
+                    }
+                },
+                init: function () {
+                    /*
+                    if (opts.showRuler) {
+                        this.initCanvas();
+                    }
+                    */
+                    if (opts.showRuler === true || opts.showRuler === 'handler') {
+                        this.initCanvasHandler();
+                        if (opts.showRuler === true) {
+                            //this.initCanvasOutsideHandler();
+                        }
+                    } else {
+                        this.initClone();
+                    }
+                },
                 initRanges: function (scale) {
-                    if (opts.highlightRange && info.isRangeDefined) {
+                    if (info.isRangeDefined || opts.range === 'min' || opts.range === 'max') {
                         var createMagnifRange = function (isFirst) {
                             return elemRange.$elem.clone().removeAttr('id').css({
                                 '-webkit-transform-origin': '0 0',
@@ -117,14 +164,62 @@
                         }
                     }
                 },
-                move: function (isFirst, offset) {
+                move: function (isFirst, valuePixel, offset) {
+                    switch (opts.range) {
+                        case 'min': if (isFirst) { 
+                                        elemRange.$elem.css(info.isHoriz ? 'width' : 'height', valuePixel + 'px');
+                                        if (info.isHoriz) {
+                                            this.$elemRange1st.css({
+                                                'left': offset + 'px',
+                                                'width': valuePixel + 'px'
+                                            });
+                                        } else {
+                                            this.$elemRange1st.css({
+                                                'top': offset + 'px',
+                                                'height': valuePixel + 'px'
+                                            });
+                                        }
+                                    }
+                                    break;
+                        case 'max': if (!info.useDoubleHandlers || info.useDoubleHandlers && !isFirst) {
+                                        if (info.isHoriz) {
+                                            elemRange.$elem.css({
+                                                'left': (elemOrig.pos.left + valuePixel + opts.beginOffset) + 'px',
+                                                'width': (elemOrig.outerWidth - valuePixel - opts.endOffset) + 'px'
+                                            });
+                                            (info.useDoubleHandlers ? this.$elemRange2nd : this.$elemRange1st).
+                                                css('width', (elemOrig.outerWidth - valuePixel - opts.endOffset) + 'px');
+                                        } else {
+                                            elemRange.$elem.css({
+                                                'top': (elemOrig.pos.top + valuePixel + opts.beginOffset) + 'px',
+                                                'height': (elemOrig.outerHeight - valuePixel - opts.endOffset) + 'px'
+                                            });
+                                            (info.useDoubleHandlers ? this.$elemRange2nd : this.$elemRange1st).
+                                                css('height', (elemOrig.outerHeight - valuePixel - opts.endOffset) + 'px');
+                                        }
+                                    }
+                                    break;
+                        case true:  if (info.isHoriz) {
+                                        var left = elemOrig.pos.left + (info.currValue[0] - opts.min) * info.ticksStep + opts.beginOffset;
+                                        elemRange.$elem.css({
+                                            'left': left + 'px',
+                                            'width': (elemOrig.pos.left + (info.currValue[1] - opts.min) * info.ticksStep + opts.beginOffset - left) + 'px'
+                                        });
+                                    } else {
+                                        var top = elemOrig.pos.top + (info.currValue[0] - opts.min) * info.ticksStep + opts.beginOffset;
+                                        elemRange.$elem.css({
+                                            'top': top + 'px',
+                                            'height': (elemOrig.pos.top + (info.currValue[1] - opts.min) * info.ticksStep + opts.beginOffset - top) + 'px'
+                                        });
+                                    }
+                    }
                     (isFirst ? this.$elem1st : this.$elem2nd).css(info.isHoriz? 'left' : 'top', offset + 'px');
-                    if (opts.highlightRange && info.isRangeDefined) {
+                    if (info.isRangeDefined) {
                         (isFirst ? this.$elemRange1st : this.$elemRange2nd).css(info.isHoriz? 'left' : 'top', (offset + info.fromPixel * opts.handle.zoom) + 'px');
                     }
                 }
             },
-            elemHandler = {
+            elemHandle = {
                 $elem1st: null,
                 $elem2nd: null,
                 width: 0,
@@ -135,7 +230,7 @@
                     var cssCommon = {
                         'background-color': '#ddd',
                         //'border': '1px blue solid',
-                        'overflow': 'hidden',
+                        //'overflow': 'hidden',
                         'opacity': 0.8,
                         
                         'position': 'absolute',
@@ -171,6 +266,7 @@
                 toPixel: 0,
                 useDoubleHandlers: !!opts.value && (typeof opts.value === 'object') && opts.value.length === 2,
                 isRangeDefined: !!opts.range && (typeof opts.range === 'object') && opts.range.length === 2,
+                isStepDefined: opts.step > 0.00005,
                 checkBounds: function () {
                     var checkValue = function (minBound, maxBound) {
                         if (opts.value < minBound) {
@@ -201,6 +297,10 @@
                             opts.value[0] = opts.value[1];
                             opts.value[1] = sw;
                         }
+                    } else {
+                        if (opts.range === true) { // range=true does not make sense for single handle
+                            opts.range = false;
+                        }
                     }
                     if (info.isRangeDefined) {
                         if (opts.range[0] > opts.range[1]) {
@@ -227,7 +327,7 @@
                     this.checkBounds();
                     this.ticksStep = (Math.max(elemOrig.outerWidth, elemOrig.outerHeight) - opts.beginOffset - opts.endOffset) / (opts.max - opts.min);
                     this.fromPixel = (info.isRangeDefined ? opts.range[0] - opts.min : 0) * this.ticksStep + opts.beginOffset;
-                    this.toPixel = ((info.isRangeDefined ? opts.range[1] : opts.max) - opts.min) * this.ticksStep + opts.beginOffset/* - opts.endOffset*/;
+                    this.toPixel = ((info.isRangeDefined ? opts.range[1] : opts.max) - opts.min) * this.ticksStep + opts.beginOffset;
                     this.initialMargin = (this.isHoriz ? util.toInt($origBar.css('margin-left')) : util.toInt($origBar.css('margin-top')));
                 }
             },
@@ -237,15 +337,15 @@
                 info.init();
                 elemRange.init();
                 elemMagnif.init();
-                elemHandler.init();
-                $origBar.after(elemHandler.$elem2nd).after(elemHandler.$elem1st).after(elemRange.$elem);
+                elemHandle.init();
+                $origBar.after(elemHandle.$elem2nd).after(elemHandle.$elem1st).after(elemRange.$elem);
 
                 // disable user text selection
                 $origBar.add(elemRange.$elem).
                     add(elemMagnif.$elem1st).
                     add(elemMagnif.$elem2nd).
-                    add(elemHandler.$elem1st).
-                    add(elemHandler.$elem2nd).css({
+                    add(elemHandle.$elem1st).
+                    add(elemHandle.$elem2nd).css({
                         '-webkit-touch-callout': 'none',
                         '-webkit-user-select': 'none',
                         '-khtml-user-select': 'none',
@@ -256,20 +356,20 @@
                     });
 
                 $origBar.add(elemRange.$elem).mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
-                elemHandler.$elem1st.mousedown(panUtil.startDragFromHandle1st).mouseup(panUtil.stopDrag);
+                elemHandle.$elem1st.mousedown(panUtil.startDragFromHandle1st).mouseup(panUtil.stopDrag);
 
                 // to prevent the default behaviour in IE when dragging an element
-                $origBar[0].ondragstart = elemMagnif.$elem1st[0].ondragstart = elemHandler.$elem1st[0].ondragstart =
-                $origBar[0].onselectstart = elemMagnif.$elem1st[0].onselectstart = elemHandler.$elem1st[0].onselectstart = function () { return false; };
+                $origBar[0].ondragstart = elemMagnif.$elem1st[0].ondragstart = elemHandle.$elem1st[0].ondragstart =
+                $origBar[0].onselectstart = elemMagnif.$elem1st[0].onselectstart = elemHandle.$elem1st[0].onselectstart = function () { return false; };
                 if (info.useDoubleHandlers) {
-                    elemMagnif.$elem2nd[0].ondragstart = elemHandler.$elem2nd[0].ondragstart =
-                    elemMagnif.$elem2nd[0].onselectstart = elemHandler.$elem2nd[0].onselectstart = function () { return false; };
-                    elemHandler.$elem2nd.mousedown(panUtil.startDragFromHandle2nd).mouseup(panUtil.stopDrag);
+                    elemMagnif.$elem2nd[0].ondragstart = elemHandle.$elem2nd[0].ondragstart =
+                    elemMagnif.$elem2nd[0].onselectstart = elemHandle.$elem2nd[0].onselectstart = function () { return false; };
+                    elemHandle.$elem2nd.mousedown(panUtil.startDragFromHandle2nd).mouseup(panUtil.stopDrag);
                 }
             },
             getHandlerOffset = function ($handlerElem) {
                 if (info.useDoubleHandlers) {
-                    if ($handlerElem === elemHandler.$elem1st) {
+                    if ($handlerElem === elemHandle.$elem1st) {
                         // top/left handler: measure point is located on the handle bottom/right side
                         return opts.handle.size;
                     } else {
@@ -286,7 +386,7 @@
             setValuePixel = function (value, $handlerElem) { // value is a zero based pixel value
                 var canSet = function (v) {
                     if (info.useDoubleHandlers) {
-                        if ($handlerElem === elemHandler.$elem1st) {
+                        if ($handlerElem === elemHandle.$elem1st) {
                             return v >= info.fromPixel && v <= info.currValue[1] * info.ticksStep + opts.beginOffset;
                         } else {
                             return v >= (info.currValue[0] * info.ticksStep + opts.beginOffset) && v <= info.toPixel + opts.endOffset;
@@ -321,25 +421,26 @@
             },
             setValueTicks = function (value, $handlerElem) {
                 var valueNoMin = value - opts.min;
-                valueNoMin = opts.step > 0.00005 ? Math.round(valueNoMin / opts.step) * opts.step : valueNoMin;
+                valueNoMin = info.isStepDefined ? Math.round(valueNoMin / opts.step) * opts.step : valueNoMin;
                 valueNoMin = checkLimits(valueNoMin + opts.min) - opts.min;
                 
                 var valuePixel = valueNoMin * info.ticksStep,
-                    $magnifElem = $handlerElem === elemHandler.$elem1st? elemMagnif.$elem1st : elemMagnif.$elem2nd;
+                    $magnifElem = $handlerElem === elemHandle.$elem1st? elemMagnif.$elem1st : elemMagnif.$elem2nd;
+                
+                info.currValue[$handlerElem === elemHandle.$elem2nd ? 1 : 0] = valueNoMin + opts.min;
                 if (info.isHoriz) {
                     $handlerElem.css({
                         'left': (elemOrig.pos.left + opts.beginOffset + getHandlerPos(valuePixel, $handlerElem)) + 'px'
                     });
-                    elemMagnif.move($handlerElem === elemHandler.$elem1st, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
+                    elemMagnif.move($handlerElem === elemHandle.$elem1st, valuePixel, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
                 } else {
                     $handlerElem.css({
                         'top': (elemOrig.pos.top + opts.beginOffset + getHandlerPos(valuePixel, $handlerElem)) + 'px'
                     });
-                    elemMagnif.move($handlerElem === elemHandler.$elem1st, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
+                    elemMagnif.move($handlerElem === elemHandle.$elem1st, valuePixel, getHandlerOffset($handlerElem) - info.initialMargin - (opts.beginOffset + valuePixel) * opts.handle.zoom);
                 }
-                info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0] = valueNoMin + opts.min;
-                if (opts.events.onChange) {
-                    opts.events.onChange($origBar, info.currValue[$handlerElem === elemHandler.$elem2nd ? 1 : 0], $handlerElem === elemHandler.$elem1st, valuePixel);
+                if (opts.onChange) {
+                    opts.onChange($origBar, info.currValue[$handlerElem === elemHandle.$elem2nd ? 1 : 0], $handlerElem === elemHandle.$elem1st, valuePixel);
                 }
             },
             util = {
@@ -348,6 +449,102 @@
                 },
                 toFloat: function (str) {
                     return !str || str == 'auto' || str == '' ? 0.0 : parseFloat(str);
+                },
+                roundToDecimalPlaces: function (num, decimals) {
+                    var base = Math.pow(10, decimals);
+                    return Math.round(num * base) / base;
+                },
+                // rounds n to the nearest multiple of m, e.g., if n = 24.8 and m = 25, then returns 25; if n = 24.8 and m = 10, then returns 20
+                roundNtoMultipleOfM: function (n, m) {
+                    return Math.round(n / m) * m;
+                },
+                initCanvas: function (ctx, width, height, zoom) {
+                    var getFontData = function () {
+                            var fontSize = !!opts.ruler.values.font ? opts.ruler.values.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
+                                fontData = { size: 10, type: 'px', sizePos: 0 };
+                            if (!fontSize) {
+                                fontSize = [$("html,body").css('font-size')];
+                            }
+                            fontData.size = util.toFloat(fontSize[0]);
+                            fontData.type = fontSize[0].replace(/(\d*.\d+|\d)/, '').toLowerCase();
+                            fontData.sizePos = !!opts.ruler.values.font ? opts.ruler.values.font.indexOf(fontSize[0]) : 0;
+                            return {
+                                size: fontData.size * zoom,
+                                contextFont:
+                                    ((!!opts.ruler.values.font ? opts.ruler.values.font.substring(0, fontData.sizePos) + ' ' : '') +
+                                    fontData.size * zoom + fontData.type + ' ' +
+                                    (!!opts.ruler.values.font ? opts.ruler.values.font.substring(fontData.sizePos + fontSize[0].length + 1) : ' arial')).trim()
+                            };
+                        },
+                        fontData = getFontData(),
+                        drawTick = function (i, longerMark, pos) {
+                            i = Math.round(i) + 0.5;
+                            ctx.moveTo(i, pos - (longerMark? opts.ruler.tickMarks.sizeBig : opts.ruler.tickMarks.sizeSmall) * zoom);
+                            ctx.lineTo(i, pos);
+                        },
+                        getFormatedNum = function (num) {
+                            return opts.ruler.values.onFmtValue ? opts.ruler.values.onFmtValue($origBar, num) : num;
+                        };
+                        
+                    ctx.font = fontData.contextFont;
+                    ctx.fillStyle = opts.ruler.values.fillStyle;
+                    ctx.strokeStyle = opts.ruler.tickMarks.strokeStyle;
+                    ctx.lineWidth = zoom;
+                    var fmtMin = getFormatedNum(opts.min),
+                        fmtMax = getFormatedNum(opts.max),
+                        from = curr = ctx.measureText(fmtMin).width,
+                        deltaStart = from / 2,
+                        deltaEnd = ctx.measureText(fmtMax).width / 2,
+                        lastLabel = width - deltaEnd * 2,
+                        to = width - deltaEnd,
+                        space = width - deltaStart - deltaEnd,
+                        tickMarkRate = space / (opts.max - opts.min),
+                        pixelStep = info.isStepDefined ? tickMarkRate * opts.step : zoom * 2,
+                        textRelativePos = fontData.size + (height - fontData.size) * opts.ruler.values.relativePos;
+                        tickMarkRelativePos = Math.max(opts.ruler.tickMarks.sizeSmall, opts.ruler.tickMarks.sizeBig) + (height - Math.max(opts.ruler.tickMarks.sizeSmall, opts.ruler.tickMarks.sizeBig)) * opts.ruler.tickMarks.relativePos;
+                    if (opts.ruler.values.show) {
+                        ctx.fillText(fmtMin, 0, textRelativePos);
+                    }
+                    for (var i = deltaStart, longerMark = true, cond = true; cond; i += pixelStep) {
+                        var num = util.roundToDecimalPlaces((i - deltaStart) / tickMarkRate + opts.min, opts.ruler.values.decimals),
+                            fmtNum;
+
+                        if (info.isStepDefined) {
+                            num = util.roundNtoMultipleOfM(num - opts.min, opts.step) + opts.min;
+                        }
+                        fmtNum = opts.ruler.values.onFmtValue ? opts.ruler.values.onFmtValue($origBar, num) : num;
+                            
+                        var textPos = ctx.measureText(fmtNum).width / 2;
+                        
+                        if (opts.ruler.values.show) {
+                            var doText = // if there is enough space (6px) that would separate this label from the previous one
+                                        i - textPos - curr > 6 * zoom && 
+                                        // and there is enough space to the last label
+                                        lastLabel - i - textPos > 6 * zoom;
+;
+                            // only shows a label, if every prefValueEvery (if defined) and ... 
+                            if (doText && !!opts.ruler.values.prefValueEvery) {
+                                var everyValue = Math.abs((num - opts.min) % opts.ruler.values.prefValueEvery);
+                                doText = everyValue < 0.00005 && i - deltaStart > 0.00005;
+                            }
+
+                            if (doText) {
+                                ctx.fillText(fmtNum, i - textPos, textRelativePos);
+                                curr = i + textPos;
+                                longerMark = true;
+                            }
+                        }
+
+                        cond = to - i - pixelStep > - 0.00005;
+                        if (opts.ruler.tickMarks.show) {
+                            drawTick(i, longerMark || !cond, tickMarkRelativePos);
+                            longerMark = to - i - pixelStep <= 0.00005;
+                        }
+                    }
+                    if (opts.ruler.values.show) {
+                        ctx.fillText(fmtMax, lastLabel, textRelativePos);
+                    }
+                    ctx.stroke();
                 }
             },
             panUtil = {
@@ -366,10 +563,10 @@
                     var to = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top,
                         from;
                     if (!info.useDoubleHandlers || to <= ((info.currValue[0] + info.currValue[1]) / 2 - opts.min) * info.ticksStep) {
-                        panUtil.$handler = elemHandler.$elem1st;
+                        panUtil.$handler = elemHandle.$elem1st;
                         from = (info.currValue[0] - opts.min) * info.ticksStep;
                     } else {
-                        panUtil.$handler = elemHandler.$elem2nd;
+                        panUtil.$handler = elemHandle.$elem2nd;
                         from = (info.currValue[1] - opts.min) * info.ticksStep;
                     }
                     panUtil.noDrag = false;
@@ -389,7 +586,7 @@
                     }
                 },
                 startDragFromHandle1st: function (event) {
-                    panUtil.$handler = elemHandler.$elem1st;
+                    panUtil.$handler = elemHandle.$elem1st;
                     var from = (info.currValue[0] - opts.min) * info.ticksStep,
                         to = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
                     panUtil.noDrag = false;
@@ -397,7 +594,7 @@
                     panUtil.animDone(to);
                 },
                 startDragFromHandle2nd: function (event) {
-                    panUtil.$handler = elemHandler.$elem2nd;
+                    panUtil.$handler = elemHandle.$elem2nd;
                     var from = (info.currValue[1] - opts.min) * info.ticksStep,
                         to = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
                     panUtil.noDrag = false;
@@ -419,10 +616,10 @@
 
         init();
         if (info.useDoubleHandlers) {
-            setValueTicks(opts.value[0], elemHandler.$elem1st);
-            setValueTicks(opts.value[1], elemHandler.$elem2nd);
+            setValueTicks(opts.value[0], elemHandle.$elem1st);
+            setValueTicks(opts.value[1], elemHandle.$elem2nd);
         } else {
-            setValueTicks(opts.value, elemHandler.$elem1st);
+            setValueTicks(opts.value, elemHandle.$elem1st);
         }
     };
 
@@ -447,7 +644,9 @@
         var opts = $.extend({}, $.fn.rsSliderLens.defaults, options);
         opts.handle = $.extend({}, $.fn.rsSliderLens.defaults.handle, options ? options.handle : options);
         opts.style = $.extend({}, $.fn.rsSliderLens.defaults.style, options ? options.style : options);
-        opts.events = $.extend({}, $.fn.rsSliderLens.defaults.events, options ? options.events : options);
+        opts.ruler = $.extend({}, $.fn.rsSliderLens.defaults.ruler, options ? options.ruler : options);
+        opts.ruler.values = $.extend({}, $.fn.rsSliderLens.defaults.ruler.values, options ? (options.ruler ? options.ruler.values : options.ruler) : options);
+        opts.ruler.tickMarks = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks, options ? (options.ruler ? options.ruler.tickMarks : options.ruler) : options);
 
         return this.each(function () {
             new SliderLensClass($(this), opts);
@@ -462,31 +661,47 @@
         step: 0,
         beginOffset: 0,
         endOffset: 0,
-        range: null, // Two number array that defines the range of values that the user can select. For example, if range=[20, 80] and min=0, max=100 the slider 
-        // renders all scale from 0 to 100, but only the 20-80 range is selectable.
-        // If you want everything to be selectable, then do not specify range, or use range=null or even use range=[0, 100].
-
-        // false - no range
-        // true - between value[0] and value[1]
-        // "min" - between 0 and value[0]
-        // "max" - between value[1] (or value[0], for single handler) to max
-        
-        highlightRange: true, // If true, a highlight bar shows up to indicate the range location. This parameter is ignored if range parameter is undefined or null.
-        // The style of this bar is defined by the classHighlightRange parameter
+        range: false,   // false - no range
+                        // true - range between current handlers. Only meaningful for double handlers.
+                        // "min" - between start and first handler
+                        // "max" - between handler and last position, or, when two handlers are used, between second handler and last position.
+                        // [from, to] - defines a range that restricts the input to the interval [from, to].
+                        // The style of this bar is defined by the classHighlightRange parameter
         style: {
             classHighlightRange: 'sliderlens-range'
         },
         handle: {
             size: 50,
             zoom: 1.5,
-            relativePos: 0.4, // float between 0 and 1 that indicates the handler relative (0% - 100%) vertical position (for horizontal sliders).
+            relativePos: 0.5, // float between 0 and 1 that indicates the handler relative (0% - 100%) vertical position (for horizontal sliders).
             // When it is 0, the handler is vertically aligned to the top, 1 for the bottom.
             // For vertical sliders, relativePos is the handler relative horizontal position: 0 for the left side, 1 for the right side
-            animation: 200
+            animation: 200,
+            onDrawRuler: null
         },
-        events: {
-            onChange: null // function ($origBar, value, isFirstHandle, pixelValue)
-        }
+        showRuler: false, // false - Original content appears outside handler. Magnified original content appears inside handler.
+                          // true - Ruler appears outside handler. Magnified rule appears inside handle.
+                          // 'handler' - Original content appears outside handler. Magnified rule appears inside handle.
+        onDrawRuler: null,
+        ruler: {
+            values: {
+                show: true,
+                font: '10px arial',
+                fillStyle: 'black',
+                relativePos: 0,
+                prefValueEvery: null,
+                decimals: 0,
+                onFmtValue: null // function ($origBar, value)
+            },
+            tickMarks: {
+                show: true,
+                strokeStyle: 'black',
+                relativePos: 1,
+                sizeSmall: 10,
+                sizeBig: 15
+            }            
+        },
+        onChange: null // function ($origBar, value, isFirstHandle, pixelValue)
     };
 
     /* TODO */
