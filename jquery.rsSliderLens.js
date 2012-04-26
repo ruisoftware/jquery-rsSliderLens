@@ -63,12 +63,14 @@
             // range that appears outside the handle
             elemRange = {
                 $elem: null,
-                // determines whether the user defined in the class classHighlightRange a height or width property
-                userAlreadyDefinedSize: function () {
+                width: 0,
+                height: 0,
+                // returns the width or height that the user defined in the class classHighlightRange. If user did not defined, returns zero.
+                getUserDefinedFixedSize: function () {
                     var $inspector = $("<div>").css('display', 'none').addClass(opts.style.classHighlightRange);
                     $("body").append($inspector); // add to DOM, in order to read the CSS property
                     try {
-                        return util.toInt($inspector.css(info.isHoriz ? 'height' : 'width')) != 0;
+                        return util.toFloat($inspector.css(info.isHoriz ? 'height' : 'width'));
                     } finally {
                         $inspector.remove(); // and remove from DOM
                     }
@@ -79,36 +81,46 @@
                             'position': 'absolute',
                             'z-index': util.toInt($origBar.css('z-index')) + 1
                         }).addClass(opts.style.classHighlightRange);
+                        var userFixedSize = this.getUserDefinedFixedSize();
                         
                         if (info.isHoriz) {
                             this.$elem.css('top', elemOrig.pos.top + 'px');
-                            if (!this.userAlreadyDefinedSize()) {
-                                this.$elem.css('height', elemOrig.height + 'px');
+                            if (Math.abs(userFixedSize) < 0.0005) {
+                                this.height = elemOrig.height;
+                                this.$elem.css('height', this.height + 'px');
+                            } else {
+                                this.height = userFixedSize;
                             }
+                            
                             switch (opts.range) {
                                 case 'min': this.$elem.css('left', Math.round(elemOrig.pos.left + info.initialMargin + info.beginOffset) + 'px');
                                             break;
                                 default:
                                     if (info.isRangeDefined) {
+                                        this.width = Math.round(info.toPixel - info.fromPixel + 1);
                                         this.$elem.css({
                                             'left': Math.round(elemOrig.pos.left + info.fromPixel + info.initialMargin) + 'px',
-                                            'width': Math.round(info.toPixel - info.fromPixel + 1) + 'px'
+                                            'width': this.width + 'px'
                                         });
                                     }
                             }
                         } else {
                             this.$elem.css('left', elemOrig.pos.left + 'px');
-                            if (!this.userAlreadyDefinedSize()) {
-                                this.$elem.css('width', elemOrig.width + 'px');
+                            if (Math.abs(userFixedSize) < 0.0005) {
+                                this.width = elemOrig.width;
+                                this.$elem.css('width', this.width + 'px');
+                            } else {
+                                this.width = userFixedSize;
                             }
                             switch (opts.range) {
                                 case 'min': this.$elem.css('top', Math.round(elemOrig.pos.top + info.initialMargin + info.beginOffset) + 'px');
                                             break;
                                 default:
                                     if (info.isRangeDefined) {
+                                        this.height = Math.round(info.toPixel - info.fromPixel + 1);
                                         this.$elem.css({
                                             'top': Math.round(elemOrig.pos.top + info.fromPixel + info.initialMargin) + 'px',
-                                            'height': Math.round(info.toPixel - info.fromPixel + 1) + 'px'
+                                            'height': this.height + 'px'
                                         });
                                     }
                             }
@@ -159,6 +171,8 @@
                     }).css({
                         'margin-left': 0,
                         'margin-top': 0,
+                        'float': 'left',
+                        'width': this.width + 'px' // to avoid problems with some browsers, floated elements should contain a width property
                     });
                     if (opts.handle.onDrawRuler) {
                         opts.handle.onDrawRuler($origBar, this.$elem1st[0], this.width, this.height);
@@ -188,20 +202,17 @@
                 initRanges: function () {
                     if (info.isRangeDefined || opts.range === 'min' || opts.range === 'max') {
                         var createMagnifRange = function () {
-                            var scale = 'scale(' + opts.handle.zoom + ')';
+                        
                             return elemRange.$elem.clone().removeAttr('id').css({
-                                '-webkit-transform-origin': '0 0',
-                                '-moz-transform-origin': '0 0',
-                                '-o-transform-origin': '0 0',
-                                'msTransformOrigin': '0 0',
-                                'transform-origin': '0 0',
-                                '-webkit-transform': scale,
-                                '-moz-transform': scale,
-                                '-o-transform': scale,
-                                'msTransform': scale,
-                                'transform': scale,
-                                'position': 'static',
-                                'z-index': ''
+                                'float': 'left',
+                                'clear': 'left',
+                                'width': (elemRange.width * opts.handle.zoom) + 'px',
+                                'height': (elemRange.height * opts.handle.zoom) + 'px',
+                                // clear these cloned properties, do not need them
+                                'position': '',
+                                'z-index': '',
+                                'left': '',
+                                'top': ''
                             });
                         };
                         
@@ -216,9 +227,15 @@
                     }
                 },
                 adjustRangesPos: function () {
-                    var pos = info.isHoriz ? this.$elemRange1st.position().top : this.$elemRange1st.position().left,
-                        userMargin = util.toFloat(this.$elemRange1st.css(info.isHoriz ? 'margin-top' : 'margin-left'));
-                    this.$elemRange1st.css((info.isHoriz ? 'margin-top' : 'margin-left'), (userMargin * opts.handle.zoom - pos) + 'px');
+                    var adjustFor = function ($elemRange, idx) {
+                        if ($elemRange) { 
+                            var prop = info.isHoriz ? 'margin-top' : 'margin-left',
+                                userMargin = util.toFloat($elemRange.css(prop));
+                            $elemRange.css(prop, (userMargin * opts.handle.zoom - (info.isHoriz ? $elemRange.position().top : 0)) + 'px');
+                        }
+                    };
+                    adjustFor(this.$elemRange1st, 0);
+                    adjustFor(this.$elemRange2nd, 1);
                 },
                 move: function (isFirst, valuePixel, offset) {
                     switch (opts.range) {
@@ -271,7 +288,8 @@
                     }
                     (isFirst ? this.$elem1st : this.$elem2nd).css(info.isHoriz? 'margin-left' : 'margin-top', offset + 'px');
                     if (info.isRangeDefined) {
-                        (isFirst ? this.$elemRange1st : this.$elemRange2nd).css(info.isHoriz? 'margin-left' : 'margin-top', (offset + info.fromPixel * opts.handle.zoom) + 'px');
+                        (isFirst ? this.$elemRange1st : this.$elemRange2nd).
+                            css(info.isHoriz? 'margin-left' : 'margin-top', (info.fromPixel * opts.handle.zoom + (info.isHoriz? offset : - this.height)) + 'px');
                     }
                 }
             },
@@ -291,17 +309,23 @@
                         'z-index': util.toInt($origBar.css('z-index')) + 2
                     }, cssCommonMiddle = {
                         'overflow': 'hidden',
-                        'border-top-left-radius': '20px'
+                        'border-top-left-radius': '20px',
+                        'border': '1px cyan solid',
+                        'width': 0, // defined below
+                        'height': 0 // defined below
                     }, cssOrient;
-                    cssCommonMiddle[info.isHoriz ? 'height' : 'width'] = (info.isHoriz ? this.height : this.width) + 'px';
                     
                     if (info.isHoriz) {
+                        cssCommonMiddle.width = opts.handle.size + 'px';
+                        cssCommonMiddle.height = this.height + 'px';
                         cssOrient = {
                             'width': opts.handle.size + 'px',
                             'height': this.height + 'px',
                             'top': (elemOrig.pos.top - (elemMagnif.height - elemOrig.height) * opts.handle.relativePos) + 'px'
                         };
                     } else {
+                        cssCommonMiddle.width = this.width + 'px';
+                        cssCommonMiddle.height = opts.handle.size + 'px';
                         cssOrient = {
                             'width': this.width + 'px',
                             'height': opts.handle.size + 'px',
@@ -401,7 +425,6 @@
                 elemHandle.init();
                 $origBar.after(elemHandle.$elem2nd).after(elemHandle.$elem1st).after(elemRange.$elem).after(elemOrig.$canvas);
                 elemMagnif.adjustRangesPos();
-                
                 // disable user text selection
                 $origBar.
                     add(elemOrig.$canvas).
@@ -767,6 +790,7 @@
                         // [from, to] - Defines a range that restricts the input to the interval [from, to] and highlights such interval.
                         //              For example, if min = 20 and max = 100 and range = [50, 70], then it is not possible to select values smaller than 50 or greater than 70
                         // The style of this bar is defined by the classHighlightRange parameter
+        dragRange: false,
         style: {
             classHighlightRange: 'sliderlens-range' // Style used to highlight range
         },
