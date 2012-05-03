@@ -2,26 +2,71 @@
     display: inline-block;
     position: absolute;
     top: 50px;
-    left: 100px;
+    left: 300px;
     height: 30px;
+    /*width: 200px;*/
     background-color: green;
     z-index: 5;
+    cursor: pointer;
 }
 
-#sliderV {
+canvas {
+    background-color: yellow;
+}
+
+.V {
     display: inline-block;
     position: absolute;
     top: 150px;
     left: 100px;
-    width: 10px;
-    background-color: green;
+    width: 50px;
+    background-color: #eee;
+    cursor: pointer;
+}
+
+p {
+    font-size: 0.5em;
+    width: 18px;
+    border-left: 1px solid black;
+    padding-left: 1px;
+    padding-right: 3px;
+    position: absolute;
+    left: 10px;
+    top: 50px;
+    margin: 0;
 }
 
 .sliderlens-range {
-    background-color: red;
-    -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-    filter: alpha(opacity=50);
-    -moz-opacity: 0.5;
-    -khtml-opacity: 0.5;
-    opacity: 0.5;
+    background-color: rgba(255, 0, 0, 0.5);
+}
+
+.sliderlens-rangeH {
+    margin-top: 10px;
+    height: 5px;
+}
+
+.sliderlens-rangeV {
+    margin-left: 20px;
+    width: 30px;
+}
+/*
+sliderlens-vert-handle
+sliderlens-horiz-handle
+sliderlens-vert-handle1
+sliderlens-vert-handle2
+sliderlens-horiz-handle1
+sliderlens-horiz-handle2
+*/
+
+.sliderlens-vert-handle {
+    border-top-left-radius: 80% 50%;
+    border-bottom-left-radius: 80% 50%;
+}
+
+.sliderlens-horiz-handle1 {
+    border-top-left-radius: 100% 80%;
+}
+
+.sliderlens-horiz-handle2 {    
+    border-top-right-radius: 100% 80%;
 }
