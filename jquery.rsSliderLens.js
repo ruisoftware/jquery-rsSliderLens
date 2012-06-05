@@ -40,23 +40,14 @@
                         'width': this.width + 'px',
                         'height': this.height + 'px'
                     });
-                    if (opts.handle.onDrawRuler) {
-                        opts.handle.onDrawRuler($origBar, this.$canvas[0], this.width, this.height);
-                    } else {
-                        if (this.$canvas[0].getContext) {
-                            var pixelOffsets = util.initCanvas(this.$canvas[0].getContext('2d'), this.width, this.height, 1);
-                            info.beginOffset = pixelOffsets.pixelStart;
-                            info.endOffset = pixelOffsets.pixelEnd;
-                        }
-                    }
+                    var ctx = this.$canvas[0].getContext('2d');
+                    ctx.scale(1 / opts.handle.zoom, 1 / opts.handle.zoom);
+                    ctx.drawImage(elemMagnif.$elem1st[0], 0, 0);
                     $origBar.hide(); // because the ruler is used instead of the original slider
                 },
                 init: function () {
                     this.outerWidth = $origBar.outerWidth() - util.toInt($origBar.css('border-left-width')) - util.toInt($origBar.css('border-right-width'));
                     this.outerHeight = $origBar.outerHeight() - util.toInt($origBar.css('border-top-width')) - util.toInt($origBar.css('border-bottom-width'));
-                    if (opts.showRuler === true) {
-                        this.initCanvasOutsideHandle();
-                    }
                 }
             },
 
@@ -97,7 +88,7 @@
                                             break;
                                 default:
                                     if (info.isRangeDefined) {
-                                        this.width = Math.round(info.toPixel - info.fromPixel + 1);
+                                        this.width = Math.round(info.toPixel - info.fromPixel);
                                         this.$elem.css({
                                             'left': Math.round(elemOrig.pos.left + info.fromPixel + info.initialMargin) + 'px',
                                             'width': this.width + 'px'
@@ -117,7 +108,7 @@
                                             break;
                                 default:
                                     if (info.isRangeDefined) {
-                                        this.height = Math.round(info.toPixel - info.fromPixel + 1);
+                                        this.height = Math.round(info.toPixel - info.fromPixel);
                                         this.$elem.css({
                                             'top': Math.round(elemOrig.pos.top + info.fromPixel + info.initialMargin) + 'px',
                                             'height': this.height + 'px'
@@ -138,32 +129,23 @@
                 width: elemOrig.width * opts.handle.zoom,
                 height: elemOrig.height * opts.handle.zoom,
                 initClone: function () {
-                    var scale = 'scale(' + opts.handle.zoom + ')';
                     this.$elem1st = $origBar.clone().removeAttr('id').removeAttr('class').css({
-                        '-webkit-transform-origin': '0 0',
-                        '-moz-transform-origin': '0 0',
-                        '-o-transform-origin': '0 0',
-                        'msTransformOrigin': '0 0',
-                        'transform-origin': '0 0',
-                        '-webkit-transform': scale,
-                        '-moz-transform': scale,
-                        '-o-transform': scale,
-                        'msTransform': scale,
-                        'transform': scale,
-                        'filter': "progid:DXImageTransform.Microsoft.Matrix(M11=" + opts.handle.zoom + ", M12=0, M21=0, M22=" + opts.handle.zoom + ", DX=0, Dy=0, SizingMethod='auto expand');",
                         'z-index': util.toInt($origBar.css('z-index')) + 2,
                         'width': elemOrig.width + 'px',
                         'height': elemOrig.height + 'px',
                         'margin-left': 0,
                         'margin-top': 0,
-'background-color': '#bfb'
+                        'position': 'static'
                     });
-
+                    
+                    if (info.isInputTypeRange) {
+                        this.$elem1st.removeAttr('name');
+                    }
+                    
                     if (info.useDoubleHandles) {
                         this.$elem2nd = this.$elem1st.clone();
                     }
                 },
-                
                 initCanvasHandle: function () {
                     this.$elem1st = $("<canvas>").attr({
                         'width': this.width + 'px',
@@ -172,32 +154,42 @@
                         'margin-left': 0,
                         'margin-top': 0,
                         'float': 'left',
-                        'width': this.width + 'px' // to avoid problems with some browsers, floated elements should contain a width property
+                        'width': this.width + 'px',
+                        'height': this.height + 'px'
                     });
-                    if (opts.handle.onDrawRuler) {
-                        opts.handle.onDrawRuler($origBar, this.$elem1st[0], this.width, this.height);
-                    } else {
-                        if (this.$elem1st[0].getContext) {
-                            var pixelOffsets = util.initCanvas(this.$elem1st[0].getContext('2d'), this.width, this.height, opts.handle.zoom);
-                            if (opts.showRuler === 'handle') {
-                                info.beginOffset = pixelOffsets.pixelStart / opts.handle.zoom;
-                                info.endOffset = pixelOffsets.pixelEnd / opts.handle.zoom;
-                            }
-                        }
-                    }
                     
-                    if (info.useDoubleHandles) {
-                        var imageData = this.$elem1st[0].getContext('2d').getImageData(0, 0, this.width, this.height);
-                        this.$elem2nd = this.$elem1st.clone();
-                        this.$elem2nd[0].getContext('2d').putImageData(imageData, 0, 0);
+                    if (!this.$elem1st[0].getContext) {
+                        return false; // browser does not support canvas
                     }
+                    var ctx = this.$elem1st[0].getContext('2d');
+                    ctx.scale(opts.handle.zoom, opts.handle.zoom);
+                    if (opts.handle.onDrawRuler) {
+                        opts.handle.onDrawRuler($origBar, this.$elem1st[0], elemOrig.width, elemOrig.height);
+                    } else {
+                        var pixelOffsets = util.initCanvas(ctx, elemOrig.width, elemOrig.height);
+                        info.beginOffset = pixelOffsets.pixelStart;
+                        info.endOffset = pixelOffsets.pixelEnd;
+                    }
+                    if (opts.showRuler === true) {
+                        elemOrig.initCanvasOutsideHandle();
+                    }
+
+                    if (info.useDoubleHandles) {
+                        this.$elem2nd = this.$elem1st.clone();
+                        this.$elem2nd[0].getContext('2d').drawImage(this.$elem1st[0], 0, 0);
+                    }
+                    return true;
                 },
                 init: function () {
-                    if (opts.showRuler === true || opts.showRuler === 'handle') {
-                        this.initCanvasHandle();
-                    } else {
-                        this.initClone();
+                    if (info.hasRuler) {
+                        if (this.initCanvasHandle()) { 
+                            return;
+                        }
+                        // user wanted canvas, but browser does not support it, then fallback to non canvas
+                        opts.showRuler = false;
+                        info.hasRuler = false;
                     }
+                    this.initClone();
                 },
                 initRanges: function () {
                     if (info.isRangeDefined || opts.range === 'min' || opts.range === 'max') {
@@ -206,8 +198,8 @@
                             return elemRange.$elem.clone().removeAttr('id').css({
                                 'float': 'left',
                                 'clear': 'left',
-                                'width': (elemRange.width * opts.handle.zoom) + 'px',
-                                'height': (elemRange.height * opts.handle.zoom) + 'px',
+                                'width': (elemRange.width * (info.hasRuler ? opts.handle.zoom : 1)) + 'px',
+                                'height': (elemRange.height * (info.hasRuler ? opts.handle.zoom : 1)) + 'px',
                                 // clear these cloned properties, do not need them
                                 'position': '',
                                 'z-index': '',
@@ -220,55 +212,87 @@
                         if (info.useDoubleHandles) {
                             this.$elemRange2nd = createMagnifRange();
                         } else {
-                            if (opts.range === 'max') {
-                                this.$elemRange1st.css('margin-left', getHandleHotPoint(this.$elemRange1st));
+                            if (opts.range === 'max' && info.isHoriz) {
+                                this.$elemRange1st.css('margin-left', getHandleHotPoint(this.$elemRange1st) / (info.hasRuler ? 1 : opts.handle.zoom));
                             }
                         }
                     }
                 },
                 adjustRangesPos: function () {
-                    var adjustFor = function ($elemRange, idx) {
+                    var adjustFor = function ($elemRange, idx, scaledChildren) {
                         if ($elemRange) { 
                             var prop = info.isHoriz ? 'margin-top' : 'margin-left',
                                 userMargin = util.toFloat($elemRange.css(prop));
-                            $elemRange.css(prop, (userMargin * opts.handle.zoom - (info.isHoriz ? $elemRange.position().top : 0)) + 'px');
+                            if (info.hasRuler) {
+                                $elemRange.css(prop, (userMargin * opts.handle.zoom - (info.isHoriz ? $elemRange.position().top : 0)) + 'px');
+                            } else {
+                                $elemRange.css(prop, (userMargin - (info.isHoriz ? (scaledChildren ? ($elemRange.position().top - userMargin) /  opts.handle.zoom : $elemRange.position().top) : 0)) + 'px');
+                            }
                         }
                     };
-                    adjustFor(this.$elemRange1st, 0);
-                    adjustFor(this.$elemRange2nd, 1);
+                    if (opts.range !== true && opts.range !== false) {
+                        var scaledChildren = true;
+                        if (!info.hasRuler) {
+                            var cssScale = util.getScaleCss(opts.handle.zoom),
+                                before = this.$elemRange1st.position().top;
+                            
+                            // this.$elemRange1st is a child of elemHandle.$elem1st, so by applying a scale transformation to elemHandle.$elem1st, 
+                            // the child should also be scalled. I say "should" because while some browsers scale all children others not really
+                            elemHandle.$elem1st.css(cssScale);
+                            // and this determines whether the browser indeed scale all children 
+                            var after = this.$elemRange1st.position().top;
+                            // this problem happens for horizontal sliders only
+                            if (info.isHoriz && before === after) {
+                                // before and after are the same, which means scale did not worked for children
+                                scaledChildren = false;
+                            }
+                            if (info.useDoubleHandles) {
+                                elemHandle.$elem2nd.css(cssScale);
+                            }
+                        }
+                        adjustFor(this.$elemRange1st, 0, scaledChildren);
+                        adjustFor(this.$elemRange2nd, 1, scaledChildren);
+                    } else {
+                        if (!info.hasRuler) {
+                            elemHandle.$elem1st.add(elemHandle.$elem2nd).css(util.getScaleCss(opts.handle.zoom));
+                        }
+                    }
                 },
                 move: function (isFirst, valuePixel, offset) {
+                    if (!info.hasRuler) {
+                        offset /= opts.handle.zoom;
+                    }
                     switch (opts.range) {
-                        case 'min': if (isFirst) { 
-                                        elemRange.$elem.css(info.isHoriz ? 'width' : 'height', valuePixel + 'px');
+                        case 'min': if (isFirst) {
+                                        elemRange.$elem.css(info.isHoriz ? 'width' : 'height', --valuePixel + 'px');
                                         if (info.isHoriz) {
                                             this.$elemRange1st.css({
                                                 'margin-left': Math.round(info.beginOffset * opts.handle.zoom + offset) + 'px',
-                                                'width': Math.round(valuePixel * opts.handle.zoom) + 'px'
+                                                'width': Math.round((valuePixel + 1) * (info.hasRuler ? opts.handle.zoom : 1)) + 'px'
                                             });
                                         } else {
                                             this.$elemRange1st.css({
-                                                'margin-top': Math.round(info.beginOffset * opts.handle.zoom - this.height) + 'px',
-                                                'height': Math.round(valuePixel * opts.handle.zoom) + 'px'
+                                                'margin-top': Math.round(info.beginOffset * opts.handle.zoom - (info.hasRuler ? this.height : elemOrig.height)) + 'px',
+                                                'height': Math.round((valuePixel + 1) * (info.hasRuler ? opts.handle.zoom : 1)) + 'px'
                                             });
                                         }
                                     }
                                     break;
                         case 'max': if (!info.useDoubleHandles || info.useDoubleHandles && !isFirst) {
                                         if (info.isHoriz) {
-                                            var wid = Math.round(elemOrig.outerWidth - valuePixel - info.beginOffset - info.endOffset) + 1;
                                             elemRange.$elem.css({
                                                 'left': (elemOrig.pos.left + valuePixel + info.beginOffset) + 'px',
-                                                'width': wid + 'px'
+                                                'width': Math.round(elemOrig.outerWidth - valuePixel - info.beginOffset - info.endOffset) + 'px'
                                             });
-                                            (info.useDoubleHandles ? this.$elemRange2nd : this.$elemRange1st).css('width', (wid * opts.handle.zoom) + 'px');
+                                            (info.useDoubleHandles ? this.$elemRange2nd : this.$elemRange1st).css('width', 
+                                                (Math.round(elemOrig.outerWidth - valuePixel - info.beginOffset - info.endOffset) * (info.hasRuler ? opts.handle.zoom : 1)) + 'px');
                                         } else {
-                                            var heig = Math.round(elemOrig.outerHeight - valuePixel - info.beginOffset - info.endOffset) + 1;
                                             elemRange.$elem.css({
                                                 'top': (elemOrig.pos.top + valuePixel + info.beginOffset) + 'px',
-                                                'height': heig + 'px'
+                                                'height': Math.round(elemOrig.outerHeight - valuePixel - info.beginOffset - info.endOffset) + 'px'
                                             });
-                                            (info.useDoubleHandles ? this.$elemRange2nd : this.$elemRange1st).css('height', (heig * opts.handle.zoom) + 'px');
+                                            (info.useDoubleHandles ? this.$elemRange2nd : this.$elemRange1st).css('height', 
+                                                (Math.round(elemOrig.outerHeight - valuePixel - info.beginOffset - info.endOffset) * (info.hasRuler ? opts.handle.zoom : 1)) + 'px');
                                         }
                                     }
                                     break;
@@ -289,10 +313,10 @@
                     (isFirst ? this.$elem1st : this.$elem2nd).css(info.isHoriz? 'margin-left' : 'margin-top', offset + 'px');
                     if (info.isRangeDefined) {
                         (isFirst ? this.$elemRange1st : this.$elemRange2nd).
-                            css(info.isHoriz? 'margin-left' : 'margin-top', (info.fromPixel * opts.handle.zoom + (info.isHoriz? offset : - this.height)) + 'px');
+                            css(info.isHoriz ? 'margin-left' : 'margin-top', (info.fromPixel * (info.hasRuler ? opts.handle.zoom : 1) + (info.isHoriz ? offset : - this.height / (info.hasRuler ? 1 : opts.handle.zoom))) + 'px');
                     } else {
                         if (opts.range === 'max' && !info.isHoriz) {
-                            (isFirst ? this.$elemRange1st : this.$elemRange2nd).css('margin-top', (- this.height - offset) + 'px');
+                            (isFirst ? this.$elemRange1st : this.$elemRange2nd).css('margin-top', (- this.height / (info.hasRuler ? 1 : opts.handle.zoom) - offset + getHandleHotPoint(isFirst ? this.$elemRange1st : this.$elemRange2nd) / (info.hasRuler ? 1 : opts.handle.zoom)) + 'px');
                         }
                     }   
                 }
@@ -304,33 +328,37 @@
                 $elem2nd: null,
                 width: 0,
                 height: 0,
+                stopPosition: [0, 0], // only applicable for double handles:
+                                      // For horizontal slider, stopPosition[0] is the rightmost pos for the left handle, stopPosition[1] is the leftmost pos for the right handle
+                                      // For vertical slider, stopPosition[0] is the bottommost pos for the top handle, stopPosition[1] is the topmost pos for the bottom handle
                 init: function () {
-                    this.width = elemOrig.outerWidth * opts.handle.zoom;
-                    this.height = elemOrig.outerHeight * opts.handle.zoom;
+                    this.width = elemOrig.outerWidth * (info.hasRuler ? opts.handle.zoom : 1);
+                    this.height = elemOrig.outerHeight * (info.hasRuler ? opts.handle.zoom : 1);
                     var cssCommon = {
-                        'opacity': 0.8,                        
                         'position': 'absolute',
                         'z-index': util.toInt($origBar.css('z-index')) + 2
                     }, cssCommonMiddle = {
                         'overflow': 'hidden',
+                        'background-color': '#bfb',
                         'width': 0, // defined below
                         'height': 0 // defined below
-                    }, cssOrient;
+                    }, cssOrient,
+                    handleSize = opts.handle.size / (info.hasRuler ? 1 : opts.handle.zoom);
                     
                     if (info.isHoriz) {
-                        cssCommonMiddle.width = opts.handle.size + 'px';
+                        cssCommonMiddle.width = handleSize + 'px';
                         cssCommonMiddle.height = this.height + 'px';
                         cssOrient = {
-                            'width': opts.handle.size + 'px',
+                            'width': handleSize + 'px',
                             'height': this.height + 'px',
                             'top': (elemOrig.pos.top - (elemMagnif.height - elemOrig.height) * opts.handle.relativePos) + 'px'
                         };
                     } else {
                         cssCommonMiddle.width = this.width + 'px';
-                        cssCommonMiddle.height = opts.handle.size + 'px';
+                        cssCommonMiddle.height = handleSize + 'px';
                         cssOrient = {
                             'width': this.width + 'px',
-                            'height': opts.handle.size + 'px',
+                            'height': handleSize + 'px',
                             'left': (elemOrig.pos.left - (elemMagnif.width - elemOrig.width) * opts.handle.relativePos) + 'px'
                         };
                     }
@@ -345,22 +373,47 @@
                     }
                 },
                 getHandleClass: function (isFirstHandle) {
+                    var classes;
                     if (info.useDoubleHandles) {
                         if (isFirstHandle) {
-                            return info.isHoriz ? opts.style.classHorizHandle1 : opts.style.classVertHandle1;
+                            classes = info.isHoriz ? opts.style.classHorizHandle1 : opts.style.classVertHandle1;
                         } else {
-                            return info.isHoriz ? opts.style.classHorizHandle2 : opts.style.classVertHandle2;
+                            classes = info.isHoriz ? opts.style.classHorizHandle2 : opts.style.classVertHandle2;
                         }
                     } else {
-                        return info.isHoriz ? opts.style.classSingleHorizHandle : opts.style.classSingleVertHandle;
+                        classes = info.isHoriz ? opts.style.classSingleHorizHandle : opts.style.classSingleVertHandle;
+                    }
+                    return info.isEnabled ? classes : classes + ' ' + opts.style.classDisabled;
+                },
+                setPos: function (isFirstHandle, pos) {
+                    if (isFirstHandle) {
+                        this.$elem1st.css(info.isHoriz ? 'left' : 'top', pos + 'px');
+                        this.stopPosition[0] = Math.round(pos + opts.handle.size - (info.isHoriz ? elemOrig.pos.left : elemOrig.pos.top));
+                    } else {
+                        this.$elem2nd.css(info.isHoriz ? 'left' : 'top', pos + 'px');
+                        this.stopPosition[1] = Math.round(pos - (info.isHoriz ? elemOrig.pos.left : elemOrig.pos.top));
                     }
                 }
             },
-
+            events = {
+                onGotoPos: function (event, optsGoto) {
+                    // setting a value for the second handle, only makes sense for double handle sliders
+                    if (!info.useDoubleHandles && !optsGoto.firstHandle) {
+                        optsGoto.firstHandle = true;
+                    }
+                    if (optsGoto.firstHandle) {
+                        setValueTicks(optsGoto.value, opts.reversed && info.useDoubleHandles ? elemHandle.$elem2nd : elemHandle.$elem1st);
+                    } else {
+                        setValueTicks(optsGoto.value, opts.reversed && info.useDoubleHandles ? elemHandle.$elem1st : elemHandle.$elem2nd);
+                    }
+                }
+            },
             info = {
                 currValue: [0, 0], // Values for both handles. When only one handle is used, the currValue[1] is ignored
                 ticksStep: 0,
+                isInputTypeRange: false, // whether the markup for this plugin in an <input type="range">
                 isHoriz: elemOrig.width >= elemOrig.height,
+                isEnabled: true,
                 initialMargin: 0,
                 fromPixel: 0,
                 toPixel: 0,
@@ -369,16 +422,25 @@
                 useDoubleHandles: !!opts.value && (typeof opts.value === 'object') && opts.value.length === 2,
                 isRangeDefined: !!opts.range && (typeof opts.range === 'object') && opts.range.length === 2,
                 isStepDefined: opts.step > 0.00005,
+                isIE9: $.browser.msie && parseInt($.browser.version) === 9,
+                hasRuler: opts.showRuler === true || opts.showRuler === 'handle',
+                getCurrValue: function (value) {
+                    if (opts.reversed) {
+                        return opts.max - value + opts.min;
+                    } else {
+                        return value;
+                    }
+                },
                 checkBounds: function () {
                     var checkValue = function (minBound, maxBound) {
-                        if (opts.value < minBound) {
-                            opts.value = minBound;
-                        } else {
-                            if (opts.value > maxBound) {
-                                opts.value = maxBound;
+                            if (opts.value < minBound) {
+                                opts.value = minBound;
+                            } else {
+                                if (opts.value > maxBound) {
+                                    opts.value = maxBound;
+                                }
                             }
-                        }
-                    },
+                        },
                         checkValueArray = function (values, minBound, maxBound) {
                             if (values[0] < minBound) {
                                 values[0] = minBound;
@@ -426,18 +488,54 @@
                     }
                 },
                 init: function () {
+                    this.isEnabled = !opts.disabled;
                     this.checkBounds();
                     this.ticksStep = (Math.max(elemOrig.outerWidth, elemOrig.outerHeight) - info.beginOffset - info.endOffset) / (opts.max - opts.min);
-                    this.fromPixel = (info.isRangeDefined ? opts.range[0] - opts.min : 0) * this.ticksStep + info.beginOffset;
-                    this.toPixel = ((info.isRangeDefined ? opts.range[1] : opts.max) - opts.min) * this.ticksStep + info.beginOffset;
+                    if (info.isRangeDefined) {
+                        if (opts.reversed) {
+                            this.fromPixel = (opts.max - opts.range[1]) * this.ticksStep + info.beginOffset;
+                            this.toPixel = (opts.max - opts.range[0]) * this.ticksStep + info.beginOffset;
+                        } else {
+                            this.fromPixel = (opts.range[0] - opts.min) * this.ticksStep + info.beginOffset;
+                            this.toPixel = (opts.range[1] - opts.min) * this.ticksStep + info.beginOffset;
+                        }
+                    } else {
+                        this.fromPixel = info.beginOffset;
+                        this.toPixel = (opts.max - opts.min) * this.ticksStep + info.beginOffset;
+                    }
                     this.initialMargin = (this.isHoriz ? util.toInt($origBar.css('margin-left')) : util.toInt($origBar.css('margin-top')));
                 }
             },
-
+            overrideInputRangeOpts = function () {
+                info.isInputTypeRange = $origBar.is("input[type=range]");
+                if (info.isInputTypeRange) {
+                    var attrValue = $origBar.attr('value');
+                    if (attrValue !== undefined) {
+                        opts = $.extend({}, opts, {value: util.toFloat(attrValue)});
+                    }
+                    attrValue = $origBar.attr('min');
+                    if (attrValue !== undefined) {
+                        opts = $.extend({}, opts, {min: util.toFloat(attrValue)});
+                    }
+                    attrValue = $origBar.attr('max');
+                    if (attrValue !== undefined) {
+                        opts = $.extend({}, opts, {max: util.toFloat(attrValue)});
+                    }
+                    attrValue = $origBar.attr('step');
+                    if (attrValue !== undefined) {
+                        opts = $.extend({}, opts, {step: util.toFloat(attrValue)});
+                    }
+                    attrValue = $origBar.attr('disabled');
+                    if (attrValue !== undefined) {
+                        opts = $.extend({}, opts, {disabled: true});
+                    }
+                }
+            },
             init = function () {
                 if (info.useDoubleHandles) {
-                    opts.handle.size /= 2;
+                    opts.handle.size /= 2.0;
                 }
+                overrideInputRangeOpts();
                 elemOrig.init();
                 elemMagnif.init();
                 info.init();
@@ -463,12 +561,15 @@
                         '-ms-user-select': 'none',
                         '-o-user-select': 'none',
                         'user-select': 'none'
-                    });
+                    }).
+                    bind('gotoSingle.rsSliderLens', events.onGotoPos);
 
                 if (opts.dragRange && (info.useDoubleHandles && opts.range === true || info.isRangeDefined)) {
                     elemRange.$elem.mousedown(panRangeUtil.startDrag).mouseup(panRangeUtil.stopDrag).click(panRangeUtil.click);
                 } else {
-                    elemRange.$elem.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                    if (!!opts.range) {
+                        elemRange.$elem.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                    }
                 }
                 
                 $origBar.add(elemOrig.$canvas).mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
@@ -511,12 +612,12 @@
                 var canSet = function (v) {
                     if (info.useDoubleHandles) {
                         if ($handleElem === elemHandle.$elem1st) {
-                            return v >= info.fromPixel && v <= (info.currValue[1] - opts.min) * info.ticksStep + info.beginOffset;
+                            return v >= info.fromPixel - 1 && v <= elemHandle.stopPosition[1] + (!!opts.showRuler ? 1 : 2);
                         } else {
-                            return v >= ((info.currValue[0] - opts.min) * info.ticksStep + info.beginOffset) && v <= info.toPixel + info.endOffset;
+                            return v >= elemHandle.stopPosition[0] - (!!opts.showRuler ? 0 : 1) && v <= info.toPixel + 1;
                         }
                     } else {
-                        return v >= info.fromPixel && v <= info.toPixel + info.endOffset;
+                        return v >= info.fromPixel - 1 && v <= info.toPixel + 1;
                     }
                 };
                 if (canSet(value + info.beginOffset)) {
@@ -524,55 +625,48 @@
                 }
             },
             checkLimits = function (value) {
-                if (info.isRangeDefined) {
-                    if (value < opts.range[0]) {
-                        return opts.range[0];
-                    } else {
-                        if (value > opts.range[1]) {
-                            return opts.range[1];
-                        }
-                    }
+                var limit = info.isRangeDefined ? info.getCurrValue(opts.range[opts.reversed ? 1 : 0]) : opts.min;
+                if (value < limit) {
+                    return limit;
                 } else {
-                    if (value < opts.min) {
-                        return opts.min;
-                    } else {
-                        if (value > opts.max) {
-                            return opts.max;
-                        }
+                    limit = info.isRangeDefined ? info.getCurrValue(opts.range[opts.reversed ? 0 : 1]) : opts.max;
+                    if (value > limit) {
+                        return limit;
                     }
                 }
                 return value;
             },
             setValueTicks = function (value, $handleElem) {
-                var valueNoMin = value - opts.min;
+                var valueNoMin = value - opts.min,
+                    isFirstHandle = $handleElem === elemHandle.$elem1st;
                 valueNoMin = info.isStepDefined ? Math.round(valueNoMin / opts.step) * opts.step : valueNoMin;
                 valueNoMin = checkLimits(valueNoMin + opts.min) - opts.min;
                 
                 var valuePixel = Math.round(valueNoMin * info.ticksStep),
-                    $magnifElem = $handleElem === elemHandle.$elem1st? elemMagnif.$elem1st : elemMagnif.$elem2nd;
-                
-                info.currValue[$handleElem === elemHandle.$elem2nd ? 1 : 0] = valueNoMin + opts.min;
+                    $magnifElem = isFirstHandle? elemMagnif.$elem1st : elemMagnif.$elem2nd;
+                info.currValue[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                 if (info.isHoriz) {
-                    $handleElem.css({
-                        'left': (elemOrig.pos.left + info.beginOffset + getHandlePos(valuePixel, $handleElem)) + 'px'
-                    });
-                    elemMagnif.move($handleElem === elemHandle.$elem1st, valuePixel, getHandleHotPoint($handleElem) - info.initialMargin - (info.beginOffset + valuePixel) * opts.handle.zoom);
+                    elemHandle.setPos(isFirstHandle, elemOrig.pos.left + info.beginOffset + getHandlePos(valuePixel, $handleElem));
+                    elemMagnif.move(isFirstHandle, valuePixel, getHandleHotPoint($handleElem) - info.initialMargin - (info.beginOffset + valuePixel) * opts.handle.zoom);
                 } else {
-                    $handleElem.css({
-                        'top': (elemOrig.pos.top + info.beginOffset + getHandlePos(valuePixel, $handleElem)) + 'px'
-                    });
-                    elemMagnif.move($handleElem === elemHandle.$elem1st, valuePixel, getHandleHotPoint($handleElem) - info.initialMargin - (info.beginOffset + valuePixel) * opts.handle.zoom);
+                    elemHandle.setPos(isFirstHandle, elemOrig.pos.top + info.beginOffset + getHandlePos(valuePixel, $handleElem));
+                    elemMagnif.move(isFirstHandle, valuePixel, getHandleHotPoint($handleElem) - info.initialMargin - (info.beginOffset + valuePixel) * opts.handle.zoom);
+                }
+                if (info.isInputTypeRange && isFirstHandle) {
+                    $origBar.attr('value', info.getCurrValue(info.currValue[0]));
                 }
                 if (opts.onChange) {
-                    opts.onChange($origBar, info.currValue[$handleElem === elemHandle.$elem2nd ? 1 : 0], $handleElem === elemHandle.$elem1st, valuePixel);
+                    opts.onChange($origBar, info.getCurrValue(info.currValue[isFirstHandle ? 0 : 1]), isFirstHandle, valuePixel);
                 }
             },
             util = {
                 toInt: function (str) {
-                    return !str || str == 'auto' || str == '' ? 0 : parseInt(str, 10);
+                    var value = !str || str == 'auto' || str == '' ? 0 : parseInt(str, 10);
+                    return isNaN(value) ? 0 : value;
                 },
                 toFloat: function (str) {
-                    return !str || str == 'auto' || str == '' ? 0.0 : parseFloat(str);
+                    var value = !str || str == 'auto' || str == '' ? 0.0 : parseFloat(str);
+                    return isNaN(value) ? 0.0 : value;
                 },
                 roundToDecimalPlaces: function (num, decimals) {
                     var base = Math.pow(10, decimals);
@@ -582,7 +676,7 @@
                 roundNtoMultipleOfM: function (n, m) {
                     return Math.round(n / m) * m;
                 },
-                initCanvas: function (ctx, width, height, zoom) {
+                initCanvas: function (ctx, width, height) {
                     var getFontData = function () {
                             var fontSize = !!opts.ruler.values.font ? opts.ruler.values.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
                                 fontData = { size: 10, type: 'px', sizePos: 0 };
@@ -593,10 +687,10 @@
                             fontData.type = fontSize[0].replace(/(\d*.\d+|\d)/, '').toLowerCase();
                             fontData.sizePos = !!opts.ruler.values.font ? opts.ruler.values.font.indexOf(fontSize[0]) : 0;
                             return {
-                                height: fontData.size * zoom,
+                                height: fontData.size,
                                 contextFont:
                                     ((!!opts.ruler.values.font ? opts.ruler.values.font.substring(0, fontData.sizePos) + ' ' : '') +
-                                    fontData.size * zoom + fontData.type + ' ' +
+                                    fontData.size + fontData.type + ' ' +
                                     (!!opts.ruler.values.font ? opts.ruler.values.font.substring(fontData.sizePos + fontSize[0].length + 1) : ' arial')).trim()
                             };
                         },
@@ -606,16 +700,16 @@
                             var offset = [0, 0];
                             if (Math.abs(opts.ruler.values.relativePos - opts.ruler.tickMarks.relativePos) < 0.005) {
                                 // values and tick marks on the relative position
-                                offset[0] = offset[1] = (longerMark ? opts.ruler.tickMarks.sizeBig : opts.ruler.tickMarks.sizeSmall) / 2 * zoom;
+                                offset[0] = offset[1] = (longerMark ? opts.ruler.tickMarks.sizeBig : opts.ruler.tickMarks.sizeSmall) / 2;
                             } else { 
                                 if (opts.ruler.values.relativePos > opts.ruler.tickMarks.relativePos) {
                                     // values below tick marks (or, in case of vertical sliders, values right to tick marks)
-                                    offset[0] = opts.ruler.tickMarks.sizeBig / 2 * zoom;
-                                    offset[1] = (longerMark ? opts.ruler.tickMarks.sizeBig / 2 : opts.ruler.tickMarks.sizeSmall - opts.ruler.tickMarks.sizeBig / 2) * zoom;
+                                    offset[0] = opts.ruler.tickMarks.sizeBig / 2;
+                                    offset[1] = longerMark ? opts.ruler.tickMarks.sizeBig / 2 : opts.ruler.tickMarks.sizeSmall - opts.ruler.tickMarks.sizeBig / 2;
                                 } else {
                                     // values above tick marks (or, in case of vertical sliders, values left to tick marks)
-                                    offset[0] = (longerMark ? opts.ruler.tickMarks.sizeBig / 2 : opts.ruler.tickMarks.sizeSmall - opts.ruler.tickMarks.sizeBig / 2) * zoom;
-                                    offset[1] = opts.ruler.tickMarks.sizeBig / 2 * zoom;
+                                    offset[0] = longerMark ? opts.ruler.tickMarks.sizeBig / 2 : opts.ruler.tickMarks.sizeSmall - opts.ruler.tickMarks.sizeBig / 2;
+                                    offset[1] = opts.ruler.tickMarks.sizeBig / 2;
                                 }
                             }
                             if (info.isHoriz) {
@@ -627,53 +721,60 @@
                             }
                         },
                         getFormatedNum = function (num) {
-                            return opts.ruler.values.onFmtValue ? opts.ruler.values.onFmtValue($origBar, num) : num;
+                            if (opts.ruler.values.onFmtValue) {
+                                var fmt = opts.ruler.values.onFmtValue($origBar, num);
+                                return fmt === undefined ? num : fmt;
+                            }
+                            return num;
                         };
-                        
                     ctx.font = fontData.contextFont;
                     ctx.fillStyle = opts.ruler.values.fillStyle;
                     ctx.strokeStyle = opts.ruler.tickMarks.strokeStyle;
-                    ctx.lineWidth = zoom;
+                    ctx.lineWidth = 1;
                     var fmtMin = fmtMax = null,
                         from = curr = deltaStart = deltaEnd = lastLabel = 0,
-                        lastLabel = to = info.isHoriz ? width : height;
+                        lastLabel = to = info.isHoriz ? width : height,
+                        min = opts.reversed ? opts.max : opts.min,
+                        max = opts.reversed ? opts.min : opts.max;
                         
                     if (opts.ruler.values.show) {
-                        fmtMin = getFormatedNum(opts.min);
-                        fmtMax = getFormatedNum(opts.max);
+                        fmtMin = getFormatedNum(min);
+                        fmtMax = getFormatedNum(max);
                         from = curr = info.isHoriz ? ctx.measureText(fmtMin).width : fontData.height;
                         deltaStart = from / 2;
                         deltaEnd = (info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height) / 2;
                         lastLabel -= deltaEnd * 2;
                         to -= deltaEnd;
                     }
-                    var tickMarkRate = ((info.isHoriz ? width : height) - deltaStart - deltaEnd) / (opts.max - opts.min),
-                        pixelStep = info.isStepDefined ? tickMarkRate * opts.step : zoom * 2,
-                        spaceForLabels = info.isHoriz ? fontData.height : Math.max(ctx.measureText(fmtMin).width, ctx.measureText(fmtMax).width),
-                        textRelativePos = (info.isHoriz ? spaceForLabels : 0) + ((info.isHoriz ? height : width) - spaceForLabels) * opts.ruler.values.relativePos;
-                        tickMarkRelativePos = opts.ruler.tickMarks.sizeBig / 2 * zoom + ((info.isHoriz ? height : width) - opts.ruler.tickMarks.sizeBig * zoom) * opts.ruler.tickMarks.relativePos;
+                    var tickMarkRate = ((info.isHoriz ? width : height) - deltaStart - deltaEnd) / (max - min),
+                        pixelStep = info.isStepDefined ? Math.abs(tickMarkRate) * opts.step : 2,
+                        tickMarkRelativePos = opts.ruler.tickMarks.sizeBig / 2 + ((info.isHoriz ? height : width) - opts.ruler.tickMarks.sizeBig) * opts.ruler.tickMarks.relativePos,
+                        textRelativePos = 0;
+
                     if (opts.ruler.values.show) {
+                        var spaceForLabels = info.isHoriz ? fontData.height : Math.max(ctx.measureText(fmtMin).width, ctx.measureText(fmtMax).width);
+                        textRelativePos = (info.isHoriz ? spaceForLabels : 0) + ((info.isHoriz ? height : width) - spaceForLabels) * opts.ruler.values.relativePos;
                         info.isHoriz ? ctx.fillText(fmtMin, 0, textRelativePos) : ctx.fillText(fmtMin, textRelativePos, fontData.height);
                     }
                     for (var i = deltaStart, longerMark = true, cond = true; cond; i += pixelStep) {
-                        var num = (i - deltaStart) / tickMarkRate + opts.min;
+                        var num = (i - deltaStart) / tickMarkRate + min;
                         if (info.isStepDefined) {
-                            num = util.roundNtoMultipleOfM(num - opts.min, opts.step) + opts.min;
+                            num = util.roundNtoMultipleOfM(num - min, opts.step) + min;
                         }
                         num = util.roundToDecimalPlaces(num, opts.ruler.values.decimals);
 
-                        var fmtNum = opts.ruler.values.onFmtValue ? opts.ruler.values.onFmtValue($origBar, num) : num,
+                        var fmtNum = getFormatedNum(num),
                             textPos = info.isHoriz ? ctx.measureText(fmtNum).width / 2 : deltaStart; // for vertical sliders deltaStart is half of text height
                         
                         if (opts.ruler.values.show) {
                             var doText = // if there is enough space (4px) that would separate this label from the previous one
-                                        i - textPos - curr > 4 * zoom && 
+                                        i - textPos - curr > 4 && 
                                         // and there is enough space to the last label
-                                        lastLabel - i - textPos > 4 * zoom;
+                                        lastLabel - i - textPos > 4;
 
                             // only shows a label, if multiple of tryShowEvery (if defined)
                             if (doText && !!opts.ruler.values.tryShowEvery) {
-                                var everyValue = Math.abs((num - opts.min) % opts.ruler.values.tryShowEvery);
+                                var everyValue = Math.abs((num - min) % opts.ruler.values.tryShowEvery);
                                 doText = everyValue < 0.00005 && i - deltaStart > 0.00005;
                             }
 
@@ -695,10 +796,30 @@
                     }
                     ctx.stroke();
                     return { pixelStart: deltaStart, pixelEnd: deltaEnd };
+                },
+                getScaleCss: function (zoomValue) {
+                    var scale = 'scale(' + opts.handle.zoom + ')',
+                        css = {
+                            '-webkit-transform-origin': '0 0',
+                            '-moz-transform-origin': '0 0',
+                            '-o-transform-origin': '0 0',
+                            'msTransformOrigin': '0 0',
+                            'transform-origin': '0 0',
+                            '-webkit-transform': scale,
+                            '-moz-transform': scale,
+                            '-o-transform': scale,
+                            'msTransform': scale,
+                            'transform': scale
+                        };
+                    if (!info.isIE9) {
+                        css['filter'] = "progid:DXImageTransform.Microsoft.Matrix(M11=" + zoomValue + ", M12=0, M21=0, M22=" + zoomValue + ", DX=0, Dy=0, SizingMethod='auto expand');"
+                    }
+                    return css;
                 }
             },
             panUtil = {
                 doDrag: true,
+                firstClickWasOutsideHandle: false,
                 dragDelta: 0,
                 $handle: null, // handle currently being dragged
                 animDone: function (value) {
@@ -735,33 +856,60 @@
                     }
                 },
                 startDrag: function (event) {
-                    panUtil.doDrag = true;
-                    panUtil.anim(event);
+                    if (info.isEnabled) {
+                        panUtil.doDrag = true;
+                        panUtil.firstClickWasOutsideHandle = true;
+                        panUtil.anim(event);
+                    }
                 },
                 startDragFromHandle: function (event, $elemHandle) {
-                    panUtil.$handle = $elemHandle;
-                    var from = (info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min) * info.ticksStep,
-                        to = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
-                    panUtil.doDrag = true;
-                    panUtil.dragDelta = from - to;
-                    panUtil.animDone(to);
+                    if (info.isEnabled) {
+                        panUtil.$handle = $elemHandle;
+                        var from = (info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min) * info.ticksStep,
+                            to = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
+                        panUtil.doDrag = true;
+                        panUtil.dragDelta = from - to;
+                        panUtil.animDone(to);
+                    }
                 },
                 startDragFromHandle1st: function (event) {
-                    panUtil.startDragFromHandle(event, elemHandle.$elem1st);
+                    if (info.isEnabled) {
+                        elemMagnif.$elem1st.parent().addClass(opts.style.classHandleClickDown);
+                        panUtil.startDragFromHandle(event, elemHandle.$elem1st);
+                    }
                 },
                 startDragFromHandle2nd: function (event) {
-                    panUtil.startDragFromHandle(event, elemHandle.$elem2nd);
+                    if (info.isEnabled) {
+                        elemMagnif.$elem2nd.parent().addClass(opts.style.classHandleClickDown);
+                        panUtil.startDragFromHandle(event, elemHandle.$elem2nd);
+                    }
+                },
+                handleStartsToMoveWhen1stClickWasOutsideHandle: function () {
+                    if (panUtil.firstClickWasOutsideHandle) {
+                        (panUtil.$handle === elemHandle.$elem1st ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().addClass(opts.style.classHandleClickDown);
+                        panUtil.firstClickWasOutsideHandle = false;
+                    }
                 },
                 dragHoriz: function (event) {
-                    setValuePixel(event.pageX - elemOrig.pos.left + panUtil.dragDelta - info.beginOffset, panUtil.$handle);
+                    panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
+                    setValuePixel(event.pageX - elemOrig.pos.left + panUtil.dragDelta, panUtil.$handle);
                 },
                 dragVert: function (event) {
-                    setValuePixel(event.pageY - elemOrig.pos.top + panUtil.dragDelta - info.beginOffset, panUtil.$handle);
+                    panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
+                    setValuePixel(event.pageY - elemOrig.pos.top + panUtil.dragDelta, panUtil.$handle);
                 },
                 stopDrag: function (event) {
-                    panUtil.doDrag = false;
-                    $("body, html").unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
-                    panUtil.dragDelta = 0;
+                    if (info.isEnabled) {
+                        panUtil.doDrag = false;
+                        panUtil.firstClickWasOutsideHandle = false;
+                        $("body, html").unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                        panUtil.dragDelta = 0;
+                        if (panUtil.$handle == elemHandle.$elem2nd) {
+                            elemMagnif.$elem2nd.parent().removeClass(opts.style.classHandleClickDown);
+                        } else {
+                            elemMagnif.$elem1st.parent().removeClass(opts.style.classHandleClickDown);
+                        }                     
+                    }
                 }
             },
             panRangeUtil = {
@@ -770,34 +918,36 @@
                 origPixelLimits: {from: 0, to: 0},
                 dragged: false,
                 startDrag: function (event) {
-                    panRangeUtil.origPixelLimits.from = info.fromPixel;
-                    panRangeUtil.origPixelLimits.to = info.toPixel;
-                    panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
-                    panRangeUtil.dragValue[0] = (info.currValue[0] - opts.min) * info.ticksStep;
-                    panRangeUtil.dragged = false;
-                    if (info.useDoubleHandles) {
-                        panRangeUtil.dragValue[1] = (info.currValue[1] - opts.min) * info.ticksStep;
-                        if (!info.isRangeDefined) { // when there is a range between the two handles (opts.range = true)
-                            panRangeUtil.origPixelLimits.from = panRangeUtil.dragValue[0] + info.beginOffset;
-                            panRangeUtil.origPixelLimits.to = panRangeUtil.dragValue[1] + info.endOffset;
+                    if (info.isEnabled) {
+                        panRangeUtil.origPixelLimits.from = info.fromPixel;
+                        panRangeUtil.origPixelLimits.to = info.toPixel;
+                        panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemOrig.pos.left : event.pageY - elemOrig.pos.top;
+                        panRangeUtil.dragValue[0] = (info.currValue[0] - opts.min) * info.ticksStep;
+                        panRangeUtil.dragged = false;
+                        if (info.useDoubleHandles) {
+                            panRangeUtil.dragValue[1] = (info.currValue[1] - opts.min) * info.ticksStep;
+                            if (!info.isRangeDefined) { // when there is a range between the two handles (opts.range = true)
+                                panRangeUtil.origPixelLimits.from = panRangeUtil.dragValue[0] + info.beginOffset;
+                                panRangeUtil.origPixelLimits.to = panRangeUtil.dragValue[1] + info.beginOffset;
+                            }
                         }
+                        $("body, html")
+                            .bind('mousemove.rsSliderLens', info.isHoriz ? panRangeUtil.dragHoriz : panRangeUtil.dragVert)
+                            .bind('mouseup.rsSliderLens', panRangeUtil.stopDrag);
                     }
-                    $("body, html")
-                        .bind('mousemove.rsSliderLens', info.isHoriz ? panRangeUtil.dragHoriz : panRangeUtil.dragVert)
-                        .bind('mouseup.rsSliderLens', panRangeUtil.stopDrag);
                 },
                 dragHorizVert: function (deltaMoved, outerSize, startPos, cssRange) {
                     panRangeUtil.dragged = true;
                     var candidateFromPixel = panRangeUtil.origPixelLimits.from + deltaMoved,
                         candidateToPixel = panRangeUtil.origPixelLimits.to + deltaMoved;
+
                     if (candidateFromPixel >= info.beginOffset && candidateToPixel <= outerSize - info.endOffset) {
-                        
                         setValuePixel(deltaMoved + panRangeUtil.dragValue[0], elemHandle.$elem1st);
                         if (info.isRangeDefined) {
                             info.fromPixel = candidateFromPixel; 
                             info.toPixel = candidateToPixel;
-                            opts.range[0] = (info.fromPixel - info.beginOffset) / info.ticksStep + opts.min;
-                            opts.range[1] = (info.toPixel - info.beginOffset) / info.ticksStep + opts.min;
+                            opts.range[opts.reversed ? 1 : 0] = info.getCurrValue((info.fromPixel - info.beginOffset) / info.ticksStep + opts.min);
+                            opts.range[opts.reversed ? 0 : 1] = info.getCurrValue((info.toPixel - info.beginOffset) / info.ticksStep + opts.min);
                         }
                         elemRange.$elem.css(cssRange, Math.round(startPos + info.fromPixel + info.initialMargin) + 'px');
                         
@@ -813,10 +963,12 @@
                     panRangeUtil.dragHorizVert(event.pageY - elemOrig.pos.top - panRangeUtil.dragDelta, elemOrig.outerHeight, elemOrig.pos.top, 'top');
                 },
                 stopDrag: function (event) {
-                    $("body, html").unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                    if (info.isEnabled) {
+                        $("body, html").unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                    }
                 },
                 click: function (event) {
-                    if (!panRangeUtil.dragged) {
+                    if (info.isEnabled && !panRangeUtil.dragged) {
                         panUtil.doDrag = false;
                         panUtil.anim(event);
                     }
@@ -825,16 +977,16 @@
 
         init();
         if (info.useDoubleHandles) {
-            setValueTicks(opts.value[0], elemHandle.$elem1st);
-            setValueTicks(opts.value[1], elemHandle.$elem2nd);
+            setValueTicks(info.getCurrValue(opts.value[0]), opts.reversed ? elemHandle.$elem2nd : elemHandle.$elem1st);
+            setValueTicks(info.getCurrValue(opts.value[1]), opts.reversed ? elemHandle.$elem1st : elemHandle.$elem2nd);
         } else {
-            setValueTicks(opts.value, elemHandle.$elem1st);
+            setValueTicks(info.getCurrValue(opts.value), elemHandle.$elem1st);
         }
     };
 
     $.fn.rsSliderLens = function (options) {
         var gotoPos = function (optionsGoto) {
-            var optsGoto = $.extend({}, $.fn.rsSlidetLens.defaultsGoto, optionsGoto);
+            var optsGoto = $.extend({}, $.fn.rsSliderLens.defaultsGoto, optionsGoto);
 
             return this.each(function () {
                 $(this).trigger('gotoSingle.rsSliderLens', [optsGoto]);
@@ -878,6 +1030,8 @@
                         //              For example, if min = 20 and max = 100 and range = [50, 70], then it is not possible to select values smaller than 50 or greater than 70
                         // The style of this bar is defined by the classHighlightRange parameter
         dragRange: false,
+        disabled: false,
+        reversed: false,
         style: {
             classHighlightRange: 'sliderlens-range',
             classSingleVertHandle: 'sliderlens-vert-handle',
@@ -885,15 +1039,17 @@
             classVertHandle1: 'sliderlens-vert-handle1',
             classVertHandle2: 'sliderlens-vert-handle2',
             classHorizHandle1: 'sliderlens-horiz-handle1',
-            classHorizHandle2: 'sliderlens-horiz-handle2'
+            classHorizHandle2: 'sliderlens-horiz-handle2',
+            classDisabled: 'sliderlens-disabled',
+            classHandleClickDown: 'sliderlens-handle-clickdown'
         },
         
         // handle is the cursor that the user can drag around to select values
         handle: {
-            size: 50,   // Size of handle is pixels. For horizontal sliders, it is handle width. For vertical sliders, it is handle height.
+            size: 25,   // Size of handle is pixels. For horizontal sliders, it is handle width. For vertical sliders, it is handle height.
                         // If two handles are used, then this is the size of both handles togeter, which means each handle has a size of size/2
             zoom: 1.5,  // Magnification factor applied inside the handle.
-            relativePos: 0.5,   // Floating point number between 0 and 1 that indicates the handle relative (0% - 100%) position.
+            relativePos: 0.7,   // Floating point number between 0 and 1 that indicates the handle relative (0% - 100%) position.
                                 // For horizontal sliders, a value of 0 aligns handle to the top, 1 aligns it to the bottom.
                                 // For vertical sliders, a value of 0 aligns handle to the left, 1 aligns it to the right.
             animation: 200,     // Duration (ms) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider)
@@ -917,16 +1073,17 @@
                 show: true,
                 strokeStyle: 'black',
                 relativePos: 1,
-                sizeSmall: 10,
-                sizeBig: 15
+                sizeSmall: 5,
+                sizeBig: 8
             }            
         },
         onChange: null // function ($origBar, value, isFirstHandle, pixelValue)
     };
 
-    /* TODO */
     $.fn.rsSliderLens.defaultsGoto = {
-        animate: 1000
+        value: 0,
+        firstHandle: true,
+        animate: false
     };
 
 })(jQuery);
