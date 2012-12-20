@@ -1329,7 +1329,7 @@
                         var spaceForLabels = info.isHoriz ? fontData.height : maxLabelWidth;
                         textRelativePos = (info.isHoriz ? spaceForLabels : 0) + ((info.isHoriz ? height : width) - spaceForLabels) * opts.ruler.values.relativePos;
                         info.isHoriz ? ctx.fillText(fmtMin, opts.flipped ? width - minLength: 0, textRelativePos) : ctx.fillText(fmtMin, textRelativePos, opts.flipped ? height : fontData.height);
-                        for (i in allLabels) {
+                        for (var i = 0; i < allLabels.length; ++i) {
                             info.isHoriz ? ctx.fillText(allLabels[i].fmt, allLabels[i].pos, textRelativePos) : ctx.fillText(allLabels[i].fmt, textRelativePos, allLabels[i].pos + fontData.height);
                         }
                         var maxLabelPos = opts.flipped ? 0 : lastLabel;
