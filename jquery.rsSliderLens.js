@@ -38,7 +38,7 @@
                         'width': this.width + 'px',
                         'height': this.height + 'px'
                     }).css({
-                        'position': 'absolute',
+                        'position': $origBar.css('position'),
                         'z-index': util.toInt($origBar.css('z-index')),
                         'left': this.pos.left + 'px',
                         'top': this.pos.top + 'px',
@@ -86,15 +86,10 @@
                     if (origBarHidden) {
                         $origBar.hide();
                     }
-                    
-                    var border = {
-                        left: util.toInt($origBar.css('border-left-width')), 
-                        top: util.toInt($origBar.css('border-top-width'))
-                    }
                     this.pos.left = pos.left;
                     this.pos.top = pos.top;
-                    this.outerWidth = $origBar.outerWidth() - border.left - util.toInt($origBar.css('border-right-width'));
-                    this.outerHeight = $origBar.outerHeight() - border.top - util.toInt($origBar.css('border-bottom-width'));
+                    this.outerWidth = $origBar.outerWidth() - util.toInt($origBar.css('border-left-width')) - util.toInt($origBar.css('border-right-width'));
+                    this.outerHeight = $origBar.outerHeight() - util.toInt($origBar.css('border-top-width')) - util.toInt($origBar.css('border-bottom-width'));
                 },
                 recalcPosBasedOnCanvas: function (creating) {
                     // origBar is hidden, so need to recalculate control position based on the canvas (ruler) instead
@@ -473,7 +468,7 @@
             elemHandle = {
                 $elem1st: null,
                 $elem2nd: null,
-                stopPosition: [0, 0], // only applicable for double handles:
+                stopPosition: [0, 0], // used to stop both handles from overlaping each other. Only applicable for double handles:
                                       // For horizontal slider, stopPosition[0] is the rightmost pos for the left handle, stopPosition[1] is the leftmost pos for the right handle
                                       // For vertical slider, stopPosition[0] is the bottommost pos for the top handle, stopPosition[1] is the topmost pos for the bottom handle
                 init: function () {
@@ -1019,15 +1014,16 @@
                     }
                     
                     // to prevent the default behaviour in IE when dragging an element
-                    $origBar[0].ondragstart = elemMagnif.$elem1st[0].ondragstart = elemHandle.$elem1st[0].ondragstart =
-                    $origBar[0].onselectstart = elemMagnif.$elem1st[0].onselectstart = elemHandle.$elem1st[0].onselectstart = function () { return false; };
+                    noIEdrag($origBar);
+                    noIEdrag(elemMagnif.$elem1st);
+                    noIEdrag(elemHandle.$elem1st);
                     noIEdrag(elemOrig.$canvas);
                     noIEdrag(elemRange.$elem);
                     noIEdrag(elemMagnif.$elemRange1st);
                     
                     if (info.useDoubleHandles) {
-                        elemMagnif.$elem2nd[0].ondragstart = elemHandle.$elem2nd[0].ondragstart =
-                        elemMagnif.$elem2nd[0].onselectstart = elemHandle.$elem2nd[0].onselectstart = function () { return false; };
+                        noIEdrag(elemMagnif.$elem2nd);
+                        noIEdrag(elemHandle.$elem2nd);
                         noIEdrag(elemMagnif.$elemRange2nd);
                         elemHandle.$elem2nd.mousedown(panUtil.startDragFromHandle2nd).mouseup(panUtil.stopDrag);
                     }
@@ -1368,6 +1364,19 @@
                     if (info.isEnabled && !panUtil.dragging) {
                         $origBar.add(elemOrig.$canvas).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).removeClass(opts.style.classHandleHover);
                     }
+                },
+                getSpeedMs: function (speed) {
+                    var ms = speed;
+                    if (typeof speed === 'string') {
+                        ms = $.fx.speeds[speed];
+                        if (ms === undefined) {
+                            ms = $.fx.speeds['_default'];
+                        }
+                    }
+                    if (ms === undefined) {
+                        ms = 400;
+                    }
+                    return ms;
                 }
             },
             panUtil = {
@@ -1421,11 +1430,12 @@
                         }
                     }
                     if (animDuration === undefined) {
-                        animDuration = opts.handle.animation;
+                        animDuration = util.getSpeedMs(opts.handle.animation);
                     }
                     if (from !== to && animDuration > 0) {
                         panUtil.animating = true;
                         $({ n: from }).animate({ n: to }, {
+                            easing: opts.handle.easing,
                             duration: animDuration,
                             step: function (now) {
                                 setValuePixel(false, now, panUtil.$handle, opts.snapOnDrag);
@@ -1446,6 +1456,7 @@
                 },
                 gotoAnim: function (fromValue, toValue, animDuration) {
                     var getDuration = function(distance) {
+                            animDuration = util.getSpeedMs(animDuration);
                             var dur = (animDuration * distance) / (info.toPixel - info.fromPixel);
                             return dur < 50 ? 0 : dur; // just do not animate if duration takes less than 50ms
                         },
@@ -1755,7 +1766,7 @@
         step: 0,  // Determines the amount of each interval the slider takes between min and max. Use 0 to disable step. 
                   // For example, if min = 0, max = 1 and step = 0.25, the user can only select the following values: 0, 0.25, 0.5, 0.75 and 1.
                   // Type: floating point number.
-        snapOnDrag: false, // Determines whether the handle snaps to each step during mouse dragging. Only meaningful if step is defined (non zero step). Type: boolean.
+        snapOnDrag: false, // Determines whether the handle snaps to each step during mouse dragging. Only meaningful if a non zerp step is defined. Type: boolean.
         range: false,   // Specifies a range contained in [min, max]. This range can be used to restrict input even further, or to simply highlight intervals.
                         // Type: boolean, string or an array of two floating point numbers
                         //   false - no range.
@@ -1800,8 +1811,10 @@
                               // For vertical sliders, a value of 0 aligns handle to the left, 1 aligns it to the right.
                               // This parameter has no effect if zoom is 1.
             
-            animation: 100, // Duration (ms) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
-                            // Use 0 to disable animation. Type: positive integer.
+            animation: 100,  // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
+                             // Use 0 to disable animation. Type: positive integer or string.
+            
+            easing: 'swing', // Easing function (@see http://api.jquery.com/animate/#easing). Type: string.
                            
             mousewheel: 1  // Speed factor applied to the handle when using the mouse wheel. Type: floating point number.
                            // when = 0, mouse wheel cannot be used to move the handle;
@@ -1814,12 +1827,16 @@
         // Ruler rendering data. Should you decide to use a ruler, SliderLens can automatically render one for you, or you can render a customized one.
         ruler: {
             display: true,          // Determines whether the ruler is displayed. Type: boolean.
+                                    // true - canvas ruler is displayed.
+                                    // false - the original content is displayed.
+                                    // There is more to this, please see onDraw below.
+
             values: {               // Configuration data for the labels that appear in the ruler.
                 show: true,             // Determines whether value labels are rendered. Type: boolean.
                 font: '12px arial',     // Canvas font used for the labels. Type: string.
                 fontStyle: 'black',     // Font style. Type: string.
             
-                relativePos: 0.9,       // Floating point number between 0 and 1 that indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+                relativePos: 0.9,       // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
                                         // Labels are left justified in vertical sliders, which means that when relativePos is 1, the longest label is aligned to the right, while the others (shorter) labels are left justified relatively to the longest one.
@@ -1837,14 +1854,14 @@
                 flipped: false          // Determines whether the shorter and longer ticks marks are flipped. Type: boolean.
             },
             onDraw: null   // Event used for customized rulers. Type: function(event, ctx, canvasWidth, canvasHeight, pixelOffsets)
-                           // If onDraw event is not defined and ruler.display is true, then a custom ruler is generated.
-                           // If onDraw event is not defined and ruler.display is false, then no ruler is displayed and the original content is shown.
+                           // If onDraw event is null and ruler.display is true, then a custom ruler is generated.
+                           // If onDraw event is null and ruler.display is false, then no ruler is displayed and the original content is shown.
                            // If onDraw event is defined and ruler.display is true, then onDraw is used to draw on top of the generated ruler.
                            // If onDraw event is defined and ruler.display is false, then use onDraw to create your own custom ruler from scratch.
         },
         keyboard: {
             allowed: ['left', 'right', 'up', 'down', 'home', 'end', 'pgup', 'pgdown', 'esc'], // Allowed keys. Type: String array.
-            animation: 1500,    // Milliseconds that takes to move the handle from one edge of the slider to the other when Home/End is pressed. Other keys use a shorter duration relatively to the distance travelled. Type: positive integer.
+            animation: 'fast',  // Milliseconds that takes to move the handle from one edge of the slider to the other when Home/End is pressed. Other keys use a shorter duration relatively to the distance travelled. Type: positive integer or string.
             numPages: 5         // Number of pages in a slider (how many times can you page up/down to go through the whole range). Type: positive integer.
         },
         onChange: null, // Event fired when value changes (when handle moves). Type: function (event, value, isFirstHandle).
