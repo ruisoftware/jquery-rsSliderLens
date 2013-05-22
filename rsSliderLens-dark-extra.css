@@ -1,315 +1,480 @@
 @font-face {
-    font-family: 'digital_dream_fat_narrowRg';
-    src: url('font_demos/segment/digitaldreamfatnarrow-webfont.eot');
-    src: url('font_demos/segment/digitaldreamfatnarrow-webfont.eot?#iefix') format('embedded-opentype'),
-         url('font_demos/segment/digitaldreamfatnarrow-webfont.woff') format('woff'),
-         url('font_demos/segment/digitaldreamfatnarrow-webfont.ttf') format('truetype'),
-         url('font_demos/segment/digitaldreamfatnarrow-webfont.svg#digital_dream_fat_narrowRg') format('svg');
-    font-weight: normal;
-    font-style: normal;
-
+  font-family: 'VT323';
+  font-style: normal;
+  font-weight: 400;
+  src: local('VT323'), local('VT323-Regular'), url(vt323.woff) format('woff');
 }
 
-div.sliderlens-hover .sliderlens-horiz-handle,
-div.sliderlens-hover .sliderlens-horiz-handle1,
-div.sliderlens-hover .sliderlens-horiz-handle2,
-div.sliderlens-hover .sliderlens-vert-handle,
-div.sliderlens-hover .sliderlens-vert-handle1,
-div.sliderlens-hover .sliderlens-vert-handle2  { 
-    border-color: #323228;
-}
-
-/* slightly lighter range when mouse hovering on horizontal sliders */
+/* yellow range on hover state for horizontal sliders */
 canvas.sliderlens-horiz.sliderlens-hover,
+div.sliderlens-hover .sliderlens-horiz-fixedhandle canvas,
 div.sliderlens-hover .sliderlens-horiz-handle canvas,
 div.sliderlens-hover .sliderlens-horiz-handle1 canvas,
 div.sliderlens-hover .sliderlens-horiz-handle2 canvas {
-    background-image: -moz-linear-gradient(top, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(40%,rgba(29,29,29,1)), color-stop(40%,rgba(50,50,40,1)), color-stop(50%,rgba(50,50,40,1)), color-stop(54%,rgba(100,100,100,1)), color-stop(54%,rgba(29,29,29,1))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(top, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(top, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(top, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* IE10+ */
-    background-image: linear-gradient(to bottom, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* W3C */
+    background-image: -moz-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -moz-linear-gradient(left, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%), 
+                      -webkit-linear-gradient(left, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -o-linear-gradient(left, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -ms-linear-gradient(left, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* IE10+ */
+    background-image: linear-gradient(to bottom, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      linear-gradient(to right, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* W3C */
 }
 
-/* slightly lighter range when mouse hovering on vertical sliders */
+/* yellow range on hover state for vertical sliders */
 canvas.sliderlens-vert.sliderlens-hover,
+div.sliderlens-hover .sliderlens-vert-fixedhandle canvas,
 div.sliderlens-hover .sliderlens-vert-handle canvas,
 div.sliderlens-hover .sliderlens-vert-handle1 canvas,
 div.sliderlens-hover .sliderlens-vert-handle2 canvas {
-    background-image: -moz-linear-gradient(left, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(40%,rgba(29,29,29,1)), color-stop(40%,rgba(50,50,40,1)), color-stop(50%,rgba(50,50,40,1)), color-stop(54%,rgba(100,100,100,1)), color-stop(54%,rgba(29,29,29,1))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(left, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(left, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(left, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* IE10+ */
-    background-image: linear-gradient(to right, rgba(29,29,29,1) 40%, rgba(50,50,40,1) 40%, rgba(50,50,40,1) 50%, rgba(100,100,100,1) 54%, rgba(29,29,29,1) 54%); /* W3C */
+    background-image: -moz-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -moz-linear-gradient(top, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -webkit-linear-gradient(top, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -o-linear-gradient(top, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      -ms-linear-gradient(top, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* IE10+ */
+    background-image: linear-gradient(to right, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0) 49%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%),
+                      linear-gradient(to bottom, rgba(185,185,0,1) 0%, rgba(100,100,0,1) 8%, rgba(0,0,0,1) 50%, rgba(100,100,0,1) 92%, rgba(185,185,0,1) 100%); /* W3C */
 }
 
-/* light lens flare pointing north, with focus (gold light) */
-div:focus .sliderlens-horiz-handle.flare::after,
-div:focus .sliderlens-horiz-handle1.flare::after,
+/*
+    /\
+   /  \
+  /    \
+  |    |
+  |____|  light lens flare pointing north with focus (gold light) */
+div:focus .sliderlens-horiz-fixedhandle.flare::after,
+div:focus .sliderlens-horiz-handle.flare::after {
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at center bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* 
+    /|
+   / |
+  /  |
+  |  |
+  |__|  light lens flare pointing north with focus (gold light), for the leftmost handle in double sliders */
+div:focus .sliderlens-horiz-handle1.flare::after {
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at right bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/*
+  |\
+  | \
+  |  \
+  |  |
+  |__|  light lens flare pointing north with focus (gold light), for the rightmost handle in double sliders */
 div:focus .sliderlens-horiz-handle2.flare::after {
     background-image: -moz-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -moz-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, 50% top, 50% bottom, color-stop(0%,rgba(255,255,255,.9)), color-stop(12%,rgba(255,255,255,.5)), color-stop(70%,rgba(255,255,255,0))),
-                      -webkit-gradient(radial, 50% 60%, 0px, 50% 60%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0)));  /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -webkit-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -o-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -ms-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      radial-gradient(ellipse at 50% 60%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at left bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare pointing south, with focus (gold light) */
-div:focus .sliderlens-horiz-handle.S.flare::after,
-div:focus .sliderlens-horiz-handle1.S.flare::after,
+/* ____
+  |    |
+  |    |
+  \    /
+   \  /
+    \/    light lens flare pointing south, with focus (gold light) */
+div:focus .sliderlens-horiz-fixedhandle.S.flare::after,
+div:focus .sliderlens-horiz-handle.S.flare::after {
+    background-image: -moz-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at center top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  \  |
+   \ |
+    \|  light lens flare pointing south with focus (gold light), for the leftmost handle in double sliders */
+div:focus .sliderlens-horiz-handle1.S.flare::after {
+    background-image: -moz-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at right top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  |  /
+  | /
+  |/    light lens flare pointing south with focus (gold light), for the rightmost handle in double sliders */
 div:focus .sliderlens-horiz-handle2.S.flare::after {
     background-image: -moz-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -moz-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, 50% bottom, 50% top, color-stop(0%,rgba(255,255,255,.9)), color-stop(12%,rgba(255,255,255,.5)), color-stop(70%,rgba(255,255,255,0))),
-                      -webkit-gradient(radial, 50% 40%, 0px, 50% 40%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0)));  /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -webkit-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -o-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(bottom, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -ms-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to top, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      radial-gradient(ellipse at 50% 40%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at left top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare pointing west with focus (gold light) */
-div:focus .sliderlens-vert-handle.flare::after,
-div:focus .sliderlens-vert-handle1.flare::after,
+/*  _______
+   /       |
+  /        |
+  \        |
+   \_______|  light lens flare pointing west with focus (gold light) */
+div:focus .sliderlens-vert-fixedhandle.flare::after,
+div:focus .sliderlens-vert-handle.flare::after {
+    background-image: -moz-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at right center, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/*  ________
+   /        |
+  /_________|  light lens flare pointing west with focus (gold light), for the topmost handle in double sliders */
+div:focus .sliderlens-vert-handle1.flare::after {
+    background-image: -moz-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at right bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/*__________
+  \         |
+   \________|  light lens flare pointing west with focus (gold light), for the bottommost handle in double sliders */
 div:focus .sliderlens-vert-handle2.flare::after {
     background-image: -moz-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -moz-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left 50%, right 50%, color-stop(0%,rgba(255,255,255,.9)), color-stop(12%,rgba(255,255,255,.5)), color-stop(70%,rgba(255,255,255,0))),
-                      -webkit-gradient(radial, 60% 50%, 0px, 60% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0)));  /* Chrome,Safari4+ */
+                      -moz-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -webkit-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -o-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -ms-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      radial-gradient(ellipse at 60% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at right top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare pointing east with focus (gold light) */
-div:focus .sliderlens-vert-handle.E.flare::after,
-div:focus .sliderlens-vert-handle1.E.flare::after,
+/* _______
+  |       \
+  |        \
+  |        /
+  |_______/   light lens flare pointing east with focus (gold light) */
+div:focus .sliderlens-vert-fixedhandle.E.flare::after,
+div:focus .sliderlens-vert-handle.E.flare::after {
+    background-image: -moz-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at left center, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* ________
+  |        \
+  |_________\  light lens flare pointing east with focus (gold light), for the topmost handle in double sliders */
+div:focus .sliderlens-vert-handle1.E.flare::after {
+    background-image: -moz-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -moz-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -o-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      -ms-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
+                      radial-gradient(ellipse at left bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __________
+  |         /
+  |________/  light lens flare pointing east with focus (gold light), for the bottommost handle in double sliders */
 div:focus .sliderlens-vert-handle2.E.flare::after {
     background-image: -moz-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -moz-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, right 50%, left 50%, color-stop(0%,rgba(255,255,255,.9)), color-stop(12%,rgba(255,255,255,.5)), color-stop(70%,rgba(255,255,255,0))),
-                      -webkit-gradient(radial, 40% 50%, 0px, 40% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,.16)), color-stop(60%,rgba(250,241,174,0)));  /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -webkit-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -o-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%,rgba(254,252,234,0) 65%); /* Opera 11.10+ */
+                      -o-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(right, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      -ms-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%,rgba(254,252,234,0) 65%); /* IE10+ */
+                      -ms-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to left, rgba(255,255,255,.9) 0%, rgba(255,255,255,.5) 12%, rgba(255,255,255,0) 70%),
-                      radial-gradient(ellipse at 40% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%,rgba(254,252,234,0) 65%); /* W3C */
+                      radial-gradient(ellipse at left top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
 
-/* light lens flare 2 pointing north with focus (gold light) */
+
+
+
+
+
+/* Below the same rules as above, but now for flare2 */
+
+/*
+    /\
+   /  \
+  /    \
+  |    |
+  |____|  light lens flare 2 pointing north with focus (gold light) */
+div:focus .sliderlens-horiz-fixedhandle.flare2::after,  
 div:focus .sliderlens-horiz-handle.flare2::after {
     background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.05)), color-stop(49%,rgba(255,255,255,.1)), color-stop(50%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 50% 60%, 0px, 50% 60%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.28) 6%,rgba(241,218,54,0.06) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(center bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 50% 60%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at center bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing south with focus (gold light) */
-div:focus .sliderlens-horiz-handle.S.flare2::after {
-    background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.05)), color-stop(49%,rgba(255,255,255,.1)), color-stop(50%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 50% 40%, 0px, 50% 40%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
-    background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 50% 40%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
-}
-
-
-
-/* light lens flare 2 pointing north with focus (gold light), for the leftmost handler in double sliders */
+/* 
+    /|
+   / |
+  /  |
+  |  |
+  |__|  light lens flare 2 pointing north with focus (gold light), for the leftmost handle in double sliders */
 div:focus .sliderlens-horiz-handle1.flare2::after {
     background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -moz-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.05)), color-stop(100%,rgba(255,255,255,.1))),
-                      -webkit-gradient(radial, 50% 60%, 0px, 50% 60%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -webkit-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -o-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -ms-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      radial-gradient(ellipse at 50% 60%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at right bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing south with focus (gold light), for the leftmost handler in double sliders */
-div:focus .sliderlens-horiz-handle1.S.flare2::after {
-    background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -moz-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.05)), color-stop(100%,rgba(255,255,255,.1))),
-                      -webkit-gradient(radial, 50% 40%, 0px, 50% 40%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -webkit-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -o-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -ms-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
-    background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      radial-gradient(ellipse at 50% 40%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
-}
-/* light lens flare 2 pointing north with focus (gold light), for the rightmost handler in double sliders */
+/*
+  |\
+  | \
+  |  \
+  |  |
+  |__|  light lens flare 2 pointing north with focus (gold light), for the rightmost handle in double sliders */
 div:focus .sliderlens-horiz-handle2.flare2::after {
     background-image: -moz-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 50% 60%, 0px, 50% 60%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(50% 60%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to right, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 50% 60%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at left bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing south with focus (gold light), for the rightmost handler in double sliders */
+/* ____
+  |    |
+  |    |
+  \    /
+   \  /
+    \/    light lens flare 2 pointing south with focus (gold light) */
+div:focus .sliderlens-horiz-fixedhandle.S.flare2::after,    
+div:focus .sliderlens-horiz-handle.S.flare2::after {
+    background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -moz-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -webkit-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -o-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -ms-radial-gradient(center top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      radial-gradient(ellipse at center top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  \  |
+   \ |
+    \|  light lens flare 2 pointing south with focus (gold light), for the leftmost handle in double sliders */
+div:focus .sliderlens-horiz-handle1.S.flare2::after {
+    background-image: -moz-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -moz-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -webkit-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -o-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -ms-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to right, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      radial-gradient(ellipse at right top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  |  /
+  | /
+  |/    light lens flare 2 pointing south with focus (gold light), for the rightmost handle in double sliders */
 div:focus .sliderlens-horiz-handle2.S.flare2::after {
     background-image: -moz-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 50% 40%, 0px, 50% 40%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(left, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(50% 40%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to right, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 50% 40%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at left top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-
-/* light lens flare 2 pointing west with focus (gold light) */
+/*  ________
+   /        |
+  /         |
+  \         |
+   \________|  light lens flare 2 pointing west with focus (gold light) */
+div:focus .sliderlens-vert-fixedhandle.flare2::after,
 div:focus .sliderlens-vert-handle.flare2::after {
     background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.05)), color-stop(49%,rgba(255,255,255,.1)), color-stop(50%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 60% 50%, 0px, 60% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(right center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 60% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at right center, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing east with focus (gold light) */
-div:focus .sliderlens-vert-handle.E.flare2::after {
-    background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.05)), color-stop(49%,rgba(255,255,255,.1)), color-stop(50%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 40% 50%, 0px, 40% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
-    background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 40% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
-}
-/* light lens flare 2 pointing west with focus (gold light), for the topmost handler in double sliders */
+/*  ________
+   /        |
+  /_________|  light lens flare 2 pointing west with focus (gold light), for the topmost handle in double sliders */
 div:focus .sliderlens-vert-handle1.flare2::after {
     background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -moz-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.05)), color-stop(100%,rgba(255,255,255,.1))),
-                      -webkit-gradient(radial, 60% 50%, 0px, 60% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -webkit-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -o-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -ms-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(right bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      radial-gradient(ellipse at 60% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at right bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing east with focus (gold light), for the topmost handler in double sliders */
-div:focus .sliderlens-vert-handle1.E.flare2::after {
-    background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -moz-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.05)), color-stop(100%,rgba(255,255,255,.1))),
-                      -webkit-gradient(radial, 40% 50%, 0px, 40% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
-    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -webkit-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -o-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      -ms-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
-    background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
-                      radial-gradient(ellipse at 40% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
-}
-/* light lens flare 2 pointing west with focus (gold light), for the bottommost handler in double sliders */
+/*__________
+  \         |
+   \________|  light lens flare 2 pointing west with focus (gold light), for the bottommost handle in double sliders */
 div:focus .sliderlens-vert-handle2.flare2::after {
     background-image: -moz-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 60% 50%, 0px, 60% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(60% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(right top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to bottom, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 60% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at right top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
-/* light lens flare 2 pointing east with focus (gold light), for the bottommost handler in double sliders */
+/* ________
+  |        \
+  |         \
+  |         /
+  |________/   light lens flare 2 pointing east with focus (gold light) */
+div:focus .sliderlens-vert-fixedhandle.E.flare2::after,
+div:focus .sliderlens-vert-handle.E.flare2::after {
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -moz-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -webkit-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -o-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      -ms-radial-gradient(left center, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 49%, rgba(255,255,255,.3) 50%, rgba(255,255,255,.15) 95%),
+                      radial-gradient(ellipse at left center, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* ________
+  |        \
+  |_________\  light lens flare 2 pointing east with focus (gold light), for the topmost handle in double sliders */
+div:focus .sliderlens-vert-handle1.E.flare2::after {
+    background-image: -moz-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -moz-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -o-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      -ms-radial-gradient(left bottom, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
+    background-image: linear-gradient(to bottom, rgba(255,255,255,.05) 0%, rgba(255,255,255,.1) 100%),
+                      radial-gradient(ellipse at left bottom, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
+}
+/* __________
+  |         /
+  |________/   light lens flare 2 pointing east with focus (gold light), for the bottommost handle in double sliders */
 div:focus .sliderlens-vert-handle2.E.flare2::after {
     background-image: -moz-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -moz-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%, rgba(241,218,54,0.16) 30%, rgba(250,241,174,0) 60%); /* FF3.6+ */
-    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(255,255,255,.3)), color-stop(95%,rgba(255,255,255,.15))),
-                      -webkit-gradient(radial, 40% 50%, 0px, 40% 50%, 100%, color-stop(6%,rgba(241,218,54,0.38)), color-stop(30%,rgba(241,218,54,0.16)), color-stop(60%,rgba(250,241,174,0))); /* Chrome,Safari4+ */
+                      -moz-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* FF3.6+ */
     background-image: -webkit-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -webkit-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Chrome10+,Safari5.1+ */
+                      -webkit-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Chrome10+,Safari5.1+ */
     background-image: -o-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -o-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* Opera 11.10+ */
+                      -o-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* Opera 11.10+ */
     background-image: -ms-linear-gradient(top, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      -ms-radial-gradient(40% 50%, ellipse cover, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* IE10+ */
+                      -ms-radial-gradient(left top, ellipse cover, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* IE10+ */
     background-image: linear-gradient(to bottom, rgba(255,255,255,.3) 0%, rgba(255,255,255,.15) 95%),
-                      radial-gradient(ellipse at 40% 50%, rgba(241,218,54,0.38) 6%,rgba(241,218,54,0.16) 30%,rgba(250,241,174,0) 60%); /* W3C */
+                      radial-gradient(ellipse at left top, rgba(240,218,54,.25) 5%,rgba(241,218,54,.05) 60%,rgba(250,241,174,0) 90%); /* W3C */
 }
 
 .sliderlens-horiz-handle span {
-    background-color: rgba(0,0,0,.5);
+    background-color: black;
     border-radius: 5px;
-    color: rgba(150,141,74,.8);
+    color: rgba(150,141,74,.6);
+    display: inline-block;
     text-align: center;
-    text-shadow: 0 0 11px rgba(255,255,0,.4);
-    font-family: 'digital_dream_fat_narrowRg', cursive, arial;
+    text-shadow: 0 0 6px rgba(255,255,0,.6);
+    font-family: arial, 'VT323', cursive;
     font-size: 0.55em;
     position: absolute;
     left: 2px;
     right: 3px;
-    bottom: 4px;
-    padding: 2px;
+    bottom: 2px;
 }
+
+ 
