@@ -12,9 +12,9 @@
 
 .sliderlens-horiz-overflow,
 .sliderlens-vert-overflow {
-    -moz-box-shadow: 0 0 2px 2px rgba(206,206,206,.3);
-    -webkit-box-shadow: 0 0 2px 2px rgba(206,206,206,.3);
-    box-shadow: 0 0 2px 2px rgba(106,106,106,.3);
+    -moz-box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
+    -webkit-box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
+    box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
 }
 
 /* gradient for horizontal slider */

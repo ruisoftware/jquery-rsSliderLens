@@ -12,26 +12,20 @@
 
 .sliderlens-horiz-overflow,
 .sliderlens-vert-overflow {
-    -moz-box-shadow: 0 0 2px 2px rgba(206,206,206,.6);
-    -webkit-box-shadow: 0 0 2px 2px rgba(206,206,206,.6);
-    box-shadow: 0 0 2px 2px rgba(106,106,106,.6);
-}
-
-.sliderlens-horiz-overflow::after {
-    -moz-box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 12px 0 17px #222, inset -12px 0 17px #222;
-    -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 12px 0 17px #222, inset -12px 0 17px #222;
-    box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 12px 0 17px #222, inset -12px 0 17px #222;
-}
-.sliderlens-vert-overflow::after {
-    -moz-box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 0 12px 17px #222, inset 0 -12px 17px #222;
-    -webkit-box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 0 12px 17px #222, inset 0 -12px 17px #222;
-    box-shadow: inset 0 0 3px rgba(0,0,0,.5), inset 0 12px 17px #222, inset 0 -12px 17px #222;
-}
-.sliderlens-horiz-overflow,
-.sliderlens-vert-overflow {
     -moz-box-shadow: 0 0 2px 2px rgba(32,32,32,.6);
     -webkit-box-shadow: 0 0 2px 2px rgba(32,32,32,.6);
     box-shadow: 0 0 2px 2px rgba(32,32,32,.6);
+}
+
+.sliderlens-horiz-overflow::after {
+    -moz-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
+    -webkit-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
+    box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
+}
+.sliderlens-vert-overflow::after {
+    -moz-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
+    -webkit-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
+    box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
 }
 
 .sliderlens-horiz-fixedhandle { 

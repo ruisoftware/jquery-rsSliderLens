@@ -86,14 +86,14 @@ div:focus .sliderlens-vert-handle2.sliderlens-mouse-down {
     bottom: 0;
 }
 .sliderlens-horiz-overflow::after {
-    -moz-box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 12px 0 17px rgba(120,120,120,.5), inset -12px 0 17px rgba(120,120,120,.5);
-    -webkit-box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 12px 0 17px rgba(120,120,120,.5), inset -12px 0 17px rgba(120,120,120,.5);
-    box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 12px 0 17px rgba(120,120,120,.5), inset -12px 0 17px rgba(120,120,120,.5);
+    -moz-box-shadow: inset 18px 0 11px rgba(120,120,120,.35), inset -18px 0 11px rgba(120,120,120,.35), inset 6px 0 8px rgba(50,50,50,.8), inset -6px 0 8px rgba(50,50,50,.8);
+    -webkit-box-shadow: inset 18px 0 11px rgba(120,120,120,.35), inset -18px 0 11px rgba(120,120,120,.35), inset 6px 0 8px rgba(50,50,50,.8), inset -6px 0 8px rgba(50,50,50,.8);
+    box-shadow: inset 18px 0 11px rgba(120,120,120,.35), inset -18px 0 11px rgba(120,120,120,.35), inset 6px 0 8px rgba(50,50,50,.8), inset -6px 0 8px rgba(50,50,50,.8);
 }
 .sliderlens-vert-overflow::after {
-    -moz-box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 0 12px 17px rgba(120,120,120,.5), inset 0 -12px 17px rgba(120,120,120,.5);
-    -webkit-box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 0 12px 17px rgba(120,120,120,.5), inset 0 -12px 17px rgba(120,120,120,.5);
-    box-shadow: inset 0 0 3px rgba(100,100,100,.5), inset 0 12px 17px rgba(120,120,120,.5), inset 0 -12px 17px rgba(120,120,120,.5);
+    -moz-box-shadow: inset 0 18px 11px rgba(120,120,120,.35), inset 0 -18px 11px rgba(120,120,120,.35), inset 0 6px 8px rgba(50,50,50,.8), inset 0 -6px 8px rgba(50,50,50,.8);
+    -webkit-box-shadow: inset 0 18px 11px rgba(120,120,120,.35), inset 0 -18px 11px rgba(120,120,120,.35), inset 0 6px 8px rgba(50,50,50,.8), inset 0 -6px 8px rgba(50,50,50,.8);
+    box-shadow: inset 0 18px 11px rgba(120,120,120,.35), inset 0 -18px 11px rgba(120,120,120,.35), inset 0 6px 8px rgba(50,50,50,.8), inset 0 -6px 8px rgba(50,50,50,.8);
 }
 
 .sliderlens-horiz-fixedhandle { 

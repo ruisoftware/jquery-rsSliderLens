@@ -156,9 +156,7 @@
                         var userFixedSize = this.getUserDefinedFixedSize();
                         
                         if (info.isHoriz) {
-                            if (!info.isFixedHandle) {
-                                this.$elem.css('top', elemOrig.pos.top + 'px');
-                            }
+                            this.$elem.css('top', (info.isFixedHandle ? 0 : elemOrig.pos.top) + 'px');
                             if (Math.abs(userFixedSize) < 0.0005) {
                                 this.height = elemOrig.height;
                                 this.$elem.css('height', this.height + 'px');
