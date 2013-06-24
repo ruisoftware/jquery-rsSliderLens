@@ -17,10 +17,39 @@
 .sliderlens-horiz-handle2,
 .sliderlens-vert-handle1,
 .sliderlens-vert-handle2 { 
-    -moz-box-shadow: 0 0 3px rgba(0,0,0,.7); 
-    -webkit-box-shadow: 0 0 3px rgba(0,0,0,.7); 
-    box-shadow: 0 0 3px rgba(0,0,0,.7);
+    -moz-box-shadow: 0 0 2px rgba(0,0,0,.6); 
+    -webkit-box-shadow: 0 0 2px rgba(0,0,0,.6); 
+    box-shadow: 0 0 2px rgba(0,0,0,.6);
 }
+/* focused handle */
+div:focus .sliderlens-horiz-handle,
+div:focus .sliderlens-horiz-handle1,
+div:focus .sliderlens-horiz-handle2,
+div:focus .sliderlens-vert-handle,
+div:focus .sliderlens-vert-handle1,
+div:focus .sliderlens-vert-handle2 {
+    -moz-box-shadow: 0 0 2px black; 
+    -webkit-box-shadow: 0 0 2px black; 
+    box-shadow: 0 0 2px black;
+}
+/* shadow when handle is being pushed down */
+.sliderlens-horiz-handle.sliderlens-mouse-down,
+.sliderlens-horiz-handle1.sliderlens-mouse-down,
+.sliderlens-horiz-handle2.sliderlens-mouse-down,
+.sliderlens-vert-handle.sliderlens-mouse-down,
+.sliderlens-vert-handle1.sliderlens-mouse-down,
+.sliderlens-vert-handle2.sliderlens-mouse-down,
+div:focus .sliderlens-horiz-handle.sliderlens-mouse-down,
+div:focus .sliderlens-horiz-handle1.sliderlens-mouse-down,
+div:focus .sliderlens-horiz-handle2.sliderlens-mouse-down,
+div:focus .sliderlens-vert-handle.sliderlens-mouse-down,
+div:focus .sliderlens-vert-handle1.sliderlens-mouse-down,
+div:focus .sliderlens-vert-handle2.sliderlens-mouse-down {
+    -moz-box-shadow: 0 0 1px rgba(0,0,0,.6); 
+    -webkit-box-shadow: 0 0 1px rgba(0,0,0,.6); 
+    box-shadow: 0 0 1px rgba(0,0,0,.6);
+}
+
 
 /* shadow when handle is disabled */
 .sliderlens-vert-handle.sliderlens-disabled,
@@ -44,35 +73,6 @@
     box-shadow: 0 5px 7px -4px rgba(50,50,50,.7), 0 -5px 7px -4px rgba(50,50,50,.7);
 } 
 
-/* focused handle */
-div:focus .sliderlens-horiz-handle,
-div:focus .sliderlens-horiz-handle1,
-div:focus .sliderlens-horiz-handle2,
-div:focus .sliderlens-vert-handle,
-div:focus .sliderlens-vert-handle1,
-div:focus .sliderlens-vert-handle2 {
-    -moz-box-shadow: 0 0 3px black; 
-    -webkit-box-shadow: 0 0 3px black; 
-    box-shadow: 0 0 3px black;
-}
-
-/* shadow when handle is being pushed down */
-.sliderlens-horiz-handle.sliderlens-mouse-down,
-.sliderlens-horiz-handle1.sliderlens-mouse-down,
-.sliderlens-horiz-handle2.sliderlens-mouse-down,
-.sliderlens-vert-handle.sliderlens-mouse-down,
-.sliderlens-vert-handle1.sliderlens-mouse-down,
-.sliderlens-vert-handle2.sliderlens-mouse-down,
-div:focus .sliderlens-horiz-handle.sliderlens-mouse-down,
-div:focus .sliderlens-horiz-handle1.sliderlens-mouse-down,
-div:focus .sliderlens-horiz-handle2.sliderlens-mouse-down,
-div:focus .sliderlens-vert-handle.sliderlens-mouse-down,
-div:focus .sliderlens-vert-handle1.sliderlens-mouse-down,
-div:focus .sliderlens-vert-handle2.sliderlens-mouse-down {
-    -moz-box-shadow: 0 0 2px rgba(0,0,0,.7); 
-    -webkit-box-shadow: 0 0 2px rgba(0,0,0,.7); 
-    box-shadow: 0 0 2px rgba(0,0,0,.7);
-}
 
 /* fixed handle inner and box shadows */
 .sliderlens-horiz-overflow::after,
@@ -85,6 +85,17 @@ div:focus .sliderlens-vert-handle2.sliderlens-mouse-down {
     right: 0;
     bottom: 0;
 }
+
+.sliderlens-horiz-overflow::after {
+    top: -4px;
+    bottom: -4px;
+}
+
+.sliderlens-vert-overflow::after {
+    left: -4px;
+    right: -4px;
+}
+
 .sliderlens-horiz-overflow::after {
     -moz-box-shadow: inset 18px 0 11px rgba(120,120,120,.35), inset -18px 0 11px rgba(120,120,120,.35), inset 6px 0 8px rgba(50,50,50,.8), inset -6px 0 8px rgba(50,50,50,.8);
     -webkit-box-shadow: inset 18px 0 11px rgba(120,120,120,.35), inset -18px 0 11px rgba(120,120,120,.35), inset 6px 0 8px rgba(50,50,50,.8), inset -6px 0 8px rgba(50,50,50,.8);
@@ -97,14 +108,14 @@ div:focus .sliderlens-vert-handle2.sliderlens-mouse-down {
 }
 
 .sliderlens-horiz-fixedhandle { 
-    -moz-box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 1px 7px -4px #323232, 0 -1px 7px -4px #323232;
-    -webkit-box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 1px 7px -4px #323232, 0 -1px 7px -4px #323232;
-    box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 1px 7px -4px #323232, 0 -1px 7px -4px #323232;
+    -moz-box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 2px 7px -4px #323232, 0 -2px 7px -4px #323232;
+    -webkit-box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 2px 7px -4px #323232, 0 -2px 7px -4px #323232;
+    box-shadow: 5px 0 7px -4px #323232, -5px 0 7px -4px #323232, 0 2px 7px -4px #323232, 0 -2px 7px -4px #323232;
 } 
 .sliderlens-vert-fixedhandle { 
-    -moz-box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 1px 0 7px -4px #323232, -1px 0 7px -4px #323232;
-    -webkit-box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 1px 0 7px -4px #323232, -1px 0 7px -4px #323232;
-    box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 1px 0 7px -4px #323232, -1px 0 7px -4px #323232;
+    -moz-box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 2px 0 7px -4px #323232, -2px 0 7px -4px #323232;
+    -webkit-box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 2px 0 7px -4px #323232, -2px 0 7px -4px #323232;
+    box-shadow: 0 5px 7px -4px #323232, 0 -5px 7px -4px #323232, 2px 0 7px -4px #323232, -2px 0 7px -4px #323232;
 }
 
 /* mouse cursor */

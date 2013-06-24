@@ -12,9 +12,9 @@
 
 .sliderlens-horiz-overflow,
 .sliderlens-vert-overflow {
-    -moz-box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
-    -webkit-box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
-    box-shadow: 0 0 2px 2px rgba(106,106,106,.3), 0 0 1px 1px rgba(106,106,106,.3);
+    -moz-box-shadow: 0 0 1px 2px rgba(100,100,100,.5), 0 0 1px rgba(100,100,100,.9);
+    -webkit-box-shadow: 0 0 1px 2px rgba(100,100,100,.5), 0 0 1px rgba(100,100,100,.9);
+    box-shadow: 0 0 1px 2px rgba(100,100,100,.5), 0 0 1px rgba(100,100,100,.9);
 }
 
 /* gradient for horizontal slider */
@@ -54,7 +54,6 @@ canvas.sliderlens-vert,
 .sliderlens-vert-handle.flare::after,
 .sliderlens-vert-handle1.flare::after,
 .sliderlens-vert-handle2.flare::after,
-
 .sliderlens-horiz-fixedhandle.flare2::after,
 .sliderlens-vert-fixedhandle.flare2::after,
 .sliderlens-horiz-handle.flare2::after,
@@ -72,7 +71,32 @@ canvas.sliderlens-vert,
     bottom: 0;
     margin: 0;
     z-index: 2;
+    -moz-box-shadow: inset 0 0 1px 1px rgba(255,255,255,.8);
+    -webkit-box-shadow: inset 0 0 1px 1px rgba(255,255,255,.8);
+    box-shadow: inset 0 0 1px 1px rgba(255,255,255,.8);
 }
+/* disabled lens flare effect */
+.sliderlens-horiz-fixedhandle.sliderlens-disabled.flare::after,
+.sliderlens-vert-fixedhandle.sliderlens-disabled.flare::after,
+.sliderlens-horiz-handle.sliderlens-disabled.flare::after,
+.sliderlens-horiz-handle1.sliderlens-disabled.flare::after,
+.sliderlens-horiz-handle2.sliderlens-disabled.flare::after,
+.sliderlens-vert-handle.sliderlens-disabled.flare::after,
+.sliderlens-vert-handle1.sliderlens-disabled.flare::after,
+.sliderlens-vert-handle2.sliderlens-disabled.flare::after,
+.sliderlens-horiz-fixedhandle.sliderlens-disabled.flare2::after,
+.sliderlens-vert-fixedhandle.sliderlens-disabled.flare2::after,
+.sliderlens-horiz-handle.sliderlens-disabled.flare2::after,
+.sliderlens-horiz-handle1.sliderlens-disabled.flare2::after,
+.sliderlens-horiz-handle2.sliderlens-disabled.flare2::after,
+.sliderlens-vert-handle.sliderlens-disabled.flare2::after,
+.sliderlens-vert-handle1.sliderlens-disabled.flare2::after,
+.sliderlens-vert-handle2.sliderlens-disabled.flare2::after {
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
 
 /* light lens flare pointing north */
 .sliderlens-horiz-fixedhandle.flare::after,
