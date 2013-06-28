@@ -1,15 +1,5 @@
 @import url('rsSliderLens.css');
 
-/*TODO: remove this #pcontent */
-#pcontent {
-    background-color: #3b3a36;
-}
-
-.sliderlens-horiz-fixedhandle,
-.sliderlens-vert-fixedhandle {
-    background-color: #3b3a36;
-}
-
 .sliderlens-horiz-overflow,
 .sliderlens-vert-overflow {
     -moz-box-shadow: 0 0 1px 2px rgba(30,30,30,.6), 0 0 1px black;
@@ -18,22 +8,24 @@
 }
 
 .sliderlens-horiz-overflow::after {
-    -moz-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
-    -webkit-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
-    box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 6px 0 8px rgba(0,0,0,.8), inset -6px 0 8px rgba(0,0,0,.8);
+    -moz-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 8px 0 8px rgba(0,0,0,.8), inset -8px 0 8px rgba(0,0,0,.8);
+    -webkit-box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 8px 0 8px rgba(0,0,0,.8), inset -8px 0 8px rgba(0,0,0,.8);
+    box-shadow: inset 18px 0 11px rgba(20,20,20,.35), inset -18px 0 11px rgba(20,20,20,.35), inset 8px 0 8px rgba(0,0,0,.8), inset -8px 0 8px rgba(0,0,0,.8);
 }
 .sliderlens-vert-overflow::after {
-    -moz-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
-    -webkit-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
-    box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 6px 8px rgba(0,0,0,.8), inset 0 -6px 8px rgba(0,0,0,.8);
+    -moz-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 8px 8px rgba(0,0,0,.8), inset 0 -8px 8px rgba(0,0,0,.8);
+    -webkit-box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 8px 8px rgba(0,0,0,.8), inset 0 -8px 8px rgba(0,0,0,.8);
+    box-shadow: inset 0 18px 11px rgba(20,20,20,.35), inset 0 -18px 11px rgba(20,20,20,.35), inset 0 8px 8px rgba(0,0,0,.8), inset 0 -8px 8px rgba(0,0,0,.8);
 }
 
 .sliderlens-horiz-fixedhandle { 
+    background-color: hsl(0,0%,24%);
     -moz-box-shadow: 5px 0 7px -4px black, -5px 0 7px -4px black, 0 1px 7px -4px black, 0 -1px 7px -4px black;
     -webkit-box-shadow: 5px 0 7px -4px black, -5px 0 7px -4px black, 0 1px 7px -4px black, 0 -1px 7px -4px black;
     box-shadow: 5px 0 7px -4px black, -5px 0 7px -4px black, 0 1px 7px -4px black, 0 -1px 7px -4px black;
 } 
-.sliderlens-vert-fixedhandle { 
+.sliderlens-vert-fixedhandle {
+    background-color: hsl(0,0%,24%);
     -moz-box-shadow: 0 5px 7px -4px black, 0 -5px 7px -4px black, 1px 0 7px -4px black, -1px 0 7px -4px black;
     -webkit-box-shadow: 0 5px 7px -4px black, 0 -5px 7px -4px black, 1px 0 7px -4px black, -1px 0 7px -4px black;
     box-shadow: 0 5px 7px -4px black, 0 -5px 7px -4px black, 1px 0 7px -4px black, -1px 0 7px -4px black;
@@ -46,12 +38,12 @@ canvas.sliderlens-horiz,
 .sliderlens-horiz-handle canvas,
 .sliderlens-horiz-handle1 canvas,
 .sliderlens-horiz-handle2 canvas {
-    background-color: #3b3a36;
-    background-image: -moz-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* FF3.6+ */
-    background-image: -webkit-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(top, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* IE10+ */
-    background-image: linear-gradient(to bottom, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* W3C */
+    background-color: hsl(0,0%,24%);
+    background-image: -moz-linear-gradient(top, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* W3C */
 }
 
 /* gradient for vertical slider */
@@ -60,12 +52,12 @@ canvas.sliderlens-vert,
 .sliderlens-vert-handle canvas,
 .sliderlens-vert-handle1 canvas,
 .sliderlens-vert-handle2 canvas {
-    background-color: #3b3a36;
-    background-image: -moz-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* FF3.6+ */
-    background-image: -webkit-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* Chrome10+,Safari5.1+ */
-    background-image: -o-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* Opera 11.10+ */
-    background-image: -ms-linear-gradient(left, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* IE10+ */
-    background-image: linear-gradient(to right, rgba(59,58,54,1) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,1) 54%); /* W3C */
+    background-color: hsl(0,0%,24%);
+    background-image: -moz-linear-gradient(left, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* IE10+ */
+    background-image: linear-gradient(to right, hsl(0,0%,24%) 40%, rgba(0,0,0,1) 40%, rgba(0,0,0,1) 50%, rgba(100,100,100,1) 54%, rgba(59,58,54,0) 58%); /* W3C */
 }
 
 /* lens flare effect */

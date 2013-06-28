@@ -72,6 +72,14 @@
                     this.autofocusable = $origBar.attr('autofocus');
                     this.canvasWidth = this.width = $origBar.width();
                     this.canvasHeight = this.height = $origBar.height();
+                    if (this.width === 0) {
+                        this.canvasWidth = this.width = 25;
+                        $origBar.width(25);    
+                    }
+                    if (this.height === 0) {
+                        this.canvasHeight = this.height = 25;
+                        $origBar.height(25);    
+                    }
                     info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : (opts.orientation === 'vert' ? false : true);
                     info.isFixedHandle = opts.fixedHandle !== false;
 
@@ -298,7 +306,7 @@
                         info.endOffset = pixelOffsets.end;
                     }
                     info.beginOffset = Math.round(info.beginOffset);
-                    info.endOffset = Math.round(info.endOffset);
+                    info.endOffset = Math.floor(info.endOffset);
                     
                     elemOrig.initCanvasOutsideHandle();
 
@@ -1264,9 +1272,9 @@
                         if (info.useDoubleHandles) {
                             if ($handleElem === elemHandle.$elem1st) {
                                 if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
-                                if (v >= elemHandle.stopPosition[1] + 1) return { valid: 1, val: elemHandle.stopPosition[1] };
+                                if (v >= elemHandle.stopPosition[1] + (info.isStepDefined ? 0 : .5)) return { valid: 1, val: elemHandle.stopPosition[1] };
                             } else {
-                                if (v <= elemHandle.stopPosition[0] - 1) return { valid: -1, val: elemHandle.stopPosition[0] };
+                                if (v <= elemHandle.stopPosition[0] - (info.isStepDefined ? 0 : .5)) return { valid: -1, val: elemHandle.stopPosition[0] };
                                 if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
                             }
                         } else {
@@ -1336,11 +1344,10 @@
                     var margin = elemHandle.fixedHandlePixelPos - valuePixel - info.beginOffset;
                     elemOrig.fixedHandle.setMargin(margin);
                     elemRange.fixedHandle.setMargin(margin);
-                    elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
                 } else {
                     elemHandle.setPos(isFirstHandle, info.beginOffset + getHandlePos(valuePixel, $handleElem));
-                    elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
                 }
+                elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
 
                 if (info.isInputTypeRange && onlyOneHandle) {
                     $origBar.attr('value', info.getCurrValue(info.currValue[0]));
@@ -1426,7 +1433,7 @@
                         from = (info.isHoriz ? ctx.measureText(fmtMin).width : fontData.height) - 1;
                         deltaStart = from / 2;
                         
-                        deltaEnd = info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height;
+                        deltaEnd = (info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height) - 1;
                         deltaEnd /= 2;
                     }
 
@@ -2049,32 +2056,32 @@
                           //   true - for horizontal sliders, the maximum is located on the left, minimum on the right. For vertical sliders, the maximum on the top, minimum on the bottom.
                           
         style: {          // CSS style classes. You can use more than one class, separated by a space. Type: string.
-            classSliderlensHoriz: 'sliderlens-horiz',                   // class added to the original horizontal slider markup and to the unscaled canvas (when ruler is used)
-            classSliderlensVert: 'sliderlens-vert',                     // class added to the original vertical slider markup and to the unscaled canvas (when ruler is used)
-            classSliderLensHorizOverflow: 'sliderlens-horiz-overflow',  // class added to the parent of the original horizontal slider markup and to the unscaled canvas (when ruler is used). Only applicable for fixed handle sliders.
-            classSliderLensVertOverflow: 'sliderlens-vert-overflow',    // class added to the parent of the original vertical slider markup and to the unscaled canvas (when ruler is used). Only applicable for fixed handle sliders.
-            classHorizHandle: 'sliderlens-horiz-handle',                // non fixed handle used in in horizontal sliders
-            classVertHandle: 'sliderlens-vert-handle',                  // non fixed handle used in in vertical sliders
-            classHorizFixedHandle: 'sliderlens-horiz-fixedhandle',      // fixed handle used in in horizontal sliders
-            classVertFixedHandle: 'sliderlens-vert-fixedhandle',        // fixed handle used in in vertical sliders
-            classHorizHandle1: 'sliderlens-horiz-handle1',              // non fixed leftmost handle in horizontal sliders
-            classHorizHandle2: 'sliderlens-horiz-handle2',              // non fixed rightmost handle in horizontal sliders
-            classVertHandle1: 'sliderlens-vert-handle1',                // non fixed topmost handle in vertical sliders
-            classVertHandle2: 'sliderlens-vert-handle2',                // non fixed bottommost handle in vertical sliders
-            classHighlightRange: 'sliderlens-range',                    // range bar (used when range is not false)
-            classHighlightRangeDraggable: 'drag',                       // added to the range bar when user can drag it
-            classHandleDisabled: 'sliderlens-disabled',                 // disabled handle
-            classDragging: 'sliderlens-mouse-down',                     // style applied while the handle is being dragged by the mouse
-            classHandleHover: 'sliderlens-hover'                        // class added when mouse is hover the handle and unscaled canvas (when ruler is used). This class is added only if enabled is true
+            classSliderlensHoriz: 'sliderlens-horiz',                       // class added to the original horizontal slider markup and to the unscaled canvas (when ruler is used)
+            classSliderlensVert: 'sliderlens-vert',                         // class added to the original vertical slider markup and to the unscaled canvas (when ruler is used)
+            classSliderLensHorizOverflow: 'sliderlens-horiz-overflow',      // class added to the parent of the original horizontal slider markup and to the unscaled canvas (when ruler is used). Only applicable for fixed handle sliders.
+            classSliderLensVertOverflow: 'sliderlens-vert-overflow',        // class added to the parent of the original vertical slider markup and to the unscaled canvas (when ruler is used). Only applicable for fixed handle sliders.
+            classHorizHandle: 'sliderlens-horiz-handle round flare2',             // non fixed handle used in in horizontal sliders
+            classVertHandle: 'sliderlens-vert-handle round flare2',               // non fixed handle used in in vertical sliders
+            classHorizFixedHandle: 'sliderlens-horiz-fixedhandle round flare2',   // fixed handle used in in horizontal sliders
+            classVertFixedHandle: 'sliderlens-vert-fixedhandle round flare2',     // fixed handle used in in vertical sliders
+            classHorizHandle1: 'sliderlens-horiz-handle1 round flare2',           // non fixed leftmost handle in horizontal sliders
+            classHorizHandle2: 'sliderlens-horiz-handle2 round flare2',           // non fixed rightmost handle in horizontal sliders
+            classVertHandle1: 'sliderlens-vert-handle1 round flare2',             // non fixed topmost handle in vertical sliders
+            classVertHandle2: 'sliderlens-vert-handle2 round flare2',             // non fixed bottommost handle in vertical sliders
+            classHighlightRange: 'sliderlens-range',                        // range bar (used when range is not false)
+            classHighlightRangeDraggable: 'drag',                           // added to the range bar when user can drag it
+            classHandleDisabled: 'sliderlens-disabled',                     // disabled handle
+            classDragging: 'sliderlens-mouse-down',                         // style applied while the handle is being dragged by the mouse
+            classHandleHover: 'sliderlens-hover'                            // class added when mouse is hover the handle and unscaled canvas (when ruler is used). This class is added only if enabled is true
         },
         
         // handle is the cursor that the user can drag around to select values
         handle: {
-            size: 25,   // Size of handle in pixels. Type: positive integer.
+            size: 40,   // Size of handle in pixels. Type: positive integer.
                         // For horizontal sliders, it is the handle width. For vertical sliders, it is the handle height.
                         // If two handles are used, then this is the size of both handles together, which means each handle has a size of size/2.
             
-            zoom: 1.5,  // Magnification factor applied inside the handle. Type: floating point number.
+            zoom: 1.25, // Magnification factor applied inside the handle. Type: floating point number.
             
             relativePos: 0.5, // Floating point number between 0 and 1 that indicates the handle relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                               // For horizontal sliders, a value of 0 aligns handle to the top, 1 aligns it to the bottom.
