@@ -1,0 +1,356 @@
+@import url('rsSliderLens.css');
+
+/*
+    /\
+   /  \
+  /    \
+  |    |
+  |____|  light lens flare pointing northbound with focus (white light) */
+div:focus .sliderlens-horiz-fixedhandle.flare:after,  
+div:focus .sliderlens-horiz-handle.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(center bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(center bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(center bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(center bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at center bottom, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-fixedhandle.flare:after,
+.w div:focus .sliderlens-horiz-handle.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(center bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(center bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(center bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(center bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at center bottom, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* 
+    /|
+   / |
+  /  |
+  |  |
+  |__|  light lens flare pointing northbound with focus (white light), for the leftmost handle in double sliders */
+div:focus .sliderlens-horiz-handle1.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -moz-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -o-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -ms-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      radial-gradient(ellipse at right bottom, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-handle1.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -moz-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -o-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -ms-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      radial-gradient(ellipse at right bottom, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/*
+  |\
+  | \
+  |  \
+  |  |
+  |__|  light lens flare pointing northbound with focus (white light), for the rightmost handle in double sliders */
+div:focus .sliderlens-horiz-handle2.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at left bottom, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-handle2.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at left bottom, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* ____
+  |    |
+  |    |
+  \    /
+   \  /
+    \/    light lens flare pointing southbound with focus (white light) */
+div:focus .sliderlens-horiz-fixedhandle.S.flare:after,    
+div:focus .sliderlens-horiz-handle.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(center top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(center top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(center top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(center top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at center top, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-fixedhandle.S.flare:after,
+.w div:focus .sliderlens-horiz-handle.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(center top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(center top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(center top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(center top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at center top, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  \  |
+   \ |
+    \|  light lens flare pointing southbound with focus (white light), for the leftmost handle in double sliders */
+div:focus .sliderlens-horiz-handle1.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -moz-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -webkit-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -o-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -ms-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      radial-gradient(ellipse at right top, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-handle1.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -moz-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -webkit-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -o-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -ms-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      radial-gradient(ellipse at right top, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* __
+  |  |
+  |  |
+  |  /
+  | /
+  |/    light lens flare pointing southbound with focus (white light), for the rightmost handle in double sliders */
+div:focus .sliderlens-horiz-handle2.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at left top, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-horiz-handle2.S.flare:after {
+    background-image: -moz-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(left, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to right, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at left top, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/*  ________
+   /        |
+  /         |
+  \         |
+   \________|  light lens flare pointing westbound with focus (white light) */
+div:focus .sliderlens-vert-fixedhandle.flare:after,
+div:focus .sliderlens-vert-handle.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(right center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(right center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(right center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(right center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at right center, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-fixedhandle.flare:after,
+.w div:focus .sliderlens-vert-handle.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(right center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(right center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(right center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(right center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at right center, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/*  ________
+   /        |
+  /_________|  light lens flare pointing westbound with focus (white light), for the topmost handle in double sliders */
+div:focus .sliderlens-vert-handle1.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -moz-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -o-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -ms-radial-gradient(right bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      radial-gradient(ellipse at right bottom, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-handle1.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -moz-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -webkit-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -o-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -ms-radial-gradient(right bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      radial-gradient(ellipse at right bottom, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/*__________
+  \         |
+   \________|  light lens flare pointing westbound with focus (white light), for the bottommost handle in double sliders */
+div:focus .sliderlens-vert-handle2.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(right top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at right top, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-handle2.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(right top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at right top, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* ________
+  |        \
+  |         \
+  |         /
+  |________/   light lens flare pointing eastbound with focus (white light) */
+div:focus .sliderlens-vert-fixedhandle.E.flare:after,
+div:focus .sliderlens-vert-handle.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(left center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(left center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(left center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(left center, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 49%, hsla(0,100%,100%,.3) 50%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at left center, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-fixedhandle.E.flare:after,
+.w div:focus .sliderlens-vert-handle.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(left center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(left center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(left center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(left center, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 49%, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at left center, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* ________
+  |        \
+  |_________\  light lens flare pointing eastbound with focus (white light), for the topmost handle in double sliders */
+div:focus .sliderlens-vert-handle1.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -moz-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -o-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      -ms-radial-gradient(left bottom, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.05) 0%, hsla(0,100%,100%,.1) 100%),
+                      radial-gradient(ellipse at left bottom, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-handle1.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -moz-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -webkit-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -o-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      -ms-radial-gradient(left bottom, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,0%,0%,.1) 0%, hsla(0,0%,0%,.35) 100%),
+                      radial-gradient(ellipse at left bottom, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
+/* __________
+  |         /
+  |________/   light lens flare pointing eastbound with focus (white light), for the bottommost handle in double sliders */
+div:focus .sliderlens-vert-handle2.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -moz-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -webkit-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -o-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      -ms-radial-gradient(left top, ellipse cover, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.3) 0%, hsla(0,100%,100%,.15) 95%),
+                      radial-gradient(ellipse at left top, hsla(0,100%,100%,.25) 5%,hsla(0,100%,100%,.05) 40%,hsla(0,100%,100%,0) 70%); /* W3C */
+}
+.w div:focus .sliderlens-vert-handle2.E.flare:after {
+    background-image: -moz-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -moz-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* FF3.6+ */
+    background-image: -webkit-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -webkit-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Chrome10+,Safari5.1+ */
+    background-image: -o-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -o-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* Opera 11.10+ */
+    background-image: -ms-linear-gradient(top, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      -ms-radial-gradient(left top, ellipse cover, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* IE10+ */
+    background-image: linear-gradient(to bottom, hsla(0,100%,100%,.5) 50%, hsla(0,0%,0%,.2) 95%),
+                      radial-gradient(ellipse at left top, hsla(50,100%,50%,.6) 5%,hsla(50,100%,50%,.2) 40%,transparent 70%); /* W3C */
+}
