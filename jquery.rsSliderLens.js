@@ -123,7 +123,13 @@
                     info.isFixedHandle = opts.fixedHandle !== false;
 
                     if (!!this.fixedHandle.$wrapper) {
-                        this.fixedHandle.$wrapper.unbind('DOMMouseScroll.rsSlideIt mousewheel.rsSlideIt mousedown mouseup mouseenter mouseleave');
+                        this.fixedHandle.$wrapper.
+                            unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel).
+                            unbind('mousedown.rsSliderLens', panUtil.startDrag).
+                            unbind('mouseup.rsSliderLens', panUtil.stopDrag).
+                            unbind('mouseenter.rsSliderLens', util.mouseenter).
+                            unbind('mouseleave.rsSliderLens', util.mouseleave);
+
                         $origBar.css('position', this.fixedHandle.$wrapper.css('position'));
                         $origBar.unwrap();
                         this.fixedHandle.$wrapper = null;
@@ -676,7 +682,11 @@
                 },
                 unbindTabEvents: function () {
                     if (elemOrig.tabindexAttr && !opts.enabled) {
-                        this.$elem1st.add(this.$elem2nd).removeAttr('tabindex').removeAttr('autofocus').unbind('focus.rsSliderLens blur.rsSliderLens');
+                        this.$elem1st.add(this.$elem2nd).removeAttr('tabindex').removeAttr('autofocus').unbind('blur.rsSliderLens', panUtil.loseFocus);
+                        this.$elem1st.unbind('focus.rsSliderLens', panUtil.gotFocus1st);
+                        if (this.$elem2nd) {
+                            this.$elem2nd.unbind('focus.rsSliderLens', panUtil.gotFocus2nd);
+                        }
                     }
                 },
                 getHandleClass: function (isFirstHandle) {
@@ -972,7 +982,7 @@
                                     }
                                     
                                     if (value === false && !!elemRange.$elem) {
-                                        elemRange.$elem.unbind('DOMMouseScroll.rsSlideIt mousewheel.rsSlideIt mousedown mouseup click').remove();
+                                        elemRange.$elem.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown mouseup click').remove();
                                         elemRange.$elem = null;                                
                                     }
                                 }
@@ -994,6 +1004,89 @@
                 onCreate: function (event) {
                     if (opts.onCreate) {
                         opts.onCreate(event);
+                    }
+                },
+                onDestroy: function (event) {
+                    $origBar.add(elemOrig.fixedHandle.$wrapper).add(elemOrig.$canvas).add(elemRange.$elem).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).
+                        unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
+                    
+                    $origBar.
+                        unbind('getter.rsSliderLens', events.onGetter).
+                        unbind('setter.rsSliderLens', events.onSetter).
+                        unbind('invalidate.rsSliderLens', events.onInvalidate).
+                        unbind('change.rsSliderLens', events.onChange).
+                        unbind('finalchange.rsSliderLens', events.onFinalChange).
+                        unbind('create.rsSliderLens', events.onCreate).
+                        unbind('destroy.rsSliderLens', events.onDestroy).
+                        unbind('fmtValue.rsSliderLens', events.onFmtValue).
+                        unbind('drawRuler.rsSliderLens', events.onDrawRuler);
+                    
+                    $origBar.add(elemOrig.$canvas).
+                        unbind('mousedown.rsSliderLens', panUtil.startDrag).
+                        unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+
+                    if (elemRange.$elem) {
+                        elemRange.$elem.
+                            unbind('mousedown.rsSliderLens', panRangeUtil.startDrag).
+                            unbind('mouseup.rsSliderLens', panRangeUtil.stopDrag).
+                            unbind('click.rsSliderLens', panRangeUtil.click).
+                            unbind('mousedown.rsSliderLens', panUtil.startDrag).
+                            unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+                    }
+
+                    $origBar.add(elemOrig.$canvas).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).add(elemOrig.fixedHandle.$wrapper).
+                        unbind('mouseleave.rsSliderLens', util.mouseleave).
+                        add(elemRange.$elem).add(elemMagnif.$elemRange1st).add(elemMagnif.$elemRange2nd).
+                        unbind('mouseenter.rsSliderLens', util.mouseenter);
+
+                    $(document).
+                        unbind('keydown.rsSliderLens', elemHandle.keydown).
+                        unbind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
+                        unbind('mouseup.rsSliderLens', panUtil.stopDragFromDoc).
+                        unbind('mousemove.rsSliderLens', panRangeUtil.drag).
+                        unbind('mouseup.rsSliderLens', panRangeUtil.stopDrag);
+
+                    elemHandle.$elem1st.
+                        unbind('focus.rsSliderLens', panUtil.gotFocus1st).
+                        unbind('blur.rsSliderLens', panUtil.loseFocus).
+                        unbind('mousedown.rsSliderLens', panUtil.startDrag).
+                        unbind('mouseup.rsSliderLens', panUtil.stopDrag).
+                        unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st).
+                        unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+
+             
+                    if (elemHandle.$elem2nd) {
+                        elemHandle.$elem2nd.
+                            unbind('focus.rsSliderLens', panUtil.gotFocus2nd).
+                            unbind('blur.rsSliderLens', panUtil.loseFocus).
+                            unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd).
+                            unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+
+                    }
+
+                    if (info.isFixedHandle) {
+                        $origBar.unwrap();
+                    }
+                    if (elemOrig.$canvas) {
+                        elemOrig.$canvas.remove();
+                    }
+                    if (elemRange.$elem) {
+                        elemRange.$elem.remove();
+                    }
+                    elemHandle.$elem1st.remove();
+                    if (elemHandle.$elem2nd) {
+                        elemHandle.$elem2nd.remove();
+                    }
+                    $origBar.css({
+                        'position': '',
+                        'display': ''                        
+                    });
+                    $origBar.css(info.isHoriz ? 'margin-left' : 'margin-top', '');
+                    if ($origBar.attr('style') === '') { 
+                        $origBar.removeAttr('style');
+                    }
+                    if (elemOrig.tabindexAttr) {
+                        $origBar.attr('tabindex', elemOrig.tabindexAttr);   
                     }
                 },
                 onFmtValue: function (event, num) {
@@ -1264,7 +1357,9 @@
                 elemMagnif.applyMeasurements();
                 
                 if (info.isFixedHandle && opts.enabled) {
-                    elemOrig.fixedHandle.$wrapper.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                    elemOrig.fixedHandle.$wrapper.
+                        bind('mousedown.rsSliderLens', panUtil.startDrag).
+                        bind('mouseup.rsSliderLens', panUtil.stopDrag);
                 }
                 if (creating) {
                     if (opts.enabled && Math.abs(opts.handle.mousewheel) > 0.5) {
@@ -1273,7 +1368,7 @@
                             add(elemOrig.$canvas).
                             add(elemRange.$elem).
                             add(elemHandle.$elem1st).
-                            add(elemHandle.$elem2nd).bind('DOMMouseScroll.rsSlideIt mousewheel.rsSlideIt', elemHandle.onMouseWheel);
+                            add(elemHandle.$elem2nd).bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
                     }
 
                     $origBar.
@@ -1282,26 +1377,41 @@
                         bind('invalidate.rsSliderLens', events.onInvalidate).
                         bind('change.rsSliderLens', events.onChange).
                         bind('finalchange.rsSliderLens', events.onFinalChange).
-                        bind('create.rsSliderLens', events.onCreate);
+                        bind('create.rsSliderLens', events.onCreate).
+                        bind('destroy.rsSliderLens', events.onDestroy);
 
                     if (info.canDragRange) {
-                        elemRange.$elem.mousedown(panRangeUtil.startDrag).mouseup(panRangeUtil.stopDrag).click(panRangeUtil.click);
+                        elemRange.$elem.
+                            bind('mousedown.rsSliderLens', panRangeUtil.startDrag).
+                            bind('mouseup.rsSliderLens', panRangeUtil.stopDrag).
+                            bind('click.rsSliderLens', panRangeUtil.click);
+
                     } else {
                         if (!!opts.range) {
-                            elemRange.$elem.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                            elemRange.$elem.
+                                bind('mousedown.rsSliderLens', panUtil.startDrag).
+                                bind('mouseup.rsSliderLens', panUtil.stopDrag);
                         }
                     }
                     
                     if (info.isFixedHandle) {
-                        elemHandle.$elem1st.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                        elemHandle.$elem1st.
+                            bind('mousedown.rsSliderLens', panUtil.startDrag).
+                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
                     } else {
-                        $origBar.add(elemOrig.$canvas).mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
-                        elemHandle.$elem1st.mousedown(panUtil.startDragFromHandle1st).mouseup(panUtil.stopDrag);
+                        $origBar.add(elemOrig.$canvas).
+                            bind('mousedown.rsSliderLens', panUtil.startDrag).
+                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
+                        elemHandle.$elem1st.
+                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st).
+                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
                     }
 
                     if (!!opts.style.classHandleHover) {
-                        $origBar.add(elemOrig.$canvas).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).add(elemOrig.fixedHandle.$wrapper).mouseleave(util.mouseleave).
-                            add(elemRange.$elem).add(elemMagnif.$elemRange1st).add(elemMagnif.$elemRange2nd).mouseenter(util.mouseenter);
+                        $origBar.add(elemOrig.$canvas).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).add(elemOrig.fixedHandle.$wrapper).
+                            bind('mouseleave.rsSliderLens', util.mouseleave).
+                            add(elemRange.$elem).add(elemMagnif.$elemRange1st).add(elemMagnif.$elemRange2nd).
+                            bind('mouseenter.rsSliderLens', util.mouseenter);
                     }
                     
                     // to prevent the default behaviour in IE when dragging an element
@@ -1316,7 +1426,9 @@
                         noIEdrag(elemMagnif.$elem2nd);
                         noIEdrag(elemHandle.$elem2nd);
                         noIEdrag(elemMagnif.$elemRange2nd);
-                        elemHandle.$elem2nd.mousedown(panUtil.startDragFromHandle2nd).mouseup(panUtil.stopDrag);
+                        elemHandle.$elem2nd.
+                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd).
+                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
                     }
                     if (info.isAutoFocusable) {
                         elemHandle.$elem1st.focus();
@@ -1326,13 +1438,19 @@
                     if (noRangeCreatedBefore && elemRange.$elem !== null) { // before had no range, now will have it                
                         if (opts.enabled) {
                             if (Math.abs(opts.handle.mousewheel) > 0.5) {
-                                elemRange.$elem.add(elemOrig.fixedHandle.$wrapper).bind('DOMMouseScroll.rsSlideIt mousewheel.rsSlideIt', elemHandle.onMouseWheel);
+                                elemRange.$elem.add(elemOrig.fixedHandle.$wrapper).
+                                    bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
                             }
                             if (info.canDragRange) {
-                                elemRange.$elem.mousedown(panRangeUtil.startDrag).mouseup(panRangeUtil.stopDrag).click(panRangeUtil.click);
+                                elemRange.$elem.
+                                    bind('mousedown.rsSliderLens', panRangeUtil.startDrag).
+                                    bind('mouseup.rsSliderLens', panRangeUtil.stopDrag).
+                                    bind('click.rsSliderLens', panRangeUtil.click);
                             } else {
                                 if (!!opts.range) {
-                                    elemRange.$elem.mousedown(panUtil.startDrag).mouseup(panUtil.stopDrag);
+                                    elemRange.$elem.
+                                        bind('mousedown.rsSliderLens', panUtil.startDrag).
+                                        bind('mouseup.rsSliderLens', panUtil.stopDrag);
                                 }
                             }
                         }
@@ -1343,7 +1461,8 @@
                         }
                     } else {
                         if (info.isFixedHandle && opts.enabled && Math.abs(opts.handle.mousewheel) > 0.5) {
-                            elemOrig.fixedHandle.$wrapper.bind('DOMMouseScroll.rsSlideIt mousewheel.rsSlideIt', elemHandle.onMouseWheel);
+                            elemOrig.fixedHandle.$wrapper.
+                                bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
                         }
                     }
                 }
@@ -2092,9 +2211,10 @@
             }
         },
         invalidate = function () {
-            return this.each(function () {
-                $(this).trigger('invalidate.rsSliderLens');
-            });
+            this.trigger('invalidate.rsSliderLens');
+        },
+        destroy = function () {
+            this.trigger('destroy.rsSliderLens');
         };
 
         if (typeof options === 'string') {
@@ -2102,6 +2222,7 @@
             switch (options) {
                 case 'option': return option.apply(this, otherArgs);
                 case 'invalidate': return invalidate.call(this);
+                case 'destroy': return destroy.call(this);
                 default: return this;
             }
         }
