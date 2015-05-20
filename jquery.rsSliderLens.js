@@ -25,13 +25,6 @@
                 $canvas: null,
                 tabindexAttr: null,
                 autofocusable: false,
-                fixedHandle: {
-                    margin: 0,
-                    setMargin: function (margin) {
-                        //(elemOrig.$canvas ? elemOrig.$canvas : $elem).css(info.isHoriz ? 'margin-left' : 'margin-top', margin + 'px');
-                        this.margin = margin;
-                    }
-                },
                 initCanvasOutsideHandle: function () {
                     var creating = this.$canvas === null;
                     if (creating) {
@@ -76,22 +69,36 @@
                     this.tabindexAttr = $elem.attr('tabindex');
                     this.autofocusable = $elem.attr('autofocus');
                     info.isFixedHandle = opts.fixedHandle !== false;
+
                     var elemPosition = $elem.css('position'),
                         elemPos = $elem.position();
 
                     this.$wrapper = $elem.css({
-                        position: 'static',
-                        'box-sizing': 'border-box',
-                        'white-space': 'nowrap',
-                        margin: '0 0 0 50%',
-                        'transform': 'translateX(0%)'
+                        display: 'inline-block',
+                        position: 'relative',
+                        left: '50%',
+                        top: '50%',
+                        'white-space': 'nowrap'
                     }).wrap('<div>').parent().
-                        css('overflow', 'hidden').
+                        css({
+                            'overflow': 'hidden',
+                            'display': 'inline-block'
+                        }).
                         addClass(opts.style.classSlider).
                         addClass(info.isHoriz ? opts.style.classHoriz : opts.style.classVert).
                         addClass(opts.enabled ? null : opts.style.classHandleDisabled);
-
-                    if (elemPosition !== 'static') {
+/*
+                    $elem.css('transform', 
+                        top: '50%',
+                        transform: 'translateY(-50%)'
+                    } : {
+                        left: '50%',
+                        transform: 'translateX(-50%)'
+                    }); 
+*/
+                    if (elemPosition === 'static') {
+                        this.$wrapper.css('position', 'relative');
+                    } else {
                         this.$wrapper.css({
                             position: elemPosition,
                             left: elemPos.left + 'px',
@@ -243,20 +250,11 @@
                 width: 0,
                 height: 0,
                 initClone: function () {
-                    if (info.isHoriz) {
-                        $elem.css({
-                            height: this.height + 'px',
-                            'line-height': this.height*2*opts.contentOffset + 'px'
-                        });
-                    } else {
-                        //todo
-                    }
-
                     this.$elem1st = $elem.clone().css({
-                        'z-index': util.toInt($elem.css('z-index')) + 2,
-                        height: elemOrig.height + 'px',
-                        'line-height': elemOrig.height*2*opts.contentOffset + 'px'
-                    }).css(util.getScaleCss(opts.handle.zoom));
+                        left: '50%',
+                        top: '50%',
+                        'transform-origin': '0 0'
+                    });
 
                     if (info.useDoubleHandles) {
                         if (!this.$elem2nd) {
@@ -506,16 +504,17 @@
 //                fixedHandleRelPos: 0,
                 init: function () {
                     var css = {
+                            display: 'inline-block',
                             overflow: 'hidden',
                             outline: 'none',
                             position: 'absolute',
-                            'z-index': util.toInt($elem.css('z-index')) + 2
+                            'z-index': $elem.css('z-index')
                         };
-                    
+
                     if (info.isHoriz) {
                         css.width = opts.handle.size*100 + '%';
                         css.transform = 'translateX(-50%)';
-                        css.top = css.bottom = 0;
+                        css.height = '100%';
                         if (info.isFixedHandle) {
                             css.left = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
                         }
@@ -1338,8 +1337,9 @@
 
                 info.currValue[onlyOneHandle ? 0 : 1] = valueNoMin + opts.min;
                 if (info.isFixedHandle) {
-                    $elem.css('transform', 'translateX(' + valueRelative + '%)');
-                    elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') translateX(' + valueRelative + '%)');
+                    var translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
+                    $elem.css('transform', translate);
+                    elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                 } else {
                     //elemHandle.setPos(isFirstHandle, info.beginOffset + getHandlePos(valuePixel, $handleElem));
                 }

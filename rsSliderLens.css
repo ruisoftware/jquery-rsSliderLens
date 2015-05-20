@@ -1,3 +1,19 @@
+.sliderlens {
+  width: 20%;
+  height: 15vh;
+}
+
+
+.sliderlens .handle {
+  background-color: #aaa;
+  box-shadow: 0 0 2px black;
+}
+
+.sliderlens,
+.sliderlens span {
+  background-color: #ddd;
+}
+
 /* handle shadow */
 .sliderlens-vert-handle,
 .sliderlens-horiz-handle,
