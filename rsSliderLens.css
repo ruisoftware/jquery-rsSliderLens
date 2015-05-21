@@ -1,6 +1,23 @@
 .sliderlens {
-  width: 20%;
   height: 15vh;
+}
+
+.sliderlens.fixed {
+  width: 20%;
+}
+
+.sliderlens.vert {
+  width: 20vh;
+  height: 30vh;
+}
+.sliderlens.fixed.vert {
+  height: auto;
+}
+
+
+.v {
+  display: inline-block;
+  width: 10vh;
 }
 
 

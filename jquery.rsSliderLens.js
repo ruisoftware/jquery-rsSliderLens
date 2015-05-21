@@ -70,42 +70,6 @@
                     this.autofocusable = $elem.attr('autofocus');
                     info.isFixedHandle = opts.fixedHandle !== false;
 
-                    var elemPosition = $elem.css('position'),
-                        elemPos = $elem.position();
-
-                    this.$wrapper = $elem.css({
-                        display: 'inline-block',
-                        position: 'relative',
-                        left: '50%',
-                        top: '50%',
-                        'white-space': 'nowrap'
-                    }).wrap('<div>').parent().
-                        css({
-                            'overflow': 'hidden',
-                            'display': 'inline-block'
-                        }).
-                        addClass(opts.style.classSlider).
-                        addClass(info.isHoriz ? opts.style.classHoriz : opts.style.classVert).
-                        addClass(opts.enabled ? null : opts.style.classHandleDisabled);
-/*
-                    $elem.css('transform', 
-                        top: '50%',
-                        transform: 'translateY(-50%)'
-                    } : {
-                        left: '50%',
-                        transform: 'translateX(-50%)'
-                    }); 
-*/
-                    if (elemPosition === 'static') {
-                        this.$wrapper.css('position', 'relative');
-                    } else {
-                        this.$wrapper.css({
-                            position: elemPosition,
-                            left: elemPos.left + 'px',
-                            top: elemPos.top + 'px'
-                        });
-                    }
-
                     this.canvasWidth = this.width = $elem.width();
                     this.canvasHeight = this.height = $elem.height();
                     if (this.width === 0) {
@@ -117,6 +81,39 @@
                         $elem.height(25);
                     }
                     info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
+
+                    var elemPosition = $elem.css('position'),
+                        elemPos = $elem.position();
+
+                    this.$wrapper = $elem.css({
+                        display: 'inline-block',
+                        position: 'relative',
+                        'white-space': 'nowrap'
+                    }).css(
+                        info.isHoriz ? 'top' : 'left', opts.contentOffset*100 + '%'
+                    ).wrap('<div>').parent().
+                        css({
+                            overflow: 'hidden',
+                            display: 'inline-block'
+                        }).
+                        addClass(opts.style.classSlider).
+                        addClass(info.isFixedHandle ? opts.style.classFixed : null).
+                        addClass(info.isHoriz ? opts.style.classHoriz : opts.style.classVert).
+                        addClass(opts.enabled ? null : opts.style.classHandleDisabled); 
+
+                    if (info.isFixedHandle) {
+                        $elem.css(info.isHoriz ? 'left' : 'top', '50%');
+                    }
+
+                    if (elemPosition === 'static') {
+                        this.$wrapper.css('position', 'relative');
+                    } else {
+                        this.$wrapper.css({
+                            position: elemPosition,
+                            left: elemPos.left + 'px',
+                            top: elemPos.top + 'px'
+                        });
+                    }
                 },
                 recalcPosBasedOnCanvas: function (creating) {
                     // origBar is hidden, so need to recalculate control position based on the canvas (ruler) instead
@@ -250,11 +247,14 @@
                 width: 0,
                 height: 0,
                 initClone: function () {
-                    this.$elem1st = $elem.clone().css({
-                        left: '50%',
-                        top: '50%',
-                        'transform-origin': '0 0'
-                    });
+                    this.$elem1st = $elem.clone().css('transform-origin', '0 0').
+                        css(info.isHoriz ? {
+                            left: '50%',
+                            top: opts.contentOffset*100 + '%'
+                        } : {
+                            left: opts.contentOffset*100 + '%',
+                            top: '50%'
+                        });
 
                     if (info.useDoubleHandles) {
                         if (!this.$elem2nd) {
@@ -517,13 +517,16 @@
                         css.height = '100%';
                         if (info.isFixedHandle) {
                             css.left = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
+                            css.top = 0;
                         }
- 
-                    } else {
-                        //todo
 
+                    } else {
+                        css.height = opts.handle.size*100 + '%';
+                        css.transform = 'translateY(-50%)';
+                        css.width = '100%';
                         if (info.isFixedHandle) {
                             css.top = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
+                            css.left = 0;
                         }
                     }
                     this.$elem1st = elemMagnif.$elem1st.wrap("<div>").parent().
@@ -1341,6 +1344,7 @@
                     $elem.css('transform', translate);
                     elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                 } else {
+
                     //elemHandle.setPos(isFirstHandle, info.beginOffset + getHandlePos(valuePixel, $handleElem));
                 }
                 //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
