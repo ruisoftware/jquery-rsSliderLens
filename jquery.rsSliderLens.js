@@ -93,7 +93,7 @@
                         info.isHoriz ? 'top' : 'left', opts.contentOffset*100 + '%'
                     ).wrap('<div>').parent().
                         css({
-                            overflow: 'hidden',
+                            overflow: (info.isFixedHandle ? 'hidden' : 'visible'),
                             display: 'inline-block'
                         }).
                         addClass(opts.style.classSlider).
@@ -103,6 +103,8 @@
 
                     if (info.isFixedHandle) {
                         $elem.css(info.isHoriz ? 'left' : 'top', '50%');
+                    } else {
+                        $elem.css('transform', 'translate' + (info.isHoriz ? 'Y' : 'X') + '(-50%)');
                     }
 
                     if (elemPosition === 'static') {
@@ -577,6 +579,7 @@
                         }
                     }
                 },
+                // todo remove this setPos function
                 setPos: function (isFirstHandle, pos) {
                     var applyPos = function ($handle) {
                         if (info.isFixedHandle) {
@@ -1112,7 +1115,7 @@
                 },
                 init: function (creating) {
                     this.checkBounds(creating);
-                    this.ticksStep = (info.isFixedHandle ? Math.max(elemOrig.canvasWidth, elemOrig.canvasHeight) : Math.max(elemOrig.outerWidth, elemOrig.outerHeight))/(opts.max - opts.min);
+                    this.ticksStep = Math.max(elemOrig.canvasWidth, elemOrig.canvasHeight)/(opts.max - opts.min);
                     if (info.isRangeDefined) {
                         if (opts.flipped) {
                             this.fromPixel = Math.round((opts.max - opts.range[1]) * this.ticksStep) + info.beginOffset;
@@ -1233,17 +1236,17 @@
             },
             updateHandles = function (values, flipped) {
                 if (info.useDoubleHandles) {
-                    setValueTicks(flipped ? info.getCurrValue(values[0]) : values[0], flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
-                    setValueTicks(flipped ? info.getCurrValue(values[1]) : values[1], flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
+                    setValue(flipped ? info.getCurrValue(values[0]) : values[0], flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
+                    setValue(flipped ? info.getCurrValue(values[1]) : values[1], flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
                     events.processFinalChange(0, true);
                     events.processFinalChange(0, false);
                 } else {
                     if (info.isFixedHandle) {
                         elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
-                        setValueTicks(flipped ? info.getCurrValue(values) : values, elemOrig.$wrapper, info.isStepDefined);
+                        setValue(flipped ? info.getCurrValue(values) : values, elemOrig.$wrapper, info.isStepDefined);
                     } else {
                         elemHandle.fixedHandleRelPos = 0;
-                        setValueTicks(flipped ? info.getCurrValue(values) : values, elemHandle.$elem1st, info.isStepDefined);
+                        setValue(flipped ? info.getCurrValue(values) : values, elemHandle.$elem1st, info.isStepDefined);
                     }
                     events.processFinalChange(0, true);
                 }
@@ -1286,7 +1289,7 @@
                 var limitsData = canSet(info.isFixedHandle ? elemHandle.fixedHandleRelPos - value : value + info.beginOffset);
                 if (limitsData.valid === 0 || forceRender) {
                     limitsData.val = (limitsData.val - info.beginOffset) / info.ticksStep + opts.min;
-                    setValueTicks(limitsData.val, $handleElem, doSnap, !!noValidation);
+                    setValue(limitsData.val, $handleElem, doSnap, !!noValidation);
                 }
             },
             checkLimits = function (value) {
@@ -1301,7 +1304,7 @@
                 }
                 return value;
             },
-            setValueTicks = function (value, $handleElem, doSnap, checkOffLimits) {
+            setValue = function (value, $handleElem, doSnap, checkOffLimits) {
                 var valueNoMin = value - opts.min,
                     valueNoMinPx = valueNoMin;
                     
@@ -1336,17 +1339,20 @@
                 
                 var valueRelative = valueNoMin/(opts.min - opts.max)*100,
                     isFirstHandle = $handleElem === elemHandle.$elem1st,
-                    onlyOneHandle = isFirstHandle || info.isFixedHandle;
+                    onlyOneHandle = isFirstHandle || info.isFixedHandle,
+                    translate;
 
                 info.currValue[onlyOneHandle ? 0 : 1] = valueNoMin + opts.min;
                 if (info.isFixedHandle) {
-                    var translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
+                    translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
                     $elem.css('transform', translate);
                     elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                 } else {
-
-                    //elemHandle.setPos(isFirstHandle, info.beginOffset + getHandlePos(valuePixel, $handleElem));
+                    translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
+                    (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
+                    $handleElem.css('left', (-valueRelative) + '%');
                 }
+                
                 //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
 
                 if (info.isInputTypeRange && onlyOneHandle) {
@@ -1695,7 +1701,7 @@
                         panUtil.dragging = true;
                         if (info.isFixedHandle) {
                             panUtil.fixedHandleStartDragPos = info.isHoriz ? event.pageX : event.pageY;
-                            panUtil.fixedHandleStartDragPos += info.ticksStep*info.currValue[0];
+                            panUtil.fixedHandleStartDragPos += info.ticksStep*(info.currValue[0] - opts.min);
                             setTimeout(function () {
                                 elemHandle.$elem1st.focus();
                             }, 1);
@@ -1719,17 +1725,20 @@
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
                         panUtil.$handle = $elemHandle;
-                        var from = (info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min) * info.ticksStep,
-                            to = info.isHoriz ? event.pageX - elemOrig.offsetPos.value().left : event.pageY - elemOrig.offsetPos.value().top;
+                        var refPnt = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top,
+                            from = info.ticksStep*(info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min),
+                            to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
+                        console.log(from, to, panUtil.dragDelta);
                         panUtil.doDrag = true;
                         panUtil.dragging = true;
                         panUtil.dragDelta = from - to;
                         panUtil.animDone(to);
+                        panUtil.dragDelta += refPnt;
                     }
                 },
                 startDragFromHandle1st: function (event) {
                     if (opts.enabled && !panUtil.$animObj) {
-                        elemMagnif.$elem1st.parent().addClass(opts.style.classDragging);
+                        elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         panUtil.startDragFromHandle(event, elemHandle.$elem1st);
                     }
                 },
@@ -1751,7 +1760,7 @@
                         setValuePixel(false, event.pageX - panUtil.fixedHandleStartDragPos, elemOrig.$wrapper, opts.snapOnDrag);
                     } else {
                         panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
-                        setValuePixel(false, event.pageX - elemOrig.offsetPos.value().left + panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
+                        setValuePixel(false, event.pageX - panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
                     }
                 },
                 dragVert: function (event) {
@@ -1775,7 +1784,7 @@
                             
                             // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
                             if (info.isStepDefined && !panUtil.$animObj) {
-                                setValueTicks(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
+                                setValue(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
                             }
                             panUtil.dragDelta = 0;
                             (panUtil.$handle === elemHandle.$elem1st || panUtil.$handle === null ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().add(elemOrig.$wrapper).removeClass(opts.style.classDragging);
@@ -1914,9 +1923,9 @@
 
                         // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
                         if (info.isStepDefined) {
-                            setValueTicks(info.currValue[0], elemHandle.$elem1st, true);
+                            setValue(info.currValue[0], elemHandle.$elem1st, true);
                             if (info.useDoubleHandles) {
-                                setValueTicks(info.currValue[1], elemHandle.$elem2nd, true);
+                                setValue(info.currValue[1], elemHandle.$elem2nd, true);
                             }
                         }
                         if (info.useDoubleHandles) {

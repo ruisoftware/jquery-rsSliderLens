@@ -7,8 +7,10 @@
     <script src="jquery.rsSliderLens.js"></script>
     <script>
         $(document).ready(function () {
-           $("input[type=range], .h, .v").rsSliderLens({
-            fixedHandle: true,
+           $("input[type=range], .h").rsSliderLens({
+            fixedHandle: false,
+            value: 40,
+            min: 20,
             ruler: {
               visible: false
             }
@@ -18,7 +20,7 @@
   </head>
   <body>
     <!--input id="s" type="range" value="input button" /-->
-    <span class="h" tabindex="">123456<img src="mdn.png">7890</span>and this vertical one
+    <span class="h" tabindex="">23456<img src="mdn.png">7890</span>and this vertical one
     <span class="v">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>0</span>
   </body>
 </html>
