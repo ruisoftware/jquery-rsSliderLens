@@ -22,7 +22,9 @@
 }
 
 
-.sliderlens .handle {
+.sliderlens .handle,
+.sliderlens .handle1,
+.sliderlens .handle2 {
   background-color: #aaa;
   box-shadow: 0 0 2px black;
 }

@@ -251,23 +251,15 @@
                 initClone: function () {
                     this.$elem1st = $elem.clone().css('transform-origin', '0 0').
                         css(info.isHoriz ? {
-                            left: '50%',
+                            left: (info.useDoubleHandles ? '100%' : '50%'),
                             top: opts.contentOffset*100 + '%'
                         } : {
                             left: opts.contentOffset*100 + '%',
-                            top: '50%'
+                            top: (info.useDoubleHandles ? '100%' : '50%')
                         });
 
                     if (info.useDoubleHandles) {
-                        if (!this.$elem2nd) {
-                            this.$elem2nd = this.$elem1st.clone();
-                        } else {
-                            this.$elem2nd.css({
-                                'width': elemOrig.width + 'px',
-                                'height': elemOrig.height + 'px',
-                                'margin': 0
-                            });
-                        }
+                        this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
                 },
                 initCanvasHandle: function () {
@@ -515,16 +507,15 @@
 
                     if (info.isHoriz) {
                         css.width = opts.handle.size*100 + '%';
-                        css.transform = 'translateX(-50%)';
+                        css.transform = 'translateX(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
                         css.height = '100%';
                         if (info.isFixedHandle) {
                             css.left = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
                             css.top = 0;
                         }
-
                     } else {
                         css.height = opts.handle.size*100 + '%';
-                        css.transform = 'translateY(-50%)';
+                        css.transform = 'translateY(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
                         css.width = '100%';
                         if (info.isFixedHandle) {
                             css.top = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
@@ -537,7 +528,7 @@
                     
                     if (info.useDoubleHandles) {
                         this.$elem2nd = elemMagnif.$elem2nd.wrap("<div>").parent().
-                            addClass(opts.style.classHandle2).css(css);
+                            addClass(opts.style.classHandle2).css(css).css('transform', '');
                         this.bindTabEvents(false);
                     }
                 },
@@ -1638,7 +1629,8 @@
                             if (doneCallback) {
                                 doneCallback();
                             }
-                        };
+                        },
+                        refPnt = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top;
 
                     if (panUtil.$animObj && !$animHandle) {
                         // stop the current animation
@@ -1646,15 +1638,15 @@
                         from = panUtil.$animObj[0].n;
                     }
                     if (to === undefined) {
-                        to = (info.isHoriz ? event.pageX - elemOrig.offsetPos.value().left: event.pageY - elemOrig.offsetPos.value().top) - info.beginOffset + elemOrig.fixedHandle.margin;
+                        to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
                     }
                     if (from === undefined) {
-                        if (!info.useDoubleHandles || to <= ((info.currValue[0] + info.currValue[1]) / 2 - opts.min) * info.ticksStep) {
+                        if (!info.useDoubleHandles || to <= ((info.currValue[0] + info.currValue[1]) / 2 - opts.min)*info.ticksStep) {
                             panUtil.$handle = elemHandle.$elem1st;
-                            from = (info.currValue[0] - opts.min) * info.ticksStep + elemOrig.fixedHandle.margin;
+                            from = (info.currValue[0] - opts.min)*info.ticksStep;
                         } else {
                             panUtil.$handle = elemHandle.$elem2nd;
-                            from = (info.currValue[1] - opts.min) * info.ticksStep;
+                            from = (info.currValue[1] - opts.min)*info.ticksStep;
                         }
                     }
                     if (animDuration === undefined) {
@@ -1725,51 +1717,47 @@
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
                         panUtil.$handle = $elemHandle;
+                        $elemHandle.add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         var refPnt = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top,
                             from = info.ticksStep*(info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min),
                             to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
-                        console.log(from, to, panUtil.dragDelta);
                         panUtil.doDrag = true;
                         panUtil.dragging = true;
                         panUtil.dragDelta = from - to;
                         panUtil.animDone(to);
-                        panUtil.dragDelta += refPnt;
+                        panUtil.dragDelta = refPnt - panUtil.dragDelta;
                     }
                 },
                 startDragFromHandle1st: function (event) {
                     if (opts.enabled && !panUtil.$animObj) {
-                        elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         panUtil.startDragFromHandle(event, elemHandle.$elem1st);
                     }
                 },
                 startDragFromHandle2nd: function (event) {
                     if (opts.enabled && !panUtil.$animObj) {
-                        elemMagnif.$elem2nd.parent().addClass(opts.style.classDragging);
                         panUtil.startDragFromHandle(event, elemHandle.$elem2nd);
                     }
                 },
                 handleStartsToMoveWhen1stClickWasOutsideHandle: function () {
                     if (panUtil.firstClickWasOutsideHandle) {
-                        (panUtil.$handle === elemHandle.$elem1st ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().addClass(opts.style.classDragging);
+                        panUtil.$handle.add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         panUtil.firstClickWasOutsideHandle = false;
-                        panUtil.dragDelta -= info.beginOffset;
+                        panUtil.dragDelta = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top;
+                    }
+                },
+                dragHorizVert: function (event, attr) {
+                    if (info.isFixedHandle) {
+                        setValuePixel(false, event[attr] - panUtil.fixedHandleStartDragPos, elemOrig.$wrapper, opts.snapOnDrag);
+                    } else {
+                        panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
+                        setValuePixel(false, event[attr] - panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
                     }
                 },
                 dragHoriz: function (event) {
-                    if (info.isFixedHandle) {
-                        setValuePixel(false, event.pageX - panUtil.fixedHandleStartDragPos, elemOrig.$wrapper, opts.snapOnDrag);
-                    } else {
-                        panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
-                        setValuePixel(false, event.pageX - panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
-                    }
+                    panUtil.dragHorizVert(event, 'pageX');
                 },
                 dragVert: function (event) {
-                    if (info.isFixedHandle) {
-                        setValuePixel(false, event.pageY - panUtil.fixedHandleStartDragPos, elemOrig.$wrapper, opts.snapOnDrag);
-                    } else {
-                        panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
-                        setValuePixel(false, event.pageY - elemOrig.offsetPos.value().top + panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
-                    }
+                    panUtil.dragHorizVert(event, 'pageY');
                 },
                 stopDrag: function (event) {
                     if (panRangeUtil.dragged) {
