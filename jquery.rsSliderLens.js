@@ -1259,29 +1259,41 @@
                 return valuePixel - getHandleHotPoint($handleElem);
             },
             setValuePixel = function (forceRender, value, $handleElem, doSnap, noValidation) { // value is a zero based pixel value
-                var canSet = function (v) {
-                    // valid: 0: ok;  -1: invalid, too small;  1: invalid, too big 
-                    if (!noValidation) {
-                        if (info.useDoubleHandles) {
-                            if ($handleElem === elemHandle.$elem1st) {
-                                if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
-                                if (v >= elemHandle.stopPosition[1] + (info.isStepDefined ? 0 : .5)) return { valid: 1, val: elemHandle.stopPosition[1] };
-                            } else {
-                                if (v <= elemHandle.stopPosition[0] - (info.isStepDefined ? 0 : .5)) return { valid: -1, val: elemHandle.stopPosition[0] };
-                                if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
-                            }
-                        } else {
-                            if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
-                            if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
+                // var canSet = function (v) {
+                //     // valid: 0: ok;  -1: invalid, too small;  1: invalid, too big 
+                //     if (!noValidation) {
+                //         if (info.useDoubleHandles) {
+                //             if ($handleElem === elemHandle.$elem1st) {
+                //                 if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
+                //                 if (v >= elemHandle.stopPosition[1] + (info.isStepDefined ? 0 : .5)) return { valid: 1, val: elemHandle.stopPosition[1] };
+                //             } else {
+                //                 if (v <= elemHandle.stopPosition[0] - (info.isStepDefined ? 0 : .5)) return { valid: -1, val: elemHandle.stopPosition[0] };
+                //                 if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
+                //             }
+                //         } else {
+                //             if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
+                //             if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
+                //         }
+                //     }
+                //     return { valid: 0, val: v };
+                // };
+                // var limitsData = canSet(info.isFixedHandle ? elemHandle.fixedHandleRelPos - value : value + info.beginOffset);
+                // if (limitsData.valid === 0 || forceRender) {
+                //    limitsData.val = limitsData.val/info.ticksStep + opts.min;
+
+                var pixel2Value = value/info.ticksStep + opts.min;
+                if (info.useDoubleHandles) {
+                    if ($handleElem === elemHandle.$elem1st) {
+                        if (pixel2Value > elemHandle.stopPosition[1]) {
+                            pixel2Value = elemHandle.stopPosition[1];
+                        }
+                    } else {
+                        if (pixel2Value < elemHandle.stopPosition[0]) {
+                            pixel2Value = elemHandle.stopPosition[0];
                         }
                     }
-                    return { valid: 0, val: v };
                 };
-                var limitsData = canSet(info.isFixedHandle ? elemHandle.fixedHandleRelPos - value : value + info.beginOffset);
-                if (limitsData.valid === 0 || forceRender) {
-                    limitsData.val = (limitsData.val - info.beginOffset) / info.ticksStep + opts.min;
-                    setValue(limitsData.val, $handleElem, doSnap, !!noValidation);
-                }
+                setValue(pixel2Value, $handleElem, doSnap, !!noValidation);
             },
             checkLimits = function (value) {
                 var limit = info.isRangeDefined ? info.getCurrValue(opts.range[opts.flipped ? 1 : 0]) : opts.min;
@@ -1342,6 +1354,7 @@
                     translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
                     (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                     $handleElem.css('left', (-valueRelative) + '%');
+                    elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                 }
                 
                 //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
