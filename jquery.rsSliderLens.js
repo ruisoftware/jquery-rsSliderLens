@@ -1104,9 +1104,12 @@
                     this.canDragRange = opts.dragRange && opts.fixedHandle === false && (this.useDoubleHandles && opts.range === true || this.isRangeDefined);
                     this.isInputTypeRange = $elem.is("input[type=range]");
                 },
+                updateTicksStep: function () {
+                    this.ticksStep = (info.isHoriz ? elemOrig.$wrapper.width() : elemOrig.$wrapper.height())/(opts.max - opts.min);
+                },
                 init: function (creating) {
                     this.checkBounds(creating);
-                    this.ticksStep = Math.max(elemOrig.canvasWidth, elemOrig.canvasHeight)/(opts.max - opts.min);
+                    this.updateTicksStep();
                     if (info.isRangeDefined) {
                         if (opts.flipped) {
                             this.fromPixel = Math.round((opts.max - opts.range[1]) * this.ticksStep) + info.beginOffset;
@@ -1258,43 +1261,6 @@
             getHandlePos = function (valuePixel, $handleElem) {
                 return valuePixel - getHandleHotPoint($handleElem);
             },
-            setValuePixel = function (forceRender, value, $handleElem, doSnap, noValidation) { // value is a zero based pixel value
-                // var canSet = function (v) {
-                //     // valid: 0: ok;  -1: invalid, too small;  1: invalid, too big 
-                //     if (!noValidation) {
-                //         if (info.useDoubleHandles) {
-                //             if ($handleElem === elemHandle.$elem1st) {
-                //                 if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
-                //                 if (v >= elemHandle.stopPosition[1] + (info.isStepDefined ? 0 : .5)) return { valid: 1, val: elemHandle.stopPosition[1] };
-                //             } else {
-                //                 if (v <= elemHandle.stopPosition[0] - (info.isStepDefined ? 0 : .5)) return { valid: -1, val: elemHandle.stopPosition[0] };
-                //                 if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
-                //             }
-                //         } else {
-                //             if (v <= info.fromPixel - 1) return { valid: -1, val: info.fromPixel };
-                //             if (v >= info.toPixel + 1) return { valid: 1, val: info.toPixel };
-                //         }
-                //     }
-                //     return { valid: 0, val: v };
-                // };
-                // var limitsData = canSet(info.isFixedHandle ? elemHandle.fixedHandleRelPos - value : value + info.beginOffset);
-                // if (limitsData.valid === 0 || forceRender) {
-                //    limitsData.val = limitsData.val/info.ticksStep + opts.min;
-
-                var pixel2Value = value/info.ticksStep + opts.min;
-                if (info.useDoubleHandles) {
-                    if ($handleElem === elemHandle.$elem1st) {
-                        if (pixel2Value > elemHandle.stopPosition[1]) {
-                            pixel2Value = elemHandle.stopPosition[1];
-                        }
-                    } else {
-                        if (pixel2Value < elemHandle.stopPosition[0]) {
-                            pixel2Value = elemHandle.stopPosition[0];
-                        }
-                    }
-                };
-                setValue(pixel2Value, $handleElem, doSnap, !!noValidation);
-            },
             checkLimits = function (value) {
                 var limit = info.isRangeDefined ? info.getCurrValue(opts.range[opts.flipped ? 1 : 0]) : opts.min;
                 if (value < limit) {
@@ -1308,6 +1274,18 @@
                 return value;
             },
             setValue = function (value, $handleElem, doSnap, checkOffLimits) {
+                if (info.useDoubleHandles) {
+                    if ($handleElem === elemHandle.$elem1st) {
+                        if (value > elemHandle.stopPosition[1]) {
+                            value = elemHandle.stopPosition[1];
+                        }
+                    } else {
+                        if (value < elemHandle.stopPosition[0]) {
+                            value = elemHandle.stopPosition[0];
+                        }
+                    }
+                };
+
                 var valueNoMin = value - opts.min,
                     valueNoMinPx = valueNoMin;
                     
@@ -1365,6 +1343,9 @@
                 $elem.triggerHandler('change.rsSliderLens', [info.getCurrValue(info.currValue[onlyOneHandle ? 0 : 1]), onlyOneHandle]);
             },
             util = {
+                pixel2Value: function (pixel) {
+                    return pixel/info.ticksStep + opts.min;
+                },
                 isDefined: function (v) {
                     return v !== undefined && v !== null;
                 },
@@ -1624,7 +1605,7 @@
                     panUtil.textSelection(true);
                 },
                 animDone: function (value, $animHandle) {
-                    setValuePixel(true, value + panUtil.dragDelta, $animHandle === undefined ? panUtil.$handle : $animHandle, undefined, !!$animHandle);
+                    setValue(util.pixel2Value(value + panUtil.dragDelta), $animHandle === undefined ? panUtil.$handle : $animHandle, undefined, !!$animHandle);
                     if (panUtil.doDrag) {
                         $(document).
                             bind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
@@ -1674,7 +1655,7 @@
                             duration: animDuration,
                             easing: easingFunc === undefined ? opts.handle.easing : easingFunc,
                             step: function (now) {
-                                setValuePixel(!!$animHandle, now, $animHandle, opts.snapOnDrag);
+                                setValue(util.pixel2Value(now), $animHandle, opts.snapOnDrag);
                             },
                             complete: done
                         });
@@ -1700,6 +1681,7 @@
                 },
                 startDrag: function (event) {
                     if (opts.enabled && !panUtil.$animObj) {
+                        info.updateTicksStep();
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
                         panUtil.doDrag = true;
@@ -1727,6 +1709,7 @@
                 },
                 startDragFromHandle: function (event, $elemHandle) {
                     if (opts.enabled) {
+                        info.updateTicksStep();
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
                         panUtil.$handle = $elemHandle;
@@ -1760,10 +1743,10 @@
                 },
                 dragHorizVert: function (event, attr) {
                     if (info.isFixedHandle) {
-                        setValuePixel(false, event[attr] - panUtil.fixedHandleStartDragPos, elemOrig.$wrapper, opts.snapOnDrag);
+                        setValue(util.pixel2Value(event[attr] - panUtil.fixedHandleStartDragPos), elemOrig.$wrapper, opts.snapOnDrag);
                     } else {
                         panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
-                        setValuePixel(false, event[attr] - panUtil.dragDelta, panUtil.$handle, opts.snapOnDrag);
+                        setValue(util.pixel2Value(event[attr] - panUtil.dragDelta), panUtil.$handle, opts.snapOnDrag);
                     }
                 },
                 dragHoriz: function (event) {
@@ -1886,7 +1869,7 @@
 
                     if (candidateFromPixel >= info.beginOffset && candidateToPixel <= (info.isHoriz ? elemOrig.outerWidth : elemOrig.outerHeight) - info.endOffset) {
                         panUtil.$handle = elemHandle.$elem1st;
-                        setValuePixel(true, deltaMoved + panRangeUtil.dragValue[0], panUtil.$handle, opts.snapOnDrag);
+                        setValue(util.pixel2Value(deltaMoved + panRangeUtil.dragValue[0]), panUtil.$handle, opts.snapOnDrag);
                         if (info.isRangeDefined) {
                             info.fromPixel = candidateFromPixel;
                             info.toPixel = candidateToPixel;
@@ -1913,7 +1896,7 @@
                        
                         if (info.useDoubleHandles) {
                             panUtil.$handle = elemHandle.$elem2nd;
-                            setValuePixel(true, deltaMoved + panRangeUtil.dragValue[1], panUtil.$handle, opts.snapOnDrag);
+                            setValue(util.pixel2Value(deltaMoved + panRangeUtil.dragValue[1]), panUtil.$handle, opts.snapOnDrag);
                         }
                     }
                 },
