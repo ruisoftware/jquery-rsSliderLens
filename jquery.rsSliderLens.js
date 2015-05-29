@@ -69,6 +69,11 @@
                     this.tabindexAttr = $elem.attr('tabindex');
                     this.autofocusable = $elem.attr('autofocus');
                     info.isFixedHandle = opts.fixedHandle !== false;
+                    if (info.isFixedHandle) {
+                        elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
+                    } else {
+                        elemHandle.fixedHandleRelPos = 0;
+                    }
 
                     this.canvasWidth = this.width = $elem.width();
                     this.canvasHeight = this.height = $elem.height();
@@ -102,7 +107,7 @@
                         addClass(opts.enabled ? null : opts.style.classHandleDisabled); 
 
                     if (info.isFixedHandle) {
-                        $elem.css(info.isHoriz ? 'left' : 'top', '50%');
+                        $elem.css(info.isHoriz ? 'left' : 'top', elemHandle.fixedHandleRelPos*100 + '%');
                     } else {
                         $elem.css('transform', 'translate' + (info.isHoriz ? 'Y' : 'X') + '(-50%)');
                     }
@@ -495,7 +500,7 @@
                 stopPosition: [0, 0], // used to stop both handles from overlaping each other. Only applicable for double handles:
                                       // For horizontal slider, stopPosition[0] is the rightmost pos for the left handle, stopPosition[1] is the leftmost pos for the right handle
                                       // For vertical slider, stopPosition[0] is the bottommost pos for the top handle, stopPosition[1] is the topmost pos for the bottom handle
-//                fixedHandleRelPos: 0,
+                fixedHandleRelPos: 0,
                 init: function () {
                     var css = {
                             display: 'inline-block',
@@ -510,7 +515,7 @@
                         css.transform = 'translateX(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
                         css.height = '100%';
                         if (info.isFixedHandle) {
-                            css.left = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
+                            css.left = this.fixedHandleRelPos*100 + '%';
                             css.top = 0;
                         }
                     } else {
@@ -518,7 +523,7 @@
                         css.transform = 'translateY(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
                         css.width = '100%';
                         if (info.isFixedHandle) {
-                            css.top = (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%';
+                            css.top = this.fixedHandleRelPos*100 + '%';
                             css.left = 0;
                         }
                     }
@@ -568,33 +573,6 @@
                         if (this.$elem2nd) {
                             this.$elem2nd.unbind('focus.rsSliderLens', panUtil.gotFocus2nd);
                         }
-                    }
-                },
-                // todo remove this setPos function
-                setPos: function (isFirstHandle, pos) {
-                    var applyPos = function ($handle) {
-                        if (info.isFixedHandle) {
-                            if (info.isHoriz) {
-                                $handle.css('left', (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%');
-                            } else {
-                                $handle.css('top', (opts.fixedHandle === true ? .5 : opts.fixedHandle)*100 + '%');
-                            }
-                        } else {
-
-                            //todo use percentages
-                            if (info.isHoriz) {
-                                $handle.css('left', (elemOrig.pos.value().left + pos) + 'px');
-                            } else {
-                                $handle.css('top', (elemOrig.pos.value().top + pos) + 'px');
-                            }
-                        }
-                    };
-                    if (isFirstHandle) {
-                        applyPos(this.$elem1st);
-                        this.stopPosition[0] = pos + opts.handle.size;
-                    } else {
-                        applyPos(this.$elem2nd);
-                        this.stopPosition[1] = pos;
                     }
                 },
 
@@ -1105,7 +1083,8 @@
                     this.isInputTypeRange = $elem.is("input[type=range]");
                 },
                 updateTicksStep: function () {
-                    this.ticksStep = (info.isHoriz ? elemOrig.$wrapper.width() : elemOrig.$wrapper.height())/(opts.max - opts.min);
+                    var $e = info.isFixedHandle ? $elem : elemOrig.$wrapper;
+                    this.ticksStep = (info.isHoriz ? $e.width() : $e.height())/(opts.max - opts.min);
                 },
                 init: function (creating) {
                     this.checkBounds(creating);
@@ -1235,13 +1214,7 @@
                     events.processFinalChange(0, true);
                     events.processFinalChange(0, false);
                 } else {
-                    if (info.isFixedHandle) {
-                        elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
-                        setValue(flipped ? info.getCurrValue(values) : values, elemOrig.$wrapper, info.isStepDefined);
-                    } else {
-                        elemHandle.fixedHandleRelPos = 0;
-                        setValue(flipped ? info.getCurrValue(values) : values, elemHandle.$elem1st, info.isStepDefined);
-                    }
+                    setValue(flipped ? info.getCurrValue(values) : values, info.isFixedHandle ? elemOrig.$wrapper : elemHandle.$elem1st, info.isStepDefined);
                     events.processFinalChange(0, true);
                 }
             },
@@ -1668,6 +1641,7 @@
                         fromPx = (fromValue - opts.min) * info.ticksStep,
                         toPx = (toValue - opts.min) * info.ticksStep;
                     if (info.isFixedHandle) {
+                        // TODO refact this
                         fromPx = elemHandle.fixedHandleRelPos - fromPx - info.beginOffset;
                         toPx = elemHandle.fixedHandleRelPos - toPx - info.beginOffset;
                     }
@@ -1743,7 +1717,7 @@
                 },
                 dragHorizVert: function (event, attr) {
                     if (info.isFixedHandle) {
-                        setValue(util.pixel2Value(event[attr] - panUtil.fixedHandleStartDragPos), elemOrig.$wrapper, opts.snapOnDrag);
+                        setValue(util.pixel2Value(-event[attr] + panUtil.fixedHandleStartDragPos), elemOrig.$wrapper, opts.snapOnDrag);
                     } else {
                         panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
                         setValue(util.pixel2Value(event[attr] - panUtil.dragDelta), panUtil.$handle, opts.snapOnDrag);
