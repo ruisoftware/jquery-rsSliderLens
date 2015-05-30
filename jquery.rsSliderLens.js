@@ -261,7 +261,7 @@
                         } : {
                             left: opts.contentOffset*100 + '%',
                             top: (info.useDoubleHandles ? '100%' : '50%')
-                        });
+                        }).removeAttr('tabindex autofocus');
 
                     if (info.useDoubleHandles) {
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
@@ -593,13 +593,10 @@
                 navigate: function (pixelOffset, valueOffset, duration, easingFunc, limits, $animHandle) {
                     var currValue = info.currValue[!info.useDoubleHandles || panUtil.$handle === elemHandle.$elem1st? 0 : 1],
                         toValue;
-                    if (Math.abs(opts.step) <= 0.0000005) {
-                        toValue = (currValue * info.ticksStep + pixelOffset) / info.ticksStep;
-                    } else {
-                        toValue = currValue + valueOffset;
-                    }
                     if (info.isStepDefined) {
-                        toValue = Math.round((toValue - opts.min) / opts.step) * opts.step + opts.min;
+                        toValue = Math.round((currValue + valueOffset)/opts.step)*opts.step;
+                    } else {
+                        toValue = (currValue * info.ticksStep + pixelOffset) / info.ticksStep;
                     }
                     if (limits !== undefined) {
                         if (toValue < limits[0]) { toValue = limits[0]; }
@@ -647,21 +644,19 @@
                         switch (event.which) {
                             case key.left:
                             case key.down:
+                                elemHandle.navigate(info.isHoriz ? -1 : 1, info.isHoriz ? -opts.step: opts.step, 0, opts.keyboard.easing, limits);
+                                break;
                             case key.right: 
                             case key.up:
-                                if (info.isHoriz) {
-                                    event.which === key.left || event.which === key.down ? elemHandle.navigate(-1, - opts.step, opts.keyboard.animation, opts.keyboard.easing, limits) : elemHandle.navigate(1, opts.step, opts.keyboard.animation, opts.keyboard.easing, limits);
-                                } else {
-                                    event.which === key.left || event.which === key.down ? elemHandle.navigate(1, opts.step, opts.keyboard.animation, opts.keyboard.easing, limits) : elemHandle.navigate(-1, - opts.step, opts.keyboard.animation, opts.keyboard.easing, limits);
-                                }
+                                elemHandle.navigate(info.isHoriz ? 1 : -1, info.isHoriz ? opts.step : -opts.step, 0, opts.keyboard.easing, limits);
                                 break;
                             case key.pgUp:
                             case key.pgDown:
-                                event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel) / opts.keyboard.numPages, (opts.min - opts.max) / opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits)
-                                                         : elemHandle.navigate((info.toPixel - info.fromPixel) / opts.keyboard.numPages, (opts.max - opts.min) / opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits);
+                                event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits)
+                                                         : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits);
                                 break;
-                            case key.home:   panUtil.gotoAnim(currValue, limits[0], opts.keyboard.animation, opts.keyboard.easing); break;
-                            case key.end:    panUtil.gotoAnim(currValue, limits[1], opts.keyboard.animation, opts.keyboard.easing); break;
+                            case key.home: panUtil.gotoAnim(currValue, limits[0], opts.keyboard.animation, opts.keyboard.easing); break;
+                            case key.end:  panUtil.gotoAnim(currValue, limits[1], opts.keyboard.animation, opts.keyboard.easing); break;
                             case key.esc:
                                 if (info.useDoubleHandles) {
                                     panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.keyboard.animation, opts.keyboard.easing, elemHandle.$elem1st);
@@ -941,33 +936,21 @@
                         return opts.ruler.onDraw(event, ctx, width, height, pixelOffsets);
                     }
                 },
-                finalChangeTimerId: null,
                 finalChangeValueFirst: null,
                 finalChangeValueSecond: null,
-                processFinalChange: function (delay, isFirstHandle) {
-                    var triggerFinalChange = function () {
-                        events.finalChangeTimerId = null;
-                        var firstHandle = isFirstHandle !== undefined ? isFirstHandle : info.isFixedHandle || panUtil.$handle === elemHandle.$elem1st,
-                            value = info.getCurrValue(info.currValue[firstHandle ? 0 : 1]);
-                        if (firstHandle) {
-                            if (value !== events.finalChangeValueFirst) {
-                                $elem.triggerHandler('finalchange.rsSliderLens', [value, true]);
-                                events.finalChangeValueFirst = value;
-                            }
-                        } else {
-                            if (value !== events.finalChangeValueSecond) {
-                                $elem.triggerHandler('finalchange.rsSliderLens', [value, false]);
-                                events.finalChangeValueSecond = value;
-                            }
+                processFinalChange: function (isFirstHandle) {
+                    var firstHandle = isFirstHandle !== undefined ? isFirstHandle : info.isFixedHandle || panUtil.$handle === elemHandle.$elem1st,
+                        value = info.getCurrValue(info.currValue[firstHandle ? 0 : 1]);
+                    if (firstHandle) {
+                        if (value !== events.finalChangeValueFirst) {
+                            $elem.triggerHandler('finalchange.rsSliderLens', [value, true]);
+                            events.finalChangeValueFirst = value;
                         }
-                    };
-                    if (!!events.finalChangeTimerId) {
-                        clearTimeout(events.finalChangeTimerId);
-                    }
-                    if (delay !== undefined && !delay) {
-                        triggerFinalChange();
                     } else {
-                        events.finalChangeTimerId = setTimeout(triggerFinalChange, delay === undefined ? 250 : delay);
+                        if (value !== events.finalChangeValueSecond) {
+                            $elem.triggerHandler('finalchange.rsSliderLens', [value, false]);
+                            events.finalChangeValueSecond = value;
+                        }
                     }
                 },
                 onFinalChange: function (event, value, isFirstHandle) {
@@ -1211,11 +1194,11 @@
                 if (info.useDoubleHandles) {
                     setValue(flipped ? info.getCurrValue(values[0]) : values[0], flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
                     setValue(flipped ? info.getCurrValue(values[1]) : values[1], flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
-                    events.processFinalChange(0, true);
-                    events.processFinalChange(0, false);
+                    events.processFinalChange(true);
+                    events.processFinalChange(false);
                 } else {
                     setValue(flipped ? info.getCurrValue(values) : values, info.isFixedHandle ? elemOrig.$wrapper : elemHandle.$elem1st, info.isStepDefined);
-                    events.processFinalChange(0, true);
+                    events.processFinalChange(true);
                 }
             },
             getHandleHotPoint = function ($handleElem) {
@@ -1318,6 +1301,9 @@
             util = {
                 pixel2Value: function (pixel) {
                     return pixel/info.ticksStep + opts.min;
+                },
+                value2Pixel: function (value) {
+                    return (value - opts.min)*info.ticksStep;
                 },
                 isDefined: function (v) {
                     return v !== undefined && v !== null;
@@ -1586,12 +1572,12 @@
                     }
                     panUtil.$animObj = null;
                 },
-                anim: function (event, from, to, animDuration, easingFunc, $animHandle, doneCallback, noFinalChange, immediateFinalChange) {
+                anim: function (event, from, to, animDuration, easingFunc, $animHandle, doneCallback, noFinalChange) {
                     var $prevAnimHandle = $animHandle,
                         done = function () {
-                            panUtil.animDone(to, $prevAnimHandle);
+                            panUtil.animDone(util.value2Pixel(to), $prevAnimHandle);
                             if (!noFinalChange) {
-                                events.processFinalChange(immediateFinalChange, $animHandle === elemHandle.$elem1st);
+                                events.processFinalChange($animHandle === elemHandle.$elem1st);
                             }
                             if (doneCallback) {
                                 doneCallback();
@@ -1602,18 +1588,18 @@
                     if (panUtil.$animObj && !$animHandle) {
                         // stop the current animation
                         panUtil.$animObj.stop();
-                        from = panUtil.$animObj[0].n;
+                        from = util.value2Pixel(panUtil.$animObj[0].n);
                     }
                     if (to === undefined) {
                         to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
                     }
                     if (from === undefined) {
-                        if (!info.useDoubleHandles || to <= ((info.currValue[0] + info.currValue[1]) / 2 - opts.min)*info.ticksStep) {
+                        if (!info.useDoubleHandles || to <= util.value2Pixel((info.currValue[0] + info.currValue[1])/2)) {
                             panUtil.$handle = elemHandle.$elem1st;
-                            from = (info.currValue[0] - opts.min)*info.ticksStep;
+                            from = util.value2Pixel(info.currValue[0]);
                         } else {
                             panUtil.$handle = elemHandle.$elem2nd;
-                            from = (info.currValue[1] - opts.min)*info.ticksStep;
+                            from = util.value2Pixel(info.currValue[1]);
                         }
                     }
                     if (animDuration === undefined) {
@@ -1622,13 +1608,15 @@
                     if ($animHandle === undefined) {
                         $animHandle = panUtil.$handle;
                     }
+                    from = util.pixel2Value(from);
+                    to = util.pixel2Value(to);
                     if (from !== to && animDuration > 0) {
                         panUtil.$animObj = $({ n: from });
                         panUtil.$animObj.animate({ n: to }, {
                             duration: animDuration,
                             easing: easingFunc === undefined ? opts.handle.easing : easingFunc,
                             step: function (now) {
-                                setValue(util.pixel2Value(now), $animHandle, opts.snapOnDrag);
+                                setValue(now, $animHandle, opts.snapOnDrag);
                             },
                             complete: done
                         });
@@ -1638,19 +1626,18 @@
                 },
                 gotoAnim: function (fromValue, toValue, animDuration, easingFunc, $animHandle) {
                     var duration = util.getSpeedMs(animDuration),
-                        fromPx = (fromValue - opts.min) * info.ticksStep,
-                        toPx = (toValue - opts.min) * info.ticksStep;
-                    if (info.isFixedHandle) {
-                        // TODO refact this
-                        fromPx = elemHandle.fixedHandleRelPos - fromPx - info.beginOffset;
-                        toPx = elemHandle.fixedHandleRelPos - toPx - info.beginOffset;
-                    }
+                        fromPx = util.value2Pixel(fromValue),
+                        toPx = util.value2Pixel(toValue);
                     panUtil.dragDelta = 0;
                     panUtil.doDrag = false;
                     if ($animHandle) {
-                        panUtil.anim(null, fromPx, toPx, duration, easingFunc, $animHandle, undefined, false, 0);
+                        panUtil.anim(null, fromPx, toPx, duration, easingFunc, $animHandle, undefined, false);
                     } else {
-                        panUtil.anim(null, fromPx, toPx, duration, easingFunc);
+                        if (animDuration === 0) {
+                            panUtil.anim(null, fromPx, toPx, duration, easingFunc, undefined, undefined, false);
+                        } else {
+                            panUtil.anim(null, fromPx, toPx, duration, easingFunc);
+                        }
                     }
                 },
                 startDrag: function (event) {
@@ -1662,10 +1649,7 @@
                         panUtil.dragging = true;
                         if (info.isFixedHandle) {
                             panUtil.fixedHandleStartDragPos = info.isHoriz ? event.pageX : event.pageY;
-                            panUtil.fixedHandleStartDragPos += info.ticksStep*(info.currValue[0] - opts.min);
-                            setTimeout(function () {
-                                elemHandle.$elem1st.focus();
-                            }, 1);
+                            panUtil.fixedHandleStartDragPos += util.value2Pixel(info.currValue[0]);
                             elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                             $(document).
                                 bind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
@@ -1689,7 +1673,7 @@
                         panUtil.$handle = $elemHandle;
                         $elemHandle.add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         var refPnt = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top,
-                            from = info.ticksStep*(info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1] - opts.min),
+                            from = util.value2Pixel(info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1]),
                             to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
                         panUtil.doDrag = true;
                         panUtil.dragging = true;
@@ -2120,7 +2104,7 @@
         },
         keyboard: {
             allowed: ['left', 'right', 'up', 'down', 'home', 'end', 'pgup', 'pgdown', 'esc'], // Allowed keys. Type: String array.
-            animation: 'normal', // Duration (ms or jQuery string alias) of the animation that the handle takes. Type: positive integer or string.
+            animation: 1000, // Duration (ms or jQuery string alias) of the animation that the handle takes. Type: positive integer or string.
             easing: 'swing',    // Easing function used in keyboard animation (@see http://api.jquery.com/animate/#easing). Type: string.
             numPages: 5         // Number of pages in a slider (how many times can you page up/down to go through the whole range). Type: positive integer.
         },

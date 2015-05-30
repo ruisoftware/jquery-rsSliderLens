@@ -8,19 +8,29 @@
     <script>
         $(document).ready(function () {
            $("input[type=range], .h").rsSliderLens({
-            fixedHandle: .2,
+            fixedHandle: false,
             value: 20,
             min: 20,
+            step: 5,
             ruler: {
               visible: false
+            },
+            onChange: function (event, value, isFirstHandle) {
+              $("#change").text('value=' + value + '  ' + (isFirstHandle ? 'first' : 'second') + ' handle')
+            },
+            onFinalChange: function (event, value, isFirstHandle) {
+              $("#changeFinal").text('Final: value=' + value + '  ' + (isFirstHandle ? 'first' : 'second') + ' handle')
             }
            });
         });
     </script>
   </head>
   <body>
+    <div id="change"></div>
+    <div id="changeFinal"></div>
+    <input type="text"/>
     <!--input id="s" type="range" value="input button" /-->
-    <span class="h" tabindex="">23456<img src="mdn.png">7890</span>and this vertical one
+    <span class="h" tabindex="0">23456<img src="mdn.png">789xxvsvsvsdvsdverbregerfg0</span>and this vertical one
     <span class="v">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>0</span>
   </body>
 </html>
