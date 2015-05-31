@@ -864,7 +864,7 @@
                         unbind('fmtValue.rsSliderLens', events.onFmtValue).
                         unbind('drawRuler.rsSliderLens', events.onDrawRuler);
                     
-                    $elem.add(elemOrig.$canvas).
+                    elemOrig.$wrapper.
                         unbind('mousedown.rsSliderLens', panUtil.startDrag).
                         unbind('mouseup.rsSliderLens', panUtil.stopDrag);
 
@@ -1160,7 +1160,7 @@
                             bind('mousedown.rsSliderLens', panUtil.startDrag).
                             bind('mouseup.rsSliderLens', panUtil.stopDrag);
                     } else {
-                        $elem.add(elemOrig.$canvas).
+                        elemOrig.$wrapper.
                             bind('mousedown.rsSliderLens', panUtil.startDrag).
                             bind('mouseup.rsSliderLens', panUtil.stopDrag);
                         elemHandle.$elem1st.
@@ -1230,6 +1230,7 @@
                 return value;
             },
             setValue = function (value, $handleElem, doSnap, checkOffLimits) {
+                console.log(value, doSnap)
                 if (info.useDoubleHandles) {
                     if ($handleElem === elemHandle.$elem1st) {
                         if (value > elemHandle.stopPosition[1]) {
@@ -1274,7 +1275,7 @@
                     valueNoMinPx = checkLimits(valueNoMinPx + opts.min) - opts.min;
                 }
                 
-                var valueRelative = valueNoMin/(opts.min - opts.max)*100,
+                var valueRelative = valueNoMinPx/(opts.min - opts.max)*100,
                     isFirstHandle = $handleElem === elemHandle.$elem1st,
                     onlyOneHandle = isFirstHandle || info.isFixedHandle,
                     translate;
@@ -1667,6 +1668,7 @@
                 },
                 startDragFromHandle: function (event, $elemHandle) {
                     if (opts.enabled) {
+                        event.stopPropagation();
                         info.updateTicksStep();
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
