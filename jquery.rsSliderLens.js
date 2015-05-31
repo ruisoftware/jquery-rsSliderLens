@@ -576,20 +576,6 @@
                     }
                 },
 
-                //todo remove this function
-                adjustSize: function () {
-                    var adjust = function($e) {
-                        var $child = $e.children();
-                        $e.css({
-                            'width': $child.outerWidth() + 'px',
-                            'height': $child.outerHeight() + 'px'
-                        });
-                    };
-                    adjust(this.$elem1st);
-                    if (info.useDoubleHandles) {
-                        adjust(this.$elem2nd);
-                    }
-                },
                 navigate: function (pixelOffset, valueOffset, duration, easingFunc, limits, $animHandle) {
                     var currValue = info.currValue[!info.useDoubleHandles || panUtil.$handle === elemHandle.$elem1st? 0 : 1],
                         toValue;
@@ -1119,7 +1105,6 @@
                 // insert into DOM
                 elemHandle.$elem1st.add(elemHandle.$elem2nd).add(elemRange.$range).appendTo(elemOrig.$wrapper);
 
-//                elemHandle.adjustSize();
                 info.usingScaleTransf = !opts.ruler.visible && (util.isDefined(elemHandle.$elem1st.css('-moz-transform')) || util.isDefined(elemHandle.$elem1st.css('-o-transform')));
                 elemMagnif.applyMeasurements();
 
@@ -1214,9 +1199,6 @@
                 // one handle: measure point is located on the handle center
                 return opts.handle.size / 2;
             },
-            getHandlePos = function (valuePixel, $handleElem) {
-                return valuePixel - getHandleHotPoint($handleElem);
-            },
             checkLimits = function (value) {
                 var limit = info.isRangeDefined ? info.getCurrValue(opts.range[opts.flipped ? 1 : 0]) : opts.min;
                 if (value < limit) {
@@ -1230,7 +1212,6 @@
                 return value;
             },
             setValue = function (value, $handleElem, doSnap, checkOffLimits) {
-                console.log(value, doSnap)
                 if (info.useDoubleHandles) {
                     if ($handleElem === elemHandle.$elem1st) {
                         if (value > elemHandle.stopPosition[1]) {
