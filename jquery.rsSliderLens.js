@@ -19,17 +19,24 @@
         var 
             // content that appears outside the handle 
             elemOrig = {
-                outerWidth: 0,
-                outerHeight: 0,
                 $wrapper: null,
-                $canvas: null,
+                $svg: null,
                 tabindexAttr: null,
                 autofocusable: false,
-                initCanvasOutsideHandle: function () {
-                    var creating = this.$canvas === null;
-                    if (creating) {
-                        this.$canvas = $("<canvas>");
-                    }
+                initSvgOutsideHandle: function () {
+                    this.$svg = DOM.createSvgDom('svg', {
+                        width: this.width + 'px',
+                        height: this.height + 'px',
+                        viewBox: '0 0 ' + this.width + ' ' + this.height,
+                        xmlns: info.ns,
+                        version: '1.1'
+                    }).css({
+                        position: 'absolute',
+
+                        left: bounds.left + 'px',
+                        top: bounds.top + 'px',
+                        'pointer-events': 'none'
+                    });
                     
                     this.$canvas.attr({
                         width: this.canvasWidth + 'px',
@@ -75,14 +82,14 @@
                         elemHandle.fixedHandleRelPos = 0;
                     }
 
-                    this.canvasWidth = this.width = $elem.width();
-                    this.canvasHeight = this.height = $elem.height();
+                    this.width = $elem.width();
+                    this.height = $elem.height();
                     if (this.width === 0) {
-                        this.canvasWidth = this.width = 25;
+                        this.width = 25;
                         $elem.width(25);
                     }
                     if (this.height === 0) {
-                        this.canvasHeight = this.height = 25;
+                        this.height = 25;
                         $elem.height(25);
                     }
                     info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
@@ -859,31 +866,26 @@
                             unbind('mousedown.rsSliderLens', panRangeUtil.startDrag).
                             unbind('mouseup.rsSliderLens', panRangeUtil.stopDrag).
                             unbind('click.rsSliderLens', panRangeUtil.click).
-                            unbind('mousedown.rsSliderLens', panUtil.startDrag).
-                            unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+                            unbind('mousedown.rsSliderLens', panUtil.startDrag);
                     }
 
                     $(document).
                         unbind('keydown.rsSliderLens', elemHandle.keydown).
                         unbind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
                         unbind('mouseup.rsSliderLens', panUtil.stopDragFromDoc).
-                        unbind('mousemove.rsSliderLens', panRangeUtil.drag).
-                        unbind('mouseup.rsSliderLens', panRangeUtil.stopDrag);
+                        unbind('mousemove.rsSliderLens', panRangeUtil.drag);
 
                     elemHandle.$elem1st.
                         unbind('focus.rsSliderLens', panUtil.gotFocus1st).
                         unbind('blur.rsSliderLens', panUtil.loseFocus).
                         unbind('mousedown.rsSliderLens', panUtil.startDrag).
-                        unbind('mouseup.rsSliderLens', panUtil.stopDrag).
-                        unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st).
-                        unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+                        unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
 
                     if (elemHandle.$elem2nd) {
                         elemHandle.$elem2nd.
                             unbind('focus.rsSliderLens', panUtil.gotFocus2nd).
                             unbind('blur.rsSliderLens', panUtil.loseFocus).
-                            unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd).
-                            unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+                            unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
                     }
 
                     if (info.isFixedHandle) {
@@ -947,6 +949,7 @@
             },
 
             info = {
+                ns: 'http://www.w3.org/2000/svg',
                 snapMaxLimit: -1,
                 snapMaxNum: opts.max,
                 currValue: [0, 0], // Values for both handles. When only one handle is used, the currValue[1] is ignored
@@ -1149,8 +1152,7 @@
                             bind('mousedown.rsSliderLens', panUtil.startDrag).
                             bind('mouseup.rsSliderLens', panUtil.stopDrag);
                         elemHandle.$elem1st.
-                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st).
-                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
+                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
                     }
 
                     // to prevent the default behaviour in IE when dragging an element
@@ -1166,8 +1168,7 @@
                         noIEdrag(elemHandle.$elem2nd);
                         noIEdrag(elemMagnif.$elemRange2nd);
                         elemHandle.$elem2nd.
-                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd).
-                            bind('mouseup.rsSliderLens', panUtil.stopDrag);
+                            bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
                     }
                     if (info.isAutoFocusable) {
                         elemHandle.$elem1st.focus();
@@ -1252,9 +1253,7 @@
                     valueNoMinPx = valueNoMin;
                 }
                 valueNoMin = checkLimits(valueNoMin + opts.min) - opts.min;
-                if (info.isStepDefined && doSnap === false) {
-                    valueNoMinPx = checkLimits(valueNoMinPx + opts.min) - opts.min;
-                }
+                valueNoMinPx = checkLimits(valueNoMinPx + opts.min) - opts.min;
                 
                 var valueRelative = valueNoMinPx/(opts.min - opts.max)*100,
                     isFirstHandle = $handleElem === elemHandle.$elem1st,
@@ -1306,6 +1305,14 @@
                 roundNtoMultipleOfM: function (n, m) {
                     return Math.round(n / m) * m;
                 },
+                createSvgDom: function (tag, attrs) {
+                    var el = document.createElementNS(info.ns, tag);
+                    for (var k in attrs) {
+                        el.setAttribute(k, attrs[k]);
+                    }
+                    return $(el);
+                },
+
                 initCanvas: function (ctx, width, height) {
                     var getFontData = function () {
                             var fontSize = !!opts.ruler.labels.font ? opts.ruler.labels.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
@@ -1697,26 +1704,28 @@
                     panUtil.dragHorizVert(event, 'pageY');
                 },
                 stopDrag: function (event) {
-                    if (panRangeUtil.dragged) {
-                        panRangeUtil.stopDrag(event);
-                        panRangeUtil.dragged = false;
-                    } else {
-                        if (opts.enabled) {
-                            panUtil.enableTextSelection();
-                            panUtil.doDrag = false;
-                            panUtil.firstClickWasOutsideHandle = false;
-                            $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
-                            
-                            // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
-                            if (info.isStepDefined && !panUtil.$animObj) {
-                                setValue(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
+                    if (panUtil.dragging) {
+                        if (panRangeUtil.dragged) {
+                            panRangeUtil.stopDrag(event);
+                            panRangeUtil.dragged = false;
+                        } else {
+                            if (opts.enabled) {
+                                panUtil.enableTextSelection();
+                                panUtil.doDrag = false;
+                                panUtil.firstClickWasOutsideHandle = false;
+                                $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                                
+                                // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
+                                if (info.isStepDefined && !panUtil.$animObj) {
+                                    setValue(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
+                                }
+                                panUtil.dragDelta = 0;
+                                (panUtil.$handle === elemHandle.$elem1st || panUtil.$handle === null ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().add(elemOrig.$wrapper).removeClass(opts.style.classDragging);
+                                events.processFinalChange();
                             }
-                            panUtil.dragDelta = 0;
-                            (panUtil.$handle === elemHandle.$elem1st || panUtil.$handle === null ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().add(elemOrig.$wrapper).removeClass(opts.style.classDragging);
-                            events.processFinalChange();
                         }
+                        panUtil.dragging = false;
                     }
-                    panUtil.dragging = false;
                 },
                 stopDragFromDoc: function (event) {
                     panUtil.stopDrag(event);
