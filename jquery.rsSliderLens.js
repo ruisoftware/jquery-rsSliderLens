@@ -25,51 +25,22 @@
                 autofocusable: false,
                 initSvgOutsideHandle: function () {
                     this.$svg = DOM.createSvgDom('svg', {
-                        width: this.width + 'px',
-                        height: this.height + 'px',
+                        width: this.width,
+                        height: this.height,
                         viewBox: '0 0 ' + this.width + ' ' + this.height,
+                        preserveAspectRatio: 'none',
                         xmlns: info.ns,
                         version: '1.1'
                     }).css({
                         position: 'absolute',
-
-                        left: bounds.left + 'px',
-                        top: bounds.top + 'px',
+                        left: 0,
+                        top: 0,
+                        width: '100%',
+                        height: '100%',
                         'pointer-events': 'none'
                     });
-                    
-                    this.$canvas.attr({
-                        width: this.canvasWidth + 'px',
-                        height: this.canvasHeight + 'px'
-                    }).css({
-                        'z-index': util.toInt($elem.css('z-index')),
-                        width: this.canvasWidth + 'px',
-                        height: this.canvasHeight + 'px'
-                    });
 
-                    if (!info.isFixedHandle) {
-                        this.$canvas.css('position', 'absolute');
-                        if (elemOrig.right !== null) {
-                            this.$canvas.css('right', elemOrig.right + 'px');
-                        } else {
-                            this.$canvas.css('left', this.pos._value.left + 'px');
-                        }
-                        if (elemOrig.bottom !== null) {
-                            this.$canvas.css('bottom', elemOrig.bottom + 'px');
-                        } else {
-                            this.$canvas.css('top', this.pos._value.top + 'px');
-                        }
-                    }
-
-                    this.$canvas.addClass(info.isHoriz ? opts.style.classSliderlensHoriz : opts.style.classSliderlensVert);
-                    
-                    if (!opts.enabled) {
-                        this.$canvas.add(this.$wrapper).addClass(opts.style.classHandleDisabled);
-                    }
-                    var ctx = this.$canvas[0].getContext('2d');
-                    ctx.scale(1.0 / opts.handle.zoom, 1.0 / opts.handle.zoom);
                     ctx.drawImage(elemMagnif.$elem1st[0], 0, 0);
-//                    this.recalcPosBasedOnCanvas(creating);
                     $elem.hide(); // because the ruler is used instead of the original slider
                 },
                 init: function () {
@@ -274,14 +245,11 @@
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
                 },
-                initCanvasHandle: function () {
-                    var creating = !this.$elem1st;
-                    if (creating) {
-                        this.$elem1st = $("<canvas>");
-                        if (!this.$elem1st[0].getContext) {
-                            this.$elem1st = null;
-                            return false; // browser does not support canvas
-                        }
+                initSvgCanvasHandle: function () {
+                    this.$elem1st = $("<canvas>");
+                    if (!this.$elem1st[0].getContext) {
+                        this.$elem1st = null;
+                        return false; // browser does not support canvas
                     }
                     this.$elem1st.attr({
                         width: this.width + 'px',
@@ -325,7 +293,7 @@
                     info.beginOffset = Math.round(info.beginOffset);
                     info.endOffset = Math.floor(info.endOffset);
                     
-                    elemOrig.initCanvasOutsideHandle();
+                    elemOrig.initSvgOutsideHandle();
 
                     if (info.useDoubleHandles) {
                         if (!this.$elem2nd) {
@@ -348,14 +316,10 @@
                 init: function () {
                     this.width = elemOrig.width*opts.handle.zoom;
                     this.height = elemOrig.height*opts.handle.zoom;
-                    if ((opts.ruler.visible || !opts.ruler.visible && opts.ruler.onDraw) && !this.initCanvasHandle()) { 
-                        // this browser does not support canvas, so fallback to non canvas
-                        opts.ruler.visible = false;
-                        this.initClone();
+                    if (opts.ruler.visible || opts.ruler.onDraw) { 
+                        this.initSvg();
                     } else {
-                        if (!opts.ruler.visible) {
-                            this.initClone();
-                        }
+                        this.initClone();
                     }
                 },
                 setCanvasWidthForFixedHandle: function (newWidth) {
@@ -1305,6 +1269,7 @@
                 roundNtoMultipleOfM: function (n, m) {
                     return Math.round(n / m) * m;
                 },
+
                 createSvgDom: function (tag, attrs) {
                     var el = document.createElementNS(info.ns, tag);
                     for (var k in attrs) {
@@ -1313,189 +1278,196 @@
                     return $(el);
                 },
 
-                initCanvas: function (ctx, width, height) {
-                    var getFontData = function () {
-                            var fontSize = !!opts.ruler.labels.font ? opts.ruler.labels.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
-                                fontData = { size: 10, type: 'px', sizePos: 0 };
-                            if (!fontSize) {
-                                fontSize = [$("html,body").css('font-size')];
-                            }
-                            fontData.size = util.toFloat(fontSize[0]);
-                            fontData.type = fontSize[0].replace(/(\d*.\d+|\d)/, '').toLowerCase();
-                            fontData.sizePos = !!opts.ruler.labels.font ? opts.ruler.labels.font.indexOf(fontSize[0]) : 0;
-                            return {
-                                height: fontData.size,
-                                contextFont:
-                                    ((!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(0, fontData.sizePos) + ' ' : '') +
-                                    fontData.size + fontData.type + ' ' +
-                                    (!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(fontData.sizePos + fontSize[0].length + 1) : ' arial')).trim()
-                            };
-                        },
-                        fontData = getFontData(),
-                        drawTick = function (i, longerMark, posMiddle) {
-                            i = Math.round(i) + 0.5;
-                            var offset = [0, 0];
-                            if (Math.abs(opts.ruler.labels.relativePos - opts.ruler.tickMarks.relativePos) < 0.005) {
-                                // values and tick marks on the same relative position
-                                offset[0] = offset[1] = (longerMark ? tickSize.big : tickSize.small) / 2;
-                            } else { 
-                                if (opts.ruler.labels.relativePos > opts.ruler.tickMarks.relativePos) {
-                                    // values below tick marks (or, in case of vertical sliders, values right to tick marks)
-                                    offset[0] = tickSize.big / 2;
-                                    offset[1] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
-                                } else {
-                                    // values above tick marks (or, in case of vertical sliders, values left to tick marks)
-                                    offset[0] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
-                                    offset[1] = tickSize.big / 2;
-                                }
-                            }
-                            if (info.isHoriz) {
-                                ctx.moveTo(i, posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0]);
-                                ctx.lineTo(i, posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1]);
-                            } else {
-                                ctx.moveTo(posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0], i);
-                                ctx.lineTo(posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1], i);
-                            }
-                        },
-                        getFormatedNum = function (num) {
-                            var fmt = $elem.triggerHandler('fmtValue.rsSliderLens', [num]);
-                            return fmt === undefined ? num : fmt;
-                        };
-
-                    ctx.font = fontData.contextFont;
-                    var fmtMin = fmtMax = null,
-                        from = curr = deltaStart = deltaEnd = 0;
-                        
-                    if (opts.ruler.labels.visible) {
-                        fmtMin = getFormatedNum(opts.min);
-                        fmtMax = getFormatedNum(opts.max);
-                        from = (info.isHoriz ? ctx.measureText(fmtMin).width : fontData.height) - 1;
-                        deltaStart = from / 2;
-                        
-                        deltaEnd = (info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height) - 1;
-                        deltaEnd /= 2;
+                initSvg: function (width, height) {
+                    if (opts.ruler.tickMarks.visible) {
+                        this.createSvgDom('marker', attrs).append(this.getMarkerShape(type, size, shade));
+                        this.createSvgDom('line', {
+                        });
                     }
-
-                    var dataRange = opts.flipped ? opts.min - opts.max : opts.max - opts.min,
-                        tickMarkRate = ((info.isHoriz ? width : height) - deltaStart - deltaEnd - 1) / dataRange;
-                    if (info.isFixedHandle && Math.abs(tickMarkRate) < 2) {
-                        tickMarkRate = (opts.flipped ? -2 : 2) / (info.isStepDefined ? opts.step : 1);
-                        if (info.isHoriz) {
-                            width = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
-                            elemMagnif.setCanvasWidthForFixedHandle(width);
-                        } else {
-                            height = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
-                            elemMagnif.setCanvasHeightForFixedHandle(height);
-                        }
-                        ctx.scale(opts.handle.zoom, opts.handle.zoom);
-                    }
-
-                    var tickSize = { big: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeBig, small: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeSmall },
-                        lastLabel = to = info.isHoriz ? width : height;
-
-                    if (opts.flipped) {
-                        curr = to - from;
-                        from = to - deltaStart;
-                        lastLabel = deltaEnd * 2;
-                        to = deltaEnd;
-                    } else {
-                        curr = from;
-                        from = deltaStart;
-                        lastLabel -= deltaEnd * 2;
-                        to -= deltaEnd;
-                    }
-                    var pixelStep = info.isStepDefined ? tickMarkRate * opts.step : (opts.flipped ? -2 : 2),
-                        tickMarkRelativePos = tickSize.big / 2 + ((info.isHoriz ? height : width) - tickSize.big) * opts.ruler.tickMarks.relativePos,
-                        textRelativePos = maxLabelWidth = 0,
-                        allLabels = [],
-                        doText = false;
-
-                    ctx.beginPath();
-                    ctx.font = fontData.contextFont;
-                    ctx.strokeStyle = opts.ruler.tickMarks.strokeStyle;
-                    ctx.fillStyle = opts.ruler.labels.fontStyle;
-                    ctx.lineWidth = 1;
-                    for (var i = from, longerMark = true, cond = true; cond; i += pixelStep) {
-                        var num = (i - from) / tickMarkRate + opts.min;
-                        if (info.isStepDefined) {
-                            num = util.roundNtoMultipleOfM(num - opts.min, opts.step) + opts.min;
-                            info.snapMaxLimit = i;
-                            if (opts.flipped) {
-                                info.snapMaxNum = num;
-                            }
-                        }
-                        num = util.roundToDecimalPlaces(num, opts.ruler.labels.decimals);
-
-                        var fmtNum = getFormatedNum(num);                            
-                        
-                        if (opts.ruler.labels.visible) {
-                            var halfLabel = info.isHoriz ? ctx.measureText(fmtNum).width / 2 : deltaStart, // for vertical sliders deltaStart is half of text height
-                                doText;
-                            
-                            if (opts.flipped) {
-                                doText = // if there is enough space (3px) that would separate this label from the previous one (right)
-                                        curr - i - halfLabel > 3 && 
-                                        // and there is enough space to the last label (on the left)
-                                        i - halfLabel - lastLabel > 3;
-                            } else {
-                                doText = // if there is enough space (3px) that would separate this label from the previous one (left)
-                                        i - halfLabel - curr > 3 && 
-                                        // and there is enough space to the last label (on the right)
-                                        lastLabel - i - halfLabel > 3;
-                            }
-
-                            // only shows a label, if multiple of tryShowEvery (if defined)
-                            if (doText && !!opts.ruler.labels.tryShowEvery) {
-                                var everyValue = Math.abs((num - opts.min) % opts.ruler.labels.tryShowEvery);
-                                doText = everyValue < 0.00005 && Math.abs(i - from) > 0.00005;
-                            }
-
-                            if (doText) {
-                                allLabels.push({ fmt: fmtNum, pos: i - halfLabel });
-                                maxLabelWidth = Math.max(maxLabelWidth, ctx.measureText(fmtNum).width);
-                                curr = i + (opts.flipped ? - halfLabel : halfLabel);
-                                longerMark = true;
-                            }
-                        }
-
-                        cond = opts.flipped ? (i + pixelStep - to > - 0.00005) : (to - i - pixelStep > - 0.00005);
-                        if (opts.ruler.tickMarks.visible) {
-                            drawTick(i, longerMark || !cond, tickMarkRelativePos);
-                            longerMark = opts.flipped ? (i + pixelStep - to <= 0.00005) : (to - i - pixelStep <= 0.00005);
-                        }
-                    }
-
-                    if (opts.ruler.labels.visible) {
-                        var minLength = ctx.measureText(fmtMin).width;
-                        if (info.isHoriz) {
-                            textRelativePos = fontData.height + (height - fontData.height) * opts.ruler.labels.relativePos;
-                            ctx.fillText(fmtMin, opts.flipped ? width - minLength: 0, textRelativePos);
-                            for (var i = 0; i < allLabels.length; ++i) {
-                                ctx.fillText(allLabels[i].fmt, allLabels[i].pos, textRelativePos);
-                            }
-                            var maxLabelPos = opts.flipped ? 0 : lastLabel;
-                            ctx.fillText(fmtMax, maxLabelPos, textRelativePos);
-                        } else {
-                            var positionLabelAt = function (fmtValue) {
-                                switch (opts.ruler.labels.vertJustify) {
-                                    case 'center': return textRelativePos + (maxLabelWidth - ctx.measureText(fmtValue).width) / 2;
-                                    case 'right': return textRelativePos + maxLabelWidth - ctx.measureText(fmtValue).width;
-                                }
-                                return textRelativePos;
-                            };
-                            maxLabelWidth = Math.max(maxLabelWidth, minLength);
-                            textRelativePos = (width - maxLabelWidth) * opts.ruler.labels.relativePos;
-                            ctx.fillText(fmtMin, positionLabelAt(fmtMin), opts.flipped ? height : fontData.height);
-                            for (var i = 0; i < allLabels.length; ++i) {
-                                ctx.fillText(allLabels[i].fmt, positionLabelAt(allLabels[i].fmt), allLabels[i].pos + fontData.height);
-                            }
-                            var maxLabelPos = opts.flipped ? 0 : lastLabel;
-                            ctx.fillText(fmtMax, positionLabelAt(fmtMax), maxLabelPos + fontData.height);
-                        }
-                    }
-                    ctx.stroke();
-                    return opts.flipped ? { begin: deltaEnd, end: deltaStart } : { begin: deltaStart, end: deltaEnd };
                 },
+                // initCanvas: function (ctx, width, height) {
+                //     var getFontData = function () {
+                //             var fontSize = !!opts.ruler.labels.font ? opts.ruler.labels.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
+                //                 fontData = { size: 10, type: 'px', sizePos: 0 };
+                //             if (!fontSize) {
+                //                 fontSize = [$("html,body").css('font-size')];
+                //             }
+                //             fontData.size = util.toFloat(fontSize[0]);
+                //             fontData.type = fontSize[0].replace(/(\d*.\d+|\d)/, '').toLowerCase();
+                //             fontData.sizePos = !!opts.ruler.labels.font ? opts.ruler.labels.font.indexOf(fontSize[0]) : 0;
+                //             return {
+                //                 height: fontData.size,
+                //                 contextFont:
+                //                     ((!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(0, fontData.sizePos) + ' ' : '') +
+                //                     fontData.size + fontData.type + ' ' +
+                //                     (!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(fontData.sizePos + fontSize[0].length + 1) : ' arial')).trim()
+                //             };
+                //         },
+                //         fontData = getFontData(),
+                //         drawTick = function (i, longerMark, posMiddle) {
+                //             i = Math.round(i) + 0.5;
+                //             var offset = [0, 0];
+                //             if (Math.abs(opts.ruler.labels.relativePos - opts.ruler.tickMarks.relativePos) < 0.005) {
+                //                 // values and tick marks on the same relative position
+                //                 offset[0] = offset[1] = (longerMark ? tickSize.big : tickSize.small) / 2;
+                //             } else { 
+                //                 if (opts.ruler.labels.relativePos > opts.ruler.tickMarks.relativePos) {
+                //                     // values below tick marks (or, in case of vertical sliders, values right to tick marks)
+                //                     offset[0] = tickSize.big / 2;
+                //                     offset[1] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
+                //                 } else {
+                //                     // values above tick marks (or, in case of vertical sliders, values left to tick marks)
+                //                     offset[0] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
+                //                     offset[1] = tickSize.big / 2;
+                //                 }
+                //             }
+                //             if (info.isHoriz) {
+                //                 ctx.moveTo(i, posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0]);
+                //                 ctx.lineTo(i, posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1]);
+                //             } else {
+                //                 ctx.moveTo(posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0], i);
+                //                 ctx.lineTo(posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1], i);
+                //             }
+                //         },
+                //         getFormatedNum = function (num) {
+                //             var fmt = $elem.triggerHandler('fmtValue.rsSliderLens', [num]);
+                //             return fmt === undefined ? num : fmt;
+                //         };
+
+                //     ctx.font = fontData.contextFont;
+                //     var fmtMin = fmtMax = null,
+                //         from = curr = deltaStart = deltaEnd = 0;
+                        
+                //     if (opts.ruler.labels.visible) {
+                //         fmtMin = getFormatedNum(opts.min);
+                //         fmtMax = getFormatedNum(opts.max);
+                //         from = (info.isHoriz ? ctx.measureText(fmtMin).width : fontData.height) - 1;
+                //         deltaStart = from / 2;
+                        
+                //         deltaEnd = (info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height) - 1;
+                //         deltaEnd /= 2;
+                //     }
+
+                //     var dataRange = opts.flipped ? opts.min - opts.max : opts.max - opts.min,
+                //         tickMarkRate = ((info.isHoriz ? width : height) - deltaStart - deltaEnd - 1) / dataRange;
+                //     if (info.isFixedHandle && Math.abs(tickMarkRate) < 2) {
+                //         tickMarkRate = (opts.flipped ? -2 : 2) / (info.isStepDefined ? opts.step : 1);
+                //         if (info.isHoriz) {
+                //             width = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
+                //             elemMagnif.setCanvasWidthForFixedHandle(width);
+                //         } else {
+                //             height = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
+                //             elemMagnif.setCanvasHeightForFixedHandle(height);
+                //         }
+                //         ctx.scale(opts.handle.zoom, opts.handle.zoom);
+                //     }
+
+                //     var tickSize = { big: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeBig, small: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeSmall },
+                //         lastLabel = to = info.isHoriz ? width : height;
+
+                //     if (opts.flipped) {
+                //         curr = to - from;
+                //         from = to - deltaStart;
+                //         lastLabel = deltaEnd * 2;
+                //         to = deltaEnd;
+                //     } else {
+                //         curr = from;
+                //         from = deltaStart;
+                //         lastLabel -= deltaEnd * 2;
+                //         to -= deltaEnd;
+                //     }
+                //     var pixelStep = info.isStepDefined ? tickMarkRate * opts.step : (opts.flipped ? -2 : 2),
+                //         tickMarkRelativePos = tickSize.big / 2 + ((info.isHoriz ? height : width) - tickSize.big) * opts.ruler.tickMarks.relativePos,
+                //         textRelativePos = maxLabelWidth = 0,
+                //         allLabels = [],
+                //         doText = false;
+
+                //     ctx.beginPath();
+                //     ctx.font = fontData.contextFont;
+                //     ctx.strokeStyle = opts.ruler.tickMarks.strokeStyle;
+                //     ctx.fillStyle = opts.ruler.labels.fontStyle;
+                //     ctx.lineWidth = 1;
+                //     for (var i = from, longerMark = true, cond = true; cond; i += pixelStep) {
+                //         var num = (i - from) / tickMarkRate + opts.min;
+                //         if (info.isStepDefined) {
+                //             num = util.roundNtoMultipleOfM(num - opts.min, opts.step) + opts.min;
+                //             info.snapMaxLimit = i;
+                //             if (opts.flipped) {
+                //                 info.snapMaxNum = num;
+                //             }
+                //         }
+                //         num = util.roundToDecimalPlaces(num, opts.ruler.labels.decimals);
+
+                //         var fmtNum = getFormatedNum(num);                            
+                        
+                //         if (opts.ruler.labels.visible) {
+                //             var halfLabel = info.isHoriz ? ctx.measureText(fmtNum).width / 2 : deltaStart, // for vertical sliders deltaStart is half of text height
+                //                 doText;
+                            
+                //             if (opts.flipped) {
+                //                 doText = // if there is enough space (3px) that would separate this label from the previous one (right)
+                //                         curr - i - halfLabel > 3 && 
+                //                         // and there is enough space to the last label (on the left)
+                //                         i - halfLabel - lastLabel > 3;
+                //             } else {
+                //                 doText = // if there is enough space (3px) that would separate this label from the previous one (left)
+                //                         i - halfLabel - curr > 3 && 
+                //                         // and there is enough space to the last label (on the right)
+                //                         lastLabel - i - halfLabel > 3;
+                //             }
+
+                //             // only shows a label, if multiple of tryShowEvery (if defined)
+                //             if (doText && !!opts.ruler.labels.tryShowEvery) {
+                //                 var everyValue = Math.abs((num - opts.min) % opts.ruler.labels.tryShowEvery);
+                //                 doText = everyValue < 0.00005 && Math.abs(i - from) > 0.00005;
+                //             }
+
+                //             if (doText) {
+                //                 allLabels.push({ fmt: fmtNum, pos: i - halfLabel });
+                //                 maxLabelWidth = Math.max(maxLabelWidth, ctx.measureText(fmtNum).width);
+                //                 curr = i + (opts.flipped ? - halfLabel : halfLabel);
+                //                 longerMark = true;
+                //             }
+                //         }
+
+                //         cond = opts.flipped ? (i + pixelStep - to > - 0.00005) : (to - i - pixelStep > - 0.00005);
+                //         if (opts.ruler.tickMarks.visible) {
+                //             drawTick(i, longerMark || !cond, tickMarkRelativePos);
+                //             longerMark = opts.flipped ? (i + pixelStep - to <= 0.00005) : (to - i - pixelStep <= 0.00005);
+                //         }
+                //     }
+
+                //     if (opts.ruler.labels.visible) {
+                //         var minLength = ctx.measureText(fmtMin).width;
+                //         if (info.isHoriz) {
+                //             textRelativePos = fontData.height + (height - fontData.height) * opts.ruler.labels.relativePos;
+                //             ctx.fillText(fmtMin, opts.flipped ? width - minLength: 0, textRelativePos);
+                //             for (var i = 0; i < allLabels.length; ++i) {
+                //                 ctx.fillText(allLabels[i].fmt, allLabels[i].pos, textRelativePos);
+                //             }
+                //             var maxLabelPos = opts.flipped ? 0 : lastLabel;
+                //             ctx.fillText(fmtMax, maxLabelPos, textRelativePos);
+                //         } else {
+                //             var positionLabelAt = function (fmtValue) {
+                //                 switch (opts.ruler.labels.vertJustify) {
+                //                     case 'center': return textRelativePos + (maxLabelWidth - ctx.measureText(fmtValue).width) / 2;
+                //                     case 'right': return textRelativePos + maxLabelWidth - ctx.measureText(fmtValue).width;
+                //                 }
+                //                 return textRelativePos;
+                //             };
+                //             maxLabelWidth = Math.max(maxLabelWidth, minLength);
+                //             textRelativePos = (width - maxLabelWidth) * opts.ruler.labels.relativePos;
+                //             ctx.fillText(fmtMin, positionLabelAt(fmtMin), opts.flipped ? height : fontData.height);
+                //             for (var i = 0; i < allLabels.length; ++i) {
+                //                 ctx.fillText(allLabels[i].fmt, positionLabelAt(allLabels[i].fmt), allLabels[i].pos + fontData.height);
+                //             }
+                //             var maxLabelPos = opts.flipped ? 0 : lastLabel;
+                //             ctx.fillText(fmtMax, positionLabelAt(fmtMax), maxLabelPos + fontData.height);
+                //         }
+                //     }
+                //     ctx.stroke();
+                //     return opts.flipped ? { begin: deltaEnd, end: deltaStart } : { begin: deltaStart, end: deltaEnd };
+                // },
                 getScaleCss: function (zoomValue) {
                     return {
                         'transform-origin': '0 0',

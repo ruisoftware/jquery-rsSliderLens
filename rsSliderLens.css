@@ -15,6 +15,12 @@
 
 }
 
+.sliderlens svg text {
+  text-anchor: middle;
+  writing-mode: tb;
+  glyph-orientation-vertical: 45;
+}
+
 
 .v {
   display: inline-block;
