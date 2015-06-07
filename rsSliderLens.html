@@ -11,10 +11,10 @@
             fixedHandle: false,
             value: 20,
             min: 20,
-            step: 0,
+            step: 10,
             snapOnDrag: true,
             ruler: {
-              visible: false
+              visible: true
             },
             onChange: function (event, value, isFirstHandle) {
               $("#change").text('value=' + value + '  ' + (isFirstHandle ? 'first' : 'second') + ' handle')

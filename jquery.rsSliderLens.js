@@ -24,13 +24,15 @@
                 tabindexAttr: null,
                 autofocusable: false,
                 initSvgOutsideHandle: function () {
-                    this.$svg = DOM.createSvgDom('svg', {
+                    this.$svg = util.createSvgDom('svg', {
                         width: this.width,
                         height: this.height,
                         viewBox: '0 0 ' + this.width + ' ' + this.height,
                         preserveAspectRatio: 'none',
                         xmlns: info.ns,
-                        version: '1.1'
+                        version: '1.1',
+                        stroke: 'black',
+                        'shape-rendering': 'crispedges'
                     }).css({
                         position: 'absolute',
                         left: 0,
@@ -39,9 +41,9 @@
                         height: '100%',
                         'pointer-events': 'none'
                     });
-
-                    ctx.drawImage(elemMagnif.$elem1st[0], 0, 0);
-                    $elem.hide(); // because the ruler is used instead of the original slider
+                    util.initSvg(this.$svg, this.width, this.height);
+                    this.$svg.prependTo(this.$wrapper);
+                    $elem.css('visibility', 'hidden'); // because the ruler is used instead of the original slider
                 },
                 init: function () {
                     this.tabindexAttr = $elem.attr('tabindex');
@@ -317,7 +319,7 @@
                     this.width = elemOrig.width*opts.handle.zoom;
                     this.height = elemOrig.height*opts.handle.zoom;
                     if (opts.ruler.visible || opts.ruler.onDraw) { 
-                        this.initSvg();
+                        elemOrig.initSvgOutsideHandle();
                     } else {
                         this.initClone();
                     }
@@ -1269,6 +1271,13 @@
                 roundNtoMultipleOfM: function (n, m) {
                     return Math.round(n / m) * m;
                 },
+                isAlmostZero: function(a, maxDelta) {
+                    return this.areTheSame(a, 0, maxDelta);
+                },
+                areTheSame: function(a, b, maxDelta) {
+                    return Math.abs(a - b) < (maxDelta === undefined ? 0.00005 : maxDelta);
+                },
+
 
                 createSvgDom: function (tag, attrs) {
                     var el = document.createElementNS(info.ns, tag);
@@ -1278,12 +1287,55 @@
                     return $(el);
                 },
 
-                initSvg: function (width, height) {
+                initSvg: function ($svg, width, height) {
                     if (opts.ruler.tickMarks.visible) {
-                        this.createSvgDom('marker', attrs).append(this.getMarkerShape(type, size, shade));
-                        this.createSvgDom('line', {
-                        });
+                        var marker = {
+                                idLong: 'l' + (+ new Date()),
+                                idShort: 's' + (+ new Date()),
+                                getMarker: function (size) {
+                                    return util.createSvgDom('marker', {
+                                        id: marker.idLong,
+                                        markerWidth: 1,
+                                        markerHeight: size,
+                                        refX: 1,
+                                        refY: 1
+                                    }).append(util.createSvgDom('line', {
+                                        x1: 1, y1: 1, x2: 1, y2: size
+                                    }))
+                                }
+                            };
+                        marker.$longMarker = marker.getMarker(5);
+                        marker.$shortMarker = marker.getMarker(2);
+
+                        var tickStep = opts.step && !this.isAlmostZero(opts.max - opts.min) ? opts.step/(opts.max - opts.min)*width : 2,
+                            points = '',
+                            y = opts.ruler.tickLine.relativePos*height,
+                            $defs = this.createSvgDom('defs').append(marker.$longMarker).prependTo(elemOrig.$svg);
+
+                        for (var x = 0; x <= width; x += tickStep) {
+                            points += x + ',' + y + ' ';
+                        }
+                        $svg.append(this.createSvgDom('polyline', {
+                            points: points,
+                            'marker-start': 'url(#' + marker.idLong + ')',
+                            'marker-mid': 'url(#' + marker.idLong + ')',
+                            'marker-end': 'url(#' + marker.idLong + ')'
+                        }));
                     }
+                    if (opts.ruler.tickLine.visible) {
+                        $svg.append(this.createSvgDom('rect', {
+                            x: 0,
+                            y: opts.ruler.tickLine.relativePos*height,
+                            width: width,
+                            height: opts.ruler.tickLine.relativeSize*height
+                        }));
+                    }
+                    $svg.append(this.createSvgDom('line', {
+                        x1: 0,
+                        y1: 0,
+                        x2: width,
+                        y2: height
+                    }));
                 },
                 // initCanvas: function (ctx, width, height) {
                 //     var getFontData = function () {
@@ -1890,6 +1942,7 @@
         opts.ruler = $.extend({}, $.fn.rsSliderLens.defaults.ruler, options ? options.ruler : options);
         opts.ruler.labels = $.extend({}, $.fn.rsSliderLens.defaults.ruler.labels, options ? (options.ruler ? options.ruler.labels : options.ruler) : options);
         opts.ruler.tickMarks = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks, options ? (options.ruler ? options.ruler.tickMarks : options.ruler) : options);
+        opts.ruler.tickLine = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickLine, options ? (options.ruler ? options.ruler.tickLine : options.ruler) : options);
         opts.keyboard = $.extend({}, $.fn.rsSliderLens.defaults.keyboard, options ? options.keyboard : options);
 
         return this.each(function () {
@@ -2059,6 +2112,11 @@
                 relativeSizeSmall: .1,  // Relative size for the shorter tick mark. Type: floating point number >= 0 and <= 1. 
                 relativeSizeBig: .2,    // Relative size for the longer tick mark. A longer tick mark indicates the place for a label. Type: floating point number >= 0 and <= 1.
                 flipped: false          // Determines whether the shorter and longer ticks marks are flipped. Type: boolean.
+            },
+            tickLine: {
+                visible: true,
+                relativePos: .4,
+                relativeSize: .2
             },
             onDraw: null   // Event used for customized rulers. Type: function(event, ctx, canvasWidth, canvasHeight, pixelOffsets)
                            // If onDraw event is not defined and ruler.visible is true, then a custom ruler is generated.
