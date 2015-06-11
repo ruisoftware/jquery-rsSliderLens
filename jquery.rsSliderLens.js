@@ -31,8 +31,7 @@
                         preserveAspectRatio: 'none',
                         xmlns: info.ns,
                         version: '1.1',
-                        stroke: 'black',
-                        'shape-rendering': 'crispedges'
+                        stroke: 'black'//,  'shape-rendering': 'crispedges'
                     }).css({
                         position: 'absolute',
                         left: 0,
@@ -90,6 +89,15 @@
                         $elem.css(info.isHoriz ? 'left' : 'top', elemHandle.fixedHandleRelPos*100 + '%');
                     } else {
                         $elem.css('transform', 'translate' + (info.isHoriz ? 'Y' : 'X') + '(-50%)');
+                    }
+
+                    // set again width and height, as css set above might change dimensions
+                    if (opts.ruler.visible || opts.ruler.onDraw) {
+                        this.width = this.$wrapper.width();
+                        this.height = this.$wrapper.height();
+                    } else {
+                        this.width = $elem.width();
+                        this.height = $elem.height();
                     }
 
                     if (elemPosition === 'static') {
@@ -1288,54 +1296,88 @@
                 },
 
                 initSvg: function ($svg, width, height) {
-                    if (opts.ruler.tickMarks.visible) {
+                    var optsTicks = opts.ruler.tickMarks;
+                    if (optsTicks.short.visible || optsTicks.long.visible) {
                         var marker = {
-                                idLong: 'l' + (+ new Date()),
-                                idShort: 's' + (+ new Date()),
-                                getMarker: function (size) {
+                                getMarker: function (id, size, stroke) {
                                     return util.createSvgDom('marker', {
-                                        id: marker.idLong,
+                                        id: id,
                                         markerWidth: 1,
                                         markerHeight: size,
                                         refX: 1,
                                         refY: 1
                                     }).append(util.createSvgDom('line', {
-                                        x1: 1, y1: 1, x2: 1, y2: size
-                                    }))
+                                        x1: 1,
+                                        y1: 1,
+                                        x2: 1,
+                                        y2: size,
+                                        stroke: stroke
+                                    }));
+                                },
+                                generateTicks: function (type) {
+                                    var step = optsTicks[type].step,
+                                        tickStep = (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*width,
+                                        points = '',
+                                        y = optsTicks[type].relativePos*height,
+                                        id = type.charAt(0) + (+ new Date()),
+                                        url = 'url(#' + id + ')';
+
+                                    if (!this.$defs) {
+                                        this.$defs = util.createSvgDom('defs');
+                                    }
+                                    this.$defs.append(this.getMarker(id, optsTicks[type].relativeSize*height, optsTicks[type].stroke));
+
+                                    for (var x = 0; x <= width; x += tickStep) {
+                                        points += x + ',' + y + ' ';
+                                    }
+                                    $svg.append(util.createSvgDom('polyline', {
+                                        points: points,
+                                        'marker-start': url,
+                                        'marker-mid': url,
+                                        'marker-end': url,
+                                        'stroke': 'transparent'
+                                    }));
                                 }
                             };
-                        marker.$longMarker = marker.getMarker(5);
-                        marker.$shortMarker = marker.getMarker(2);
-
-                        var tickStep = opts.step && !this.isAlmostZero(opts.max - opts.min) ? opts.step/(opts.max - opts.min)*width : 2,
-                            points = '',
-                            y = opts.ruler.tickLine.relativePos*height,
-                            $defs = this.createSvgDom('defs').append(marker.$longMarker).prependTo(elemOrig.$svg);
-
-                        for (var x = 0; x <= width; x += tickStep) {
-                            points += x + ',' + y + ' ';
+                        if (optsTicks.short.visible) {
+                            marker.generateTicks('short');
                         }
-                        $svg.append(this.createSvgDom('polyline', {
-                            points: points,
-                            'marker-start': 'url(#' + marker.idLong + ')',
-                            'marker-mid': 'url(#' + marker.idLong + ')',
-                            'marker-end': 'url(#' + marker.idLong + ')'
-                        }));
+                        if (optsTicks.long.visible) {
+                            marker.generateTicks('long');
+                        }
+                        marker.$defs.prependTo(elemOrig.$svg);
                     }
-                    if (opts.ruler.tickLine.visible) {
-                        $svg.append(this.createSvgDom('rect', {
-                            x: 0,
-                            y: opts.ruler.tickLine.relativePos*height,
-                            width: width,
-                            height: opts.ruler.tickLine.relativeSize*height
-                        }));
+
+                    if (opts.ruler.labels.values === 'step' && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
+                        var $allText = util.createSvgDom('g', {
+                                font: opts.ruler.labels.font,
+                                style: opts.ruler.labels.fontStyle
+                            }),
+                            range = opts.max - opts.min,
+                            withinBounds = function (value) {
+                                value = +value; // strToInt
+                                return value >= opts.min && value <= opts.max;
+                            },
+                            renderText = function (value) {
+                                $allText.append(util.createSvgDom('text', {
+                                    x: (value - opts.min)/range*elemOrig.width,
+                                    y: .5
+                                }).append(value));
+                            };
+                        if (opts.ruler.labels.values instanceof Array) {
+                            opts.ruler.labels.values.sort(function (a, b) { return a - b; });
+                            for (var x in opts.ruler.labels.values) {
+                                if (withinBounds(opts.ruler.labels.values[x])) {
+                                    renderText(opts.ruler.labels.values[x]);
+                                }
+                            }
+                        } else {
+                            for (var x = opts.min; x <= opts.max; x += opts.step) {
+                                renderText(x);
+                            }
+                        }
+                        $allText.appendTo(elemOrig.$svg);
                     }
-                    $svg.append(this.createSvgDom('line', {
-                        x1: 0,
-                        y1: 0,
-                        x2: width,
-                        y2: height
-                    }));
                 },
                 // initCanvas: function (ctx, width, height) {
                 //     var getFontData = function () {
@@ -1942,6 +1984,8 @@
         opts.ruler = $.extend({}, $.fn.rsSliderLens.defaults.ruler, options ? options.ruler : options);
         opts.ruler.labels = $.extend({}, $.fn.rsSliderLens.defaults.ruler.labels, options ? (options.ruler ? options.ruler.labels : options.ruler) : options);
         opts.ruler.tickMarks = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks, options ? (options.ruler ? options.ruler.tickMarks : options.ruler) : options);
+        opts.ruler.tickMarks.short = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks.short, options ? (options.ruler ? (options.ruler.tickMarks ? options.ruler.tickMarks.short : options.ruler.tickMarks) : options.ruler) : options);
+        opts.ruler.tickMarks.long = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks.long, options ? (options.ruler ? (options.ruler.tickMarks ? options.ruler.tickMarks.long : options.ruler.tickMarks) : options.ruler) : options);
         opts.ruler.tickLine = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickLine, options ? (options.ruler ? options.ruler.tickLine : options.ruler) : options);
         opts.keyboard = $.extend({}, $.fn.rsSliderLens.defaults.keyboard, options ? options.keyboard : options);
 
@@ -2091,6 +2135,7 @@
 
             labels: {               // Configuration data for the labels that appear in the ruler.
                 visible: true,          // Determines whether value labels are displayed. Type: boolean.
+                values: 'step',
                 font: '10px arial',     // Canvas font used for the labels. Type: string.
                 fontStyle: 'black',     // Font style. Type: string.
             
@@ -2106,12 +2151,20 @@
                 onFmtValue: null        // Event called for each label, to allow customized formating. Type: function (event, value).
             },
             tickMarks: {
-                visible: true,          // Determines whether the tick marks are displayed. Type: boolean. 
-                strokeStyle: 'black',   // Stroke style for the tick marks lines. Type: string.
-                relativePos: 0.1,       // Position for the tick marks relatively to the height (for horizontal sliders) or width (for vertical sliders). Type: floating point number >= 0 and <= 1.
-                relativeSizeSmall: .1,  // Relative size for the shorter tick mark. Type: floating point number >= 0 and <= 1. 
-                relativeSizeBig: .2,    // Relative size for the longer tick mark. A longer tick mark indicates the place for a label. Type: floating point number >= 0 and <= 1.
-                flipped: false          // Determines whether the shorter and longer ticks marks are flipped. Type: boolean.
+                short: {
+                    visible: true,
+                    step: 1,
+                    stroke: 'black',
+                    relativePos: .1,
+                    relativeSize: .15
+                },
+                long: {
+                    visible: true,
+                    step: 10,
+                    stroke: 'black',
+                    relativePos: .1,
+                    relativeSize: .3
+                }
             },
             tickLine: {
                 visible: true,

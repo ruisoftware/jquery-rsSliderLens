@@ -1,6 +1,5 @@
 .sliderlens {
   height: 15vh;
-  margin-left: 3em;
 }
 
 .sliderlens.fixed {
@@ -17,7 +16,7 @@
 
 .sliderlens svg text {
   text-anchor: middle;
-  writing-mode: tb;
+  dwriting-mode: tb;
   glyph-orientation-vertical: 45;
 }
 
