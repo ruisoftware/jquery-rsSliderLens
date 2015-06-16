@@ -40,7 +40,12 @@
                         height: '100%',
                         'pointer-events': 'none'
                     });
-                    util.initSvg(this.$svg, this.width, this.height);
+                    if (opts.ruler.visible) {
+                        util.initSvg(this.$svg, this.width, this.height);
+                    }
+                    if (opts.ruler.onDraw) {
+                        opts.ruler.onDraw(this.$svg, this.width, this.height, util.createSvgDom);
+                    }
                     this.$svg.prependTo(this.$wrapper);
                     $elem.css('visibility', 'hidden'); // because the ruler is used instead of the original slider
                 },
@@ -2128,7 +2133,7 @@
         // Ruler rendering data. Should you decide to use a ruler, SliderLens can automatically render one for you, or you can render a customized one.
         ruler: {
             visible: true,          // Determines whether the ruler is shown. Type: boolean.
-                                    // true - canvas ruler is displayed.
+                                    // true - svg ruler is displayed.
                                     // false - the original content is displayed.
                                     // Note: If the plug-in is attached to a DOM element that contains no content at all (no children),
                                     //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
@@ -2179,7 +2184,7 @@
                 relativePos: .4,
                 relativeSize: .2
             },
-            onDraw: null   // Event used for customized rulers. Type: function(event, ctx, canvasWidth, canvasHeight, pixelOffsets)
+            onDraw: null   // Event used for customized rulers. Type: function($svg, width, height, createSvgDomFunc)
                            // If onDraw event is not defined and ruler.visible is true, then a custom ruler is generated.
                            // If onDraw event is not defined and ruler.visible is false, then no ruler is displayed and the original content is shown.
                            // If onDraw event is defined and ruler.visible is true, then onDraw is used to draw on top of the generated ruler.
