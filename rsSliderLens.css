@@ -15,9 +15,23 @@
 }
 
 .sliderlens svg text {
-  text-anchor: middle;
-  dwriting-mode: tb;
-  glyph-orientation-vertical: 45;
+  font-family: arial;
+  font-size: 10px;
+  text-anchor: middle; /* start | middle | end */
+  stroke-width: 0;
+  fill: black;
+  /*
+  stroke: black;
+  letter-spacing: 2;
+  word-spacing: 2;
+  transform: rotate(30 20, 45);
+  textLength: 200;
+  lengthAdjust: spacingAndGlyphs;
+  
+  */
+  swriting-mode: tb;
+  
+  dglyph-orientation-vertical: 0;
 }
 
 

@@ -1349,20 +1349,21 @@
                     }
 
                     if (opts.ruler.labels.values === 'step' && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
-                        var $allText = util.createSvgDom('g', {
-                                font: opts.ruler.labels.font,
-                                style: opts.ruler.labels.fontStyle
-                            }),
+                        var $allText = util.createSvgDom('g'),
                             range = opts.max - opts.min,
                             withinBounds = function (value) {
                                 value = +value; // strToInt
                                 return value >= opts.min && value <= opts.max;
                             },
                             renderText = function (value) {
-                                $allText.append(util.createSvgDom('text', {
-                                    x: (value - opts.min)/range*elemOrig.width,
-                                    y: .5
-                                }).append(value));
+                                var textData = {
+                                        x: (value - opts.min)/range*width,
+                                        y: opts.ruler.labels.relativePos*height
+                                    };
+                                if (opts.ruler.labels.onSvgTransform) {
+                                    textData.transform = opts.ruler.labels.onSvgTransform(textData.x, textData.y);
+                                }
+                                $allText.append(util.createSvgDom('text', textData).append(value));
                             };
                         if (opts.ruler.labels.values instanceof Array) {
                             opts.ruler.labels.values.sort(function (a, b) { return a - b; });
@@ -2136,19 +2137,26 @@
             labels: {               // Configuration data for the labels that appear in the ruler.
                 visible: true,          // Determines whether value labels are displayed. Type: boolean.
                 values: 'step',
-                font: '10px arial',     // Canvas font used for the labels. Type: string.
-                fontStyle: 'black',     // Font style. Type: string.
-            
-                relativePos: 0.8,       // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+
+                relativePos: 0.5,       // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
 
                 vertJustify: 'left',    // For vertical sliders, indicates whether shorter labels are left, center or right justified in relation to the widest label. Type: string 'left', 'center' or 'right'
                                         // For horizontal sliders has no effect.
 
-                tryShowEvery: null,     // Instructs the plug-in to try to place a label every 'tryShowEvery' value. This is not guaranteed, since it depends on whether the previous label left enough space for the next label. Type: positive real number.
-                decimals: 0,            // Decimals places for labels. Type: positive integer.
-                onFmtValue: null        // Event called for each label, to allow customized formating. Type: function (event, value).
+                onSvgTransform: null    // For each label, the result of this event is added as a transform parameter to the SVG text element. Type: function (x, y).
+                                        // Example: to rotate labels 45 degrees use:
+                                        /*  $(".myElement").rsSliderLens({
+                                                ruler: {
+                                                    labels: {
+                                                        onSvgTransform: function (x, y) {
+                                                            return 'rotate(45 ' + x + ',' + y + ')';
+                                                        }
+                                                    }
+                                            });
+                                        */
+
             },
             tickMarks: {
                 short: {
