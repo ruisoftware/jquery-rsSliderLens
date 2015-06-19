@@ -24,24 +24,14 @@
                 tabindexAttr: null,
                 autofocusable: false,
                 initSvgOutsideHandle: function () {
-                    this.$svg = util.createSvgDom('svg', {
-                        width: this.width,
-                        height: this.height,
-                        viewBox: '0 0 ' + this.width + ' ' + this.height,
-                        preserveAspectRatio: 'none',
-                        xmlns: info.ns,
-                        version: '1.1',
-                        stroke: 'black'//,  'shape-rendering': 'crispedges'
-                    }).css({
-                        position: 'absolute',
+                    this.$svg = util.createSvg(this.width, this.height).css({
                         left: 0,
                         top: 0,
                         width: '100%',
-                        height: '100%',
-                        'pointer-events': 'none'
+                        height: '100%'
                     });
                     if (opts.ruler.visible) {
-                        util.initSvg(this.$svg, this.width, this.height);
+                        util.renderSvg(this.$svg, this.width, this.height);
                     }
                     if (opts.ruler.onDraw) {
                         opts.ruler.onDraw(this.$svg, this.width, this.height, util.createSvgDom);
@@ -260,71 +250,21 @@
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
                 },
-                initSvgCanvasHandle: function () {
-                    this.$elem1st = $("<canvas>");
-                    if (!this.$elem1st[0].getContext) {
-                        this.$elem1st = null;
-                        return false; // browser does not support canvas
-                    }
-                    this.$elem1st.attr({
-                        width: this.width + 'px',
-                        height: this.height + 'px'
-                    }).css({
-                        width: this.width + 'px',
-                        height: this.height + 'px',
-                        margin: 0
+                initSvgHandle: function () {
+                    elemOrig.initSvgOutsideHandle();
+                    this.$elem1st = util.createSvg(this.width, this.height).css({
+                        left: '50%',
+                        top: '50%'
                     });
-                    
-                    var ctx = this.$elem1st[0].getContext('2d'),
-                        pixelOffsets = { begin: 0, end: 0 };
-                    if (!creating) {
-                        ctx.clearRect(0, 0, this.width, this.height);
-                    }
-                    ctx.scale(opts.handle.zoom, opts.handle.zoom);
-                    if (creating) {
-                        $elem.
-                            bind('fmtValue.rsSliderLens', events.onFmtValue).
-                            bind('drawRuler.rsSliderLens', events.onDrawRuler);
-                    }
                     if (opts.ruler.visible) {
-                        pixelOffsets = util.initCanvas(ctx, elemOrig.outerWidth, elemOrig.outerHeight);
+                        util.renderSvg(this.$elem1st, this.width, this.height, opts.handle.zoom !== 1);
                     }
                     if (opts.ruler.onDraw) {
-                        var customPixelOffsets = $elem.triggerHandler('drawRuler.rsSliderLens', [ctx, elemOrig.canvasWidth, elemOrig.canvasHeight, pixelOffsets]);
-                        if (customPixelOffsets) {
-                            info.snapMaxLimit = -1;
-                            info.beginOffset = customPixelOffsets.begin ? customPixelOffsets.begin : 0;
-                            info.endOffset = customPixelOffsets.end ? customPixelOffsets.end : 0;
-                        } else {
-                            if (opts.ruler.visible) {
-                                info.beginOffset = pixelOffsets.begin;
-                                info.endOffset = pixelOffsets.end;
-                            }
-                        }
-                    } else {
-                        info.beginOffset = pixelOffsets.begin;
-                        info.endOffset = pixelOffsets.end;
+                        opts.ruler.onDraw(this.$elem1st, this.width, this.height, util.createSvgDom);
                     }
-                    info.beginOffset = Math.round(info.beginOffset);
-                    info.endOffset = Math.floor(info.endOffset);
-                    
-                    elemOrig.initSvgOutsideHandle();
 
                     if (info.useDoubleHandles) {
-                        if (!this.$elem2nd) {
-                            this.$elem2nd = this.$elem1st.clone();
-                        } else {
-                            this.$elem2nd.attr({
-                                'width': this.width + 'px',
-                                'height': this.height + 'px'
-                            }).css({
-                                'float': 'left',
-                                'width': this.width + 'px',
-                                'height': this.height + 'px',
-                                'margin': 0
-                            });
-                        }
-                        this.$elem2nd[0].getContext('2d').drawImage(this.$elem1st[0], 0, 0);
+                        this.$elem2nd = this.$elem1st.clone();
                     }
                     return true;
                 },
@@ -332,7 +272,7 @@
                     this.width = elemOrig.width*opts.handle.zoom;
                     this.height = elemOrig.height*opts.handle.zoom;
                     if (opts.ruler.visible || opts.ruler.onDraw) { 
-                        elemOrig.initSvgOutsideHandle();
+                        this.initSvgHandle();
                     } else {
                         this.initClone();
                     }
@@ -1246,7 +1186,7 @@
                     elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                 } else {
                     translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
-                    (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
+                    (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', opts.ruler.visible || opts.ruler.onDraw ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
                     $handleElem.css('left', (-valueRelative) + '%');
                     elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                 }
@@ -1300,7 +1240,22 @@
                     return $(el);
                 },
 
-                initSvg: function ($svg, width, height) {
+                createSvg: function (width, height) {
+                    return util.createSvgDom('svg', {
+                        width: width,
+                        height: height,
+                        viewBox: '0 0 ' + width + ' ' + height,
+                        preserveAspectRatio: 'none',
+                        xmlns: info.ns,
+                        version: '1.1',
+                        stroke: 'black'
+                    }).css({
+                        position: 'absolute',
+                        'pointer-events': 'none'
+                    });
+                },
+
+                renderSvg: function ($svg, width, height, doScale) {
                     var optsTicks = opts.ruler.tickMarks;
                     if (optsTicks.short.visible || optsTicks.long.visible) {
                         var marker = {
@@ -1350,7 +1305,7 @@
                         if (optsTicks.long.visible) {
                             marker.generateTicks('long');
                         }
-                        marker.$defs.prependTo(elemOrig.$svg);
+                        marker.$defs.prependTo($svg);
                     }
 
                     if (opts.ruler.labels.values === 'step' && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
@@ -1362,11 +1317,15 @@
                             },
                             renderText = function (value) {
                                 var textData = {
-                                        x: (value - opts.min)/range*width,
-                                        y: opts.ruler.labels.relativePos*height
+                                        x: (value - opts.min)/range*width/(doScale ? opts.handle.zoom : 1),
+                                        y: opts.ruler.labels.relativePos*height/(doScale ? opts.handle.zoom : 1)
                                     };
                                 if (opts.ruler.labels.onSvgTransform) {
-                                    textData.transform = opts.ruler.labels.onSvgTransform(textData.x, textData.y);
+                                    textData.transform = (doScale ? 'scale(' + opts.handle.zoom + ') ' : '') + opts.ruler.labels.onSvgTransform(textData.x, textData.y);
+                                } else {
+                                    if (doScale) {
+                                        textData.transform = 'scale(' + opts.handle.zoom + ')';
+                                    }
                                 }
                                 $allText.append(util.createSvgDom('text', textData).append(value));
                             };
@@ -1382,7 +1341,7 @@
                                 renderText(x);
                             }
                         }
-                        $allText.appendTo(elemOrig.$svg);
+                        $allText.appendTo($svg);
                     }
                 },
                 // initCanvas: function (ctx, width, height) {
@@ -2072,7 +2031,7 @@
         flipped: false,   // Indicates the values direction. Type: boolean.
                           //   false - for horizontal sliders, the minimum is located on the left, maximum on the right. For vertical sliders, the minimum on the top, maximum on the bottom.
                           //   true - for horizontal sliders, the maximum is located on the left, minimum on the right. For vertical sliders, the maximum on the top, minimum on the bottom.
-        contentOffset: 0.5,
+        contentOffset: 0.5, // For horizontal sliders: Relative vertical position for content; For vertical sliders: Relative horizontal position for content. Ignored when SVG ruler is used.
         style: {          // CSS style classes. You can use more than one class, separated by a space. Type: string.
             classSlider: 'sliderlens',
             classFixed: 'fixed',
@@ -2151,8 +2110,8 @@
                                         // For horizontal sliders has no effect.
 
                 onSvgTransform: null    // For each label, the result of this event is added as a transform parameter to the SVG text element. Type: function (x, y).
-                                        // Example: to rotate labels 45 degrees use:
-                                        /*  $(".myElement").rsSliderLens({
+                                        /* Example: to rotate labels 45 degrees use:
+                                            $(".myElement").rsSliderLens({
                                                 ruler: {
                                                     labels: {
                                                         onSvgTransform: function (x, y) {

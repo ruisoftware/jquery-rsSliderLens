@@ -3,7 +3,8 @@
   <head>
     <title>rsSliderLens plugin</title>
     <link rel="stylesheet" href="rsSliderLens.css" />
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+    <!--script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script-->
+    <script src="jquery.2.0.0.min.js"></script>
     <script src="jquery.rsSliderLens.js"></script>
     <script>
         $(document).ready(function () {
@@ -12,7 +13,11 @@
             value: 20,
             min: 20,
             step: 5,
-            snapOnDrag: true,
+            snapOnDrag: false,
+            //contentOffset: .2,
+            handle: {
+              zoom: 1.25
+            },
             ruler: {
               labels: {
                 onSvgTransform: function (x, y) {
@@ -27,7 +32,7 @@
                   stroke: 'red'
                 }
               },
-              onDraw: function ($svg, width, height, createSvgDomFunc) {
+              on__Draw: function ($svg, width, height, createSvgDomFunc) {
                 $svg.append(createSvgDomFunc('rect', {
                   x: 0,
                   y: height/2,
