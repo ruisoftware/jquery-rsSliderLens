@@ -252,10 +252,14 @@
                 },
                 initSvgHandle: function () {
                     elemOrig.initSvgOutsideHandle();
-                    this.$elem1st = util.createSvg(this.width, this.height).css({
-                        left: '50%',
-                        top: '50%'
-                    });
+                    this.$elem1st = util.createSvg(this.width, this.height).
+                        css(info.isHoriz ? {
+                            left: (info.useDoubleHandles ? '100%' : '50%'),
+                            top: '50%'
+                        } : {
+                            left: '50%',
+                            top: (info.useDoubleHandles ? '100%' : '50%')
+                        });
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$elem1st, this.width, this.height, opts.handle.zoom !== 1);
                     }
@@ -264,7 +268,7 @@
                     }
 
                     if (info.useDoubleHandles) {
-                        this.$elem2nd = this.$elem1st.clone();
+                        this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
                     return true;
                 },
@@ -438,19 +442,27 @@
 
                     if (info.isHoriz) {
                         css.width = opts.handle.size*100 + '%';
-                        css.transform = 'translateX(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
-                        css.height = '100%';
                         if (info.isFixedHandle) {
                             css.left = this.fixedHandleRelPos*100 + '%';
                             css.top = 0;
+                            css.height = '100%';
+                            css.transform = 'translateX(-50%)';
+                        } else {
+                            css.top = opts.handle.relativePos*100 + '%';
+                            css.height = (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize)*100 + '%';
+                            css.transform = 'translate(-' + (info.useDoubleHandles ? 100 : 50) + '%, -50%)';
                         }
                     } else {
                         css.height = opts.handle.size*100 + '%';
-                        css.transform = 'translateY(-' + (info.useDoubleHandles ? 100 : 50) + '%)';
-                        css.width = '100%';
                         if (info.isFixedHandle) {
                             css.top = this.fixedHandleRelPos*100 + '%';
                             css.left = 0;
+                            css.width = '100%';
+                            css.transform = 'translateY(-50%)';
+                        } else {
+                            css.left = opts.handle.relativePos*100 + '%';
+                            css.width = (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize)*100 + '%';
+                            css.transform = 'translate(-50%, -' + (info.useDoubleHandles ? 100 : 50) + '%)';
                         }
                     }
                     this.$elem1st = elemMagnif.$elem1st.wrap("<div>").parent().
@@ -459,7 +471,7 @@
                     
                     if (info.useDoubleHandles) {
                         this.$elem2nd = elemMagnif.$elem2nd.wrap("<div>").parent().
-                            addClass(opts.style.classHandle2).css(css).css('transform', '');
+                            addClass(opts.style.classHandle2).css(css).css('transform', 'translate' + (info.isHoriz ? 'Y(-50%)' : 'X(-50%)'));
                         this.bindTabEvents(false);
                     }
                 },
@@ -1344,189 +1356,6 @@
                         $allText.appendTo($svg);
                     }
                 },
-                // initCanvas: function (ctx, width, height) {
-                //     var getFontData = function () {
-                //             var fontSize = !!opts.ruler.labels.font ? opts.ruler.labels.font.match(/(\d*.\d+|\d)(em|pt|px|%)/i) : null,
-                //                 fontData = { size: 10, type: 'px', sizePos: 0 };
-                //             if (!fontSize) {
-                //                 fontSize = [$("html,body").css('font-size')];
-                //             }
-                //             fontData.size = util.toFloat(fontSize[0]);
-                //             fontData.type = fontSize[0].replace(/(\d*.\d+|\d)/, '').toLowerCase();
-                //             fontData.sizePos = !!opts.ruler.labels.font ? opts.ruler.labels.font.indexOf(fontSize[0]) : 0;
-                //             return {
-                //                 height: fontData.size,
-                //                 contextFont:
-                //                     ((!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(0, fontData.sizePos) + ' ' : '') +
-                //                     fontData.size + fontData.type + ' ' +
-                //                     (!!opts.ruler.labels.font ? opts.ruler.labels.font.substring(fontData.sizePos + fontSize[0].length + 1) : ' arial')).trim()
-                //             };
-                //         },
-                //         fontData = getFontData(),
-                //         drawTick = function (i, longerMark, posMiddle) {
-                //             i = Math.round(i) + 0.5;
-                //             var offset = [0, 0];
-                //             if (Math.abs(opts.ruler.labels.relativePos - opts.ruler.tickMarks.relativePos) < 0.005) {
-                //                 // values and tick marks on the same relative position
-                //                 offset[0] = offset[1] = (longerMark ? tickSize.big : tickSize.small) / 2;
-                //             } else { 
-                //                 if (opts.ruler.labels.relativePos > opts.ruler.tickMarks.relativePos) {
-                //                     // values below tick marks (or, in case of vertical sliders, values right to tick marks)
-                //                     offset[0] = tickSize.big / 2;
-                //                     offset[1] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
-                //                 } else {
-                //                     // values above tick marks (or, in case of vertical sliders, values left to tick marks)
-                //                     offset[0] = longerMark ? tickSize.big / 2 : tickSize.small - tickSize.big / 2;
-                //                     offset[1] = tickSize.big / 2;
-                //                 }
-                //             }
-                //             if (info.isHoriz) {
-                //                 ctx.moveTo(i, posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0]);
-                //                 ctx.lineTo(i, posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1]);
-                //             } else {
-                //                 ctx.moveTo(posMiddle - offset[opts.ruler.tickMarks.flipped ? 1 : 0], i);
-                //                 ctx.lineTo(posMiddle + offset[opts.ruler.tickMarks.flipped ? 0 : 1], i);
-                //             }
-                //         },
-                //         getFormatedNum = function (num) {
-                //             var fmt = $elem.triggerHandler('fmtValue.rsSliderLens', [num]);
-                //             return fmt === undefined ? num : fmt;
-                //         };
-
-                //     ctx.font = fontData.contextFont;
-                //     var fmtMin = fmtMax = null,
-                //         from = curr = deltaStart = deltaEnd = 0;
-                        
-                //     if (opts.ruler.labels.visible) {
-                //         fmtMin = getFormatedNum(opts.min);
-                //         fmtMax = getFormatedNum(opts.max);
-                //         from = (info.isHoriz ? ctx.measureText(fmtMin).width : fontData.height) - 1;
-                //         deltaStart = from / 2;
-                        
-                //         deltaEnd = (info.isHoriz ? ctx.measureText(fmtMax).width : fontData.height) - 1;
-                //         deltaEnd /= 2;
-                //     }
-
-                //     var dataRange = opts.flipped ? opts.min - opts.max : opts.max - opts.min,
-                //         tickMarkRate = ((info.isHoriz ? width : height) - deltaStart - deltaEnd - 1) / dataRange;
-                //     if (info.isFixedHandle && Math.abs(tickMarkRate) < 2) {
-                //         tickMarkRate = (opts.flipped ? -2 : 2) / (info.isStepDefined ? opts.step : 1);
-                //         if (info.isHoriz) {
-                //             width = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
-                //             elemMagnif.setCanvasWidthForFixedHandle(width);
-                //         } else {
-                //             height = dataRange*tickMarkRate + deltaStart + deltaEnd + 1;
-                //             elemMagnif.setCanvasHeightForFixedHandle(height);
-                //         }
-                //         ctx.scale(opts.handle.zoom, opts.handle.zoom);
-                //     }
-
-                //     var tickSize = { big: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeBig, small: (info.isHoriz ? height : width) * opts.ruler.tickMarks.relativeSizeSmall },
-                //         lastLabel = to = info.isHoriz ? width : height;
-
-                //     if (opts.flipped) {
-                //         curr = to - from;
-                //         from = to - deltaStart;
-                //         lastLabel = deltaEnd * 2;
-                //         to = deltaEnd;
-                //     } else {
-                //         curr = from;
-                //         from = deltaStart;
-                //         lastLabel -= deltaEnd * 2;
-                //         to -= deltaEnd;
-                //     }
-                //     var pixelStep = info.isStepDefined ? tickMarkRate * opts.step : (opts.flipped ? -2 : 2),
-                //         tickMarkRelativePos = tickSize.big / 2 + ((info.isHoriz ? height : width) - tickSize.big) * opts.ruler.tickMarks.relativePos,
-                //         textRelativePos = maxLabelWidth = 0,
-                //         allLabels = [],
-                //         doText = false;
-
-                //     ctx.beginPath();
-                //     ctx.font = fontData.contextFont;
-                //     ctx.strokeStyle = opts.ruler.tickMarks.strokeStyle;
-                //     ctx.fillStyle = opts.ruler.labels.fontStyle;
-                //     ctx.lineWidth = 1;
-                //     for (var i = from, longerMark = true, cond = true; cond; i += pixelStep) {
-                //         var num = (i - from) / tickMarkRate + opts.min;
-                //         if (info.isStepDefined) {
-                //             num = util.roundNtoMultipleOfM(num - opts.min, opts.step) + opts.min;
-                //             info.snapMaxLimit = i;
-                //             if (opts.flipped) {
-                //                 info.snapMaxNum = num;
-                //             }
-                //         }
-                //         num = util.roundToDecimalPlaces(num, opts.ruler.labels.decimals);
-
-                //         var fmtNum = getFormatedNum(num);                            
-                        
-                //         if (opts.ruler.labels.visible) {
-                //             var halfLabel = info.isHoriz ? ctx.measureText(fmtNum).width / 2 : deltaStart, // for vertical sliders deltaStart is half of text height
-                //                 doText;
-                            
-                //             if (opts.flipped) {
-                //                 doText = // if there is enough space (3px) that would separate this label from the previous one (right)
-                //                         curr - i - halfLabel > 3 && 
-                //                         // and there is enough space to the last label (on the left)
-                //                         i - halfLabel - lastLabel > 3;
-                //             } else {
-                //                 doText = // if there is enough space (3px) that would separate this label from the previous one (left)
-                //                         i - halfLabel - curr > 3 && 
-                //                         // and there is enough space to the last label (on the right)
-                //                         lastLabel - i - halfLabel > 3;
-                //             }
-
-                //             // only shows a label, if multiple of tryShowEvery (if defined)
-                //             if (doText && !!opts.ruler.labels.tryShowEvery) {
-                //                 var everyValue = Math.abs((num - opts.min) % opts.ruler.labels.tryShowEvery);
-                //                 doText = everyValue < 0.00005 && Math.abs(i - from) > 0.00005;
-                //             }
-
-                //             if (doText) {
-                //                 allLabels.push({ fmt: fmtNum, pos: i - halfLabel });
-                //                 maxLabelWidth = Math.max(maxLabelWidth, ctx.measureText(fmtNum).width);
-                //                 curr = i + (opts.flipped ? - halfLabel : halfLabel);
-                //                 longerMark = true;
-                //             }
-                //         }
-
-                //         cond = opts.flipped ? (i + pixelStep - to > - 0.00005) : (to - i - pixelStep > - 0.00005);
-                //         if (opts.ruler.tickMarks.visible) {
-                //             drawTick(i, longerMark || !cond, tickMarkRelativePos);
-                //             longerMark = opts.flipped ? (i + pixelStep - to <= 0.00005) : (to - i - pixelStep <= 0.00005);
-                //         }
-                //     }
-
-                //     if (opts.ruler.labels.visible) {
-                //         var minLength = ctx.measureText(fmtMin).width;
-                //         if (info.isHoriz) {
-                //             textRelativePos = fontData.height + (height - fontData.height) * opts.ruler.labels.relativePos;
-                //             ctx.fillText(fmtMin, opts.flipped ? width - minLength: 0, textRelativePos);
-                //             for (var i = 0; i < allLabels.length; ++i) {
-                //                 ctx.fillText(allLabels[i].fmt, allLabels[i].pos, textRelativePos);
-                //             }
-                //             var maxLabelPos = opts.flipped ? 0 : lastLabel;
-                //             ctx.fillText(fmtMax, maxLabelPos, textRelativePos);
-                //         } else {
-                //             var positionLabelAt = function (fmtValue) {
-                //                 switch (opts.ruler.labels.vertJustify) {
-                //                     case 'center': return textRelativePos + (maxLabelWidth - ctx.measureText(fmtValue).width) / 2;
-                //                     case 'right': return textRelativePos + maxLabelWidth - ctx.measureText(fmtValue).width;
-                //                 }
-                //                 return textRelativePos;
-                //             };
-                //             maxLabelWidth = Math.max(maxLabelWidth, minLength);
-                //             textRelativePos = (width - maxLabelWidth) * opts.ruler.labels.relativePos;
-                //             ctx.fillText(fmtMin, positionLabelAt(fmtMin), opts.flipped ? height : fontData.height);
-                //             for (var i = 0; i < allLabels.length; ++i) {
-                //                 ctx.fillText(allLabels[i].fmt, positionLabelAt(allLabels[i].fmt), allLabels[i].pos + fontData.height);
-                //             }
-                //             var maxLabelPos = opts.flipped ? 0 : lastLabel;
-                //             ctx.fillText(fmtMax, positionLabelAt(fmtMax), maxLabelPos + fontData.height);
-                //         }
-                //     }
-                //     ctx.stroke();
-                //     return opts.flipped ? { begin: deltaEnd, end: deltaStart } : { begin: deltaStart, end: deltaEnd };
-                // },
                 getScaleCss: function (zoomValue) {
                     return {
                         'transform-origin': '0 0',
@@ -1951,7 +1780,6 @@
         opts.ruler.tickMarks = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks, options ? (options.ruler ? options.ruler.tickMarks : options.ruler) : options);
         opts.ruler.tickMarks.short = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks.short, options ? (options.ruler ? (options.ruler.tickMarks ? options.ruler.tickMarks.short : options.ruler.tickMarks) : options.ruler) : options);
         opts.ruler.tickMarks.long = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickMarks.long, options ? (options.ruler ? (options.ruler.tickMarks ? options.ruler.tickMarks.long : options.ruler.tickMarks) : options.ruler) : options);
-        opts.ruler.tickLine = $.extend({}, $.fn.rsSliderLens.defaults.ruler.tickLine, options ? (options.ruler ? options.ruler.tickLine : options.ruler) : options);
         opts.keyboard = $.extend({}, $.fn.rsSliderLens.defaults.keyboard, options ? options.keyboard : options);
 
         return this.each(function () {
@@ -2063,24 +1891,36 @@
         
         // handle is the cursor that the user can drag around to select values
         handle: {
-            size: .3,   // Size of handle in percentage. Type: Floating number between 0 and 1, inclusive.
+            size: .3,   // Relative handle width (for horizontal sliders) or relative handle height (for vertical sliders). Type: Floating number between 0 and 1, inclusive.
                         // For horizontal sliders, it is the handle width relative to the slider width, e.g.,
                         // if slider width is 500px and handle size is .3, then handle size becomes (500px * 30%) = 150px in width.
                         // For vertical sliders, it is the handle height relative to the slider height.
                         // If two handles are used, then this is the size of both handles together, which means each handle has a size of size/2.
-            
-            zoom: 1.25, // Magnification factor applied inside the handle. Type: floating point number.
-            
-            relativePos: 0.5, // Floating point number between 0 and 1 that indicates the handle relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
-                              // For horizontal sliders, a value of 0 aligns handle to the top, 1 aligns it to the bottom.
-                              // For vertical sliders, a value of 0 aligns handle to the left, 1 aligns it to the right.
-                              // This parameter has no effect if zoom is 1.
-            
+
+            zoom: 1.25, // Magnification factor applied inside the handle. Type: positive floating point number.
+                        // If greater than 1, the content is magnified.
+                        // If 1, the content remains the same size.
+                        // if smaller than 1, the content is shrinked.
+
+            relativePos: 0.5, // Indicates the middle handle relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                              // NOT aplicable for fixed handled sliders.
+                              // For horizontal sliders, a value of 0 aligns the middle of the handle to the top of the outer element,
+                              // 1 aligns the middle of the handle to the bottom of the outer element.
+                              // For vertical sliders, a value of 0 aligns the middle of the handle to the left of the outer element,
+                              // 1 aligns the middle of the handle to the right of the outer element.
+
+            otherSize: 'zoom', // Relative handle height (for horizontal sliders) or relative handle width (for vertical sliders). Type: string or floating point number >= 0.
+                               // NOT aplicable for fixed handled sliders.
+                               // If set to string 'zoom' the otherSize is set according to the handle.zoom value,
+                               // e.g. if the handle.zoom is 1.25, then the otherSize is also 1.25 (or 125% of the slider size).
+                               // If set to a loating point number, it represents a relative size, e.g. if set to 1, then handle size will have
+                               // the same size (100%) of the slider element.
+
             animation: 180,   // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
                               // Use 0 to disable animation. Type: positive integer or string.
-            
+
             easing: 'swing', // Easing function used for the handle animation (@see http://api.jquery.com/animate/#easing). Type: string.
-                           
+
             mousewheel: 1  // Threshold factor applied to the handle when using the mouse wheel. Type: floating point number.
                            // when = 0, mouse wheel cannot be used to move the handle;
                            // when > 0 and mouse wheel goes up, then handle moves to the right (for horizontal sliders) or up (for vertical sliders)
@@ -2137,11 +1977,6 @@
                     relativePos: .1,
                     relativeSize: .3
                 }
-            },
-            tickLine: {
-                visible: true,
-                relativePos: .4,
-                relativeSize: .2
             },
             onDraw: null   // Event used for customized rulers. Type: function($svg, width, height, createSvgDomFunc)
                            // If onDraw event is not defined and ruler.visible is true, then a custom ruler is generated.
