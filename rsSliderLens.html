@@ -10,12 +10,15 @@
         $(document).ready(function () {
            $("input[type=range], .h").rsSliderLens({
             fixedHandle: false,
-            value: [20, 22],
+            value: 20,
             min: 20,
             step: 5,
             snapOnDrag: false,
             //contentOffset: .2,
+            //paddingStart: .2,
+            //paddingEnd: .5,
             handle: {
+              relativePos: 1,
               zoom: 1.25
             },
             ruler: {

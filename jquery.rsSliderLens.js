@@ -885,6 +885,7 @@
                 snapMaxNum: opts.max,
                 currValue: [0, 0], // Values for both handles. When only one handle is used, the currValue[1] is ignored
                 ticksStep: 0,
+                startPixel: 0,
                 isFixedHandle: false,
                 isInputTypeRange: false, // whether the markup for this plugin in an <input type="range">
                 isHoriz: true,
@@ -986,8 +987,10 @@
                     this.isInputTypeRange = $elem.is("input[type=range]");
                 },
                 updateTicksStep: function () {
-                    var $e = info.isFixedHandle ? $elem : elemOrig.$wrapper;
-                    this.ticksStep = (info.isHoriz ? $e.width() : $e.height())/(opts.max - opts.min);
+                    var $e = info.isFixedHandle ? $elem : elemOrig.$wrapper,
+                        size = info.isHoriz ? $e.width() : $e.height();
+                    this.ticksStep = size*(1 - opts.paddingStart)*(1 - opts.paddingEnd)/(opts.max - opts.min);
+                    this.startPixel = size*opts.paddingStart;
                 },
                 init: function (creating) {
                     this.checkBounds(creating);
@@ -1154,7 +1157,7 @@
                             value = elemHandle.stopPosition[0];
                         }
                     }
-                };
+                }
 
                 var valueNoMin = value - opts.min,
                     valueNoMinPx = valueNoMin;
@@ -1197,9 +1200,9 @@
                     $elem.css('transform', translate);
                     elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                 } else {
-                    translate = 'translate(' + (info.isHoriz ? valueRelative + '%, -50' : '-50%, ' + valueRelative) + '%)';
+                    translate = 'translate(' + (info.isHoriz ? (valueRelative*(1 - opts.paddingStart) - opts.paddingStart*100 - opts.paddingEnd*valueRelative) + '%, -50' : '-50%, ' + (valueRelative - 5)) + '%)';
                     (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', opts.ruler.visible || opts.ruler.onDraw ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
-                    $handleElem.css('left', (-valueRelative) + '%');
+                    $handleElem.css('left', (-valueRelative + (opts.paddingStart*100 + opts.paddingStart*valueRelative) + (opts.paddingEnd*valueRelative)) + '%');
                     elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                 }
                 
@@ -1212,10 +1215,10 @@
             },
             util = {
                 pixel2Value: function (pixel) {
-                    return pixel/info.ticksStep + opts.min;
+                    return (pixel - info.startPixel)/info.ticksStep + opts.min;
                 },
                 value2Pixel: function (value) {
-                    return (value - opts.min)*info.ticksStep;
+                    return (value - opts.min)*info.ticksStep + info.startPixel;
                 },
                 isDefined: function (v) {
                     return v !== undefined && v !== null;
@@ -1268,7 +1271,11 @@
                 },
 
                 renderSvg: function ($svg, width, height, doScale) {
-                    var optsTicks = opts.ruler.tickMarks;
+                    var optsTicks = opts.ruler.tickMarks,
+                        paddingStart = opts.paddingStart*width,
+                        paddingEnd = opts.paddingEnd*width,
+                        usableArea = width - paddingStart - paddingEnd;
+
                     if (optsTicks.short.visible || optsTicks.long.visible) {
                         var marker = {
                                 getMarker: function (id, size, stroke) {
@@ -1288,7 +1295,7 @@
                                 },
                                 generateTicks: function (type) {
                                     var step = optsTicks[type].step,
-                                        tickStep = (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*width,
+                                        tickStep = (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*usableArea,
                                         points = '',
                                         y = optsTicks[type].relativePos*height,
                                         id = type.charAt(0) + (+ new Date()),
@@ -1299,7 +1306,7 @@
                                     }
                                     this.$defs.append(this.getMarker(id, optsTicks[type].relativeSize*height, optsTicks[type].stroke));
 
-                                    for (var x = 0; x <= width; x += tickStep) {
+                                    for (var x = paddingStart; x <= width - paddingEnd; x += tickStep) {
                                         points += x + ',' + y + ' ';
                                     }
                                     $svg.append(util.createSvgDom('polyline', {
@@ -1329,7 +1336,7 @@
                             },
                             renderText = function (value) {
                                 var textData = {
-                                        x: (value - opts.min)/range*width/(doScale ? opts.handle.zoom : 1),
+                                        x: (value - opts.min)/range*usableArea/(doScale ? opts.handle.zoom : 1) + (doScale ? paddingStart/opts.handle.zoom : paddingStart),
                                         y: opts.ruler.labels.relativePos*height/(doScale ? opts.handle.zoom : 1)
                                     };
                                 if (opts.ruler.labels.onSvgTransform) {
@@ -1860,6 +1867,8 @@
                           //   false - for horizontal sliders, the minimum is located on the left, maximum on the right. For vertical sliders, the minimum on the top, maximum on the bottom.
                           //   true - for horizontal sliders, the maximum is located on the left, minimum on the right. For vertical sliders, the maximum on the top, minimum on the bottom.
         contentOffset: 0.5, // For horizontal sliders: Relative vertical position for content; For vertical sliders: Relative horizontal position for content. Ignored when SVG ruler is used.
+        paddingStart: 0,
+        paddingEnd: 0,
         style: {          // CSS style classes. You can use more than one class, separated by a space. Type: string.
             classSlider: 'sliderlens',
             classFixed: 'fixed',
@@ -1916,7 +1925,7 @@
                                // If set to a loating point number, it represents a relative size, e.g. if set to 1, then handle size will have
                                // the same size (100%) of the slider element.
 
-            animation: 180,   // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
+            animation: 100,   // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
                               // Use 0 to disable animation. Type: positive integer or string.
 
             easing: 'swing', // Easing function used for the handle animation (@see http://api.jquery.com/animate/#easing). Type: string.
@@ -1986,7 +1995,7 @@
         },
         keyboard: {
             allowed: ['left', 'right', 'up', 'down', 'home', 'end', 'pgup', 'pgdown', 'esc'], // Allowed keys. Type: String array.
-            animation: 1000, // Duration (ms or jQuery string alias) of the animation that the handle takes. Type: positive integer or string.
+            animation: 250, // Duration (ms or jQuery string alias) of the animation that the handle takes. Type: positive integer or string.
             easing: 'swing',    // Easing function used in keyboard animation (@see http://api.jquery.com/animate/#easing). Type: string.
             numPages: 5         // Number of pages in a slider (how many times can you page up/down to go through the whole range). Type: positive integer.
         },
