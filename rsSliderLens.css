@@ -8,7 +8,7 @@
 
 .sliderlens.vert {
   width: 20vh;
-  height: 30vh;
+  height: auto;
 }
 .sliderlens.fixed.vert {
 
@@ -34,6 +34,10 @@
   dglyph-orientation-vertical: 0;
 }
 
+.sliderlens .range {
+  background-color: blue;
+}
+
 
 .v {
   display: inline-block;
@@ -46,11 +50,15 @@
 .sliderlens .handle2 {
   background-color: #aaa;
   box-shadow: 0 0 2px black;
+  opacity: .6;
 }
 
-.sliderlens,
+.sliderlens {
+  background-color: #ccc;
+}
 .sliderlens span {
   background-color: #ddd;
+  opacity: .6;
 }
 
 /* handle shadow */
