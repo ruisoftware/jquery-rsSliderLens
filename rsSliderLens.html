@@ -9,30 +9,36 @@
     <script>
         $(document).ready(function () {
            $("input[type=range], .h, .v").rsSliderLens({
-            fixedHandle: false,
+            fixedHandle: true,
             value: 60,
             min: 20,
             step: 10,
             snapOnDrag: false,
             contentOffset: .5,
-            paddingStart: .2,
-            paddingEnd: .1,
-            flipped: true,
+            paddingStart: 0.25,
+            paddingEnd: 0,
+            flipped: false,
             handle: {
-              relativePos: .15,
-              otherSize: 1.5,
-              zoom: 1
+              relativePos: .5,
+              //otherSize: 1.5,
+              zoom: 2
             },
             range: {
               type: 'min'
             },
             ruler: {
               labels: {
+                relativePos: .7,
                 onSvgTransform: function (x, y) {
-                  return 'rotate(45 ' + x + ',' + y + ')';
+                  //return 'rotate(45 ' + x + ',' + y + ')';
                 }
               },
-              visible: true,
+              tickMarks: {
+                short: {
+                  relativePos:.5
+                }
+              },
+              visible: false,
               tickMarks: {
                 long: {
                   relativePos: 0.05,

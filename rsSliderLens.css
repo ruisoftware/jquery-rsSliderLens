@@ -1,5 +1,5 @@
 .sliderlens {
-  height: 5vh;
+  height: 15vh;
 }
 
 .sliderlens.fixed {
@@ -8,7 +8,7 @@
 
 .sliderlens.vert {
   width: 20vh;
-  height: auto;
+  height: 25vh;
 }
 .sliderlens.fixed.vert {
 

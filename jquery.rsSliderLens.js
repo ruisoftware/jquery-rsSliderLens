@@ -147,33 +147,36 @@
                             css.width = opts.range.size*100 + '%';
                             css.transform = 'translateX(-50%)';
                         }
-                        switch (opts.range.type) {
-                            case 'min': css[elemRange.getPropMin()] = opts.paddingStart*100 + '%';
-                                        break;
-                            case 'max': css[elemRange.getPropMax()] = opts.paddingEnd*100 + '%';
-                                        break;
-                            default:
-                                if (info.isRangeFromToDefined) {
-                                    var factor = (1 - opts.paddingStart - opts.paddingEnd)/(opts.max - opts.min),
-                                        relStart = (info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min)*factor,
-                                        relEnd = (info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) - opts.min)*factor,
-                                        start, end;
-                                    if (opts.flipped) {
-                                        start = (opts.paddingEnd + relStart)*100 + '%';
-                                        end = (1 - relEnd - opts.paddingEnd)*100 + '%'
-                                    } else {
-                                        start = (opts.paddingStart + relStart)*100 + '%';
-                                        end = (1 - relEnd - opts.paddingStart)*100 + '%'
-                                    }
 
-                                    if (info.isHoriz) {
-                                        css.left = start;
-                                        css.right = end;
-                                    } else {
-                                        css.top = start;
-                                        css.bottom = end;
+                        if (!info.isFixedHandle) {
+                            switch (opts.range.type) {
+                                case 'min': css[elemRange.getPropMin()] = opts.paddingStart*100 + '%';
+                                            break;
+                                case 'max': css[elemRange.getPropMax()] = opts.paddingEnd*100 + '%';
+                                            break;
+                                default:
+                                    if (info.isRangeFromToDefined) {
+                                        var factor = (1 - opts.paddingStart - opts.paddingEnd)/(opts.max - opts.min),
+                                            relStart = (info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min)*factor,
+                                            relEnd = (info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) - opts.min)*factor,
+                                            start, end;
+                                        if (opts.flipped) {
+                                            start = (opts.paddingEnd + relStart)*100 + '%';
+                                            end = (1 - relEnd - opts.paddingEnd)*100 + '%'
+                                        } else {
+                                            start = (opts.paddingStart + relStart)*100 + '%';
+                                            end = (1 - relEnd - opts.paddingStart)*100 + '%'
+                                        }
+
+                                        if (info.isHoriz) {
+                                            css.left = start;
+                                            css.right = end;
+                                        } else {
+                                            css.top = start;
+                                            css.bottom = end;
+                                        }
                                     }
-                                }
+                            }
                         }
 
                         this.$range = $("<div>").css(css).addClass(opts.style.classHighlightRange);
@@ -183,10 +186,19 @@
                     }
                 },
                 update: function (pos, isFirstHandle) {
+                    var fixedHandlePos = 0;
+                    if (info.isFixedHandle) {
+                        fixedHandlePos = opts.fixedHandle === true ? 0.5 : opts.fixedHandle;
+                    }
+
                     switch (opts.range.type) {
-                        case 'min': 
-                            if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
-                                elemRange.$range.css(elemRange.getPropMax(), (opts.flipped ? pos : 100 - pos) + '%');
+                        case 'min':
+                            if (info.isFixedHandle) {
+                                elemRange.$range.css(elemRange.getPropMin(), ((opts.flipped ? pos : 100 - pos) - fixedHandlePos*100) + '%');
+                            } else {
+                                if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
+                                    elemRange.$range.css(elemRange.getPropMax(), (opts.flipped ? pos : 100 - pos) + '%');
+                                }
                             }
                             break;
                         case 'max':
@@ -252,7 +264,7 @@
                 },
                 init: function () {
                     this.width = elemOrig.width*opts.handle.zoom;
-                    this.height = elemOrig.height*opts.handle.zoom;
+                        this.height = elemOrig.height*opts.handle.zoom;
                     if (opts.ruler.visible || opts.ruler.onDraw) { 
                         this.initSvgHandle();
                     } else {
@@ -1160,20 +1172,26 @@
                     onlyOneHandle = isFirstHandle || info.isFixedHandle,
                     padStart = opts.flipped ? opts.paddingEnd : opts.paddingStart,
                     padEnd = opts.flipped ? opts.paddingStart : opts.paddingEnd,
-                    translate;
+                    pos = valueRelative*(1 - padStart - padEnd) - padStart*100,
+                    translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)');
 
                 info.currValue[onlyOneHandle ? 0 : 1] = valueNoMin + opts.min;
-                translate = valueRelative*(1 - padStart) - padStart*100 - padEnd*valueRelative;
-                translate = 'translate(' + (info.isHoriz ? translate + '%, -50%)' : '-50%, ' + translate + '%)');
                 if (info.isFixedHandle) {
-                    $elem.css('transform', translate);
-                    elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
+                    if (opts.ruler.visible || opts.ruler.onDraw) {
+                        elemMagnif.$elem1st.css('transform', translate);
+                        pos += 50;
+                        translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)');
+                        elemOrig.$svg.css('transform', translate);
+                    } else {
+                        elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
+                        $elem.css('transform', translate);
+                    }
+                    elemRange.update(-pos, isFirstHandle);
                 } else {
-                    var pos = -valueRelative + padStart*100 + padStart*valueRelative + padEnd*valueRelative;
-                    $handleElem.css(info.isHoriz ? 'left' : 'top', pos + '%');
+                    $handleElem.css(info.isHoriz ? 'left' : 'top', (-pos) + '%');
                     (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', opts.ruler.visible || opts.ruler.onDraw ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
                     elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
-                    elemRange.update(pos, isFirstHandle);
+                    elemRange.update(-pos, isFirstHandle);
                 }
 
                 //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
@@ -1309,7 +1327,8 @@
                             renderText = function (value) {
                                 var textData = {},
                                     w = opts.flipped ? opts.max - value : value - opts.min,
-                                    s = opts.ruler.labels.relativePos*shortest/(doScale ? opts.handle.zoom : 1);
+                                    s = opts.ruler.labels.relativePos*shortest/(doScale ? opts.handle.zoom : 1),
+                                    svgTextTransform = opts.ruler.labels.onSvgTransform ? opts.ruler.labels.onSvgTransform(textData.x, textData.y) : undefined;
                                 w = w/range*usableArea/(doScale ? opts.handle.zoom : 1) + (doScale ? padStart/opts.handle.zoom : padStart);
                                 if (info.isHoriz) {
                                     textData.x = w;
@@ -1318,8 +1337,8 @@
                                     textData.x = s;
                                     textData.y = w;
                                 }
-                                if (opts.ruler.labels.onSvgTransform) {
-                                    textData.transform = (doScale ? 'scale(' + opts.handle.zoom + ') ' : '') + opts.ruler.labels.onSvgTransform(textData.x, textData.y);
+                                if (typeof svgTextTransform === 'string') {
+                                    textData.transform = (doScale ? 'scale(' + opts.handle.zoom + ') ' : '') + svgTextTransform;
                                 } else {
                                     if (doScale) {
                                         textData.transform = 'scale(' + opts.handle.zoom + ')';
@@ -1483,6 +1502,7 @@
                         panUtil.doDrag = true;
                         panUtil.dragging = true;
                         if (info.isFixedHandle) {
+                            panUtil.$handle = elemHandle.$elem1st;
                             panUtil.fixedHandleStartDragPos = info.isHoriz ? event.pageX : event.pageY;
                             panUtil.fixedHandleStartDragPos += util.value2Pixel(info.currValue[0]);
                             elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
@@ -1566,7 +1586,7 @@
                                     setValue(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
                                 }
                                 panUtil.dragDelta = 0;
-                                (panUtil.$handle === elemHandle.$elem1st || panUtil.$handle === null ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().add(elemOrig.$wrapper).removeClass(opts.style.classDragging);
+                                (panUtil.$handle === elemHandle.$elem1st ? elemMagnif.$elem1st : elemMagnif.$elem2nd).parent().add(elemOrig.$wrapper).removeClass(opts.style.classDragging);
                                 events.processFinalChange();
                             }
                         }
