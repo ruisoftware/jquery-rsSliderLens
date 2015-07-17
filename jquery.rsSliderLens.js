@@ -140,11 +140,11 @@
 
                         if (info.isHoriz) {
                             css.top = opts.range.relativePos*100 + '%';
-                            css.height = opts.range.size*100 + '%';
+                            css.height = opts.range.size*opts.handle.size*100 + '%';
                             css.transform = 'translateY(-50%)';
                         } else {
                             css.left = opts.range.relativePos*100 + '%';
-                            css.width = opts.range.size*100 + '%';
+                            css.width = opts.range.size*opts.handle.size*100 + '%';
                             css.transform = 'translateX(-50%)';
                         }
 
@@ -177,6 +177,8 @@
                                         }
                                     }
                             }
+                        } else {
+                            css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : (1 - elemHandle.fixedHandleRelPos))*100 + '%';
                         }
 
                         this.$range = $("<div>").css(css).addClass(opts.style.classHighlightRange);
@@ -186,24 +188,23 @@
                     }
                 },
                 update: function (pos, isFirstHandle) {
-                    var fixedHandlePos = 0;
-                    if (info.isFixedHandle) {
-                        fixedHandlePos = opts.fixedHandle === true ? 0.5 : opts.fixedHandle;
-                    }
-
+                    var $e = opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem,
+                        relPos = opts.flipped ? 100 - pos : pos;
                     switch (opts.range.type) {
                         case 'min':
                             if (info.isFixedHandle) {
-                                elemRange.$range.css(elemRange.getPropMin(), ((opts.flipped ? pos : 100 - pos) - fixedHandlePos*100) + '%');
+                                // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
+                                // when applied to the specific case of range sizes
+                                elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
                             } else {
                                 if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
-                                    elemRange.$range.css(elemRange.getPropMax(), (opts.flipped ? pos : 100 - pos) + '%');
+                                    elemRange.$range.css(elemRange.getPropMax(), (100 - relPos) + '%');
                                 }
                             }
                             break;
                         case 'max':
                             if (!info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
-                                elemRange.$range.css(elemRange.getPropMin(), (opts.flipped ? 100 - pos : pos) + '%');
+                                elemRange.$range.css(elemRange.getPropMin(), relPos + '%');
                             }
                             break;
                         case true:
