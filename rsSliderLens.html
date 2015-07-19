@@ -9,22 +9,22 @@
     <script>
         $(document).ready(function () {
            $("input[type=range], .h, .v").rsSliderLens({
-            fixedHandle: .35,
-            value: 60,
+            //fixedHandle: .35,
+            value: [60, 80],
             min: 20,
             step: 10,
             snapOnDrag: false,
             contentOffset: .5,
-            paddingStart: 0,//0.25,
-            paddingEnd: 0,
-            flipped: false,
+            paddingStart: 0.25,
+            paddingEnd: 0.1,
+            flipped: true,
             handle: {
               relativePos: .5,
               //otherSize: 1.5,
-              zoom: 2
+              zoom: 1.25
             },
             range: {
-              type: 'min'
+              type: 'between'
             },
             ruler: {
               labels: {
@@ -38,7 +38,7 @@
                   relativePos:.5
                 }
               },
-              visible: false,
+              visible: true,
               tickMarks: {
                 long: {
                   relativePos: 0.05,

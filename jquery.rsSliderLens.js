@@ -25,8 +25,8 @@
                 autofocusable: false,
                 initSvgOutsideHandle: function () {
                     this.$svg = util.createSvg(this.width, this.height).css({
-                        left: 0,
-                        top: 0,
+                        left: (info.isFixedHandle ? (info.isHoriz ? elemHandle.fixedHandleRelPos*100 : 50) : 0) + '%',
+                        top: (info.isFixedHandle ? (info.isHoriz ? 50 : elemHandle.fixedHandleRelPos*100) : 0) + '%',
                         width: '100%',
                         height: '100%'
                     });
@@ -178,7 +178,12 @@
                                     }
                             }
                         } else {
-                            css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : (1 - elemHandle.fixedHandleRelPos))*100 + '%';
+                            switch (opts.range.type) {
+                                case 'min': css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : 1 - elemHandle.fixedHandleRelPos)*100 + '%';
+                                            break;
+                                case 'max': css[this.getPropMin()] = (opts.flipped ? 1 - elemHandle.fixedHandleRelPos : elemHandle.fixedHandleRelPos)*100 + '%';
+                                            break;
+                            }
                         }
 
                         this.$range = $("<div>").css(css).addClass(opts.style.classHighlightRange);
@@ -195,6 +200,7 @@
                             if (info.isFixedHandle) {
                                 // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
                                 // when applied to the specific case of range sizes
+                                relPos -= (opts.flipped ? opts.paddingEnd : opts.paddingStart)*100;
                                 elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
                             } else {
                                 if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
@@ -203,8 +209,15 @@
                             }
                             break;
                         case 'max':
-                            if (!info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
-                                elemRange.$range.css(elemRange.getPropMin(), relPos + '%');
+                            if (info.isFixedHandle) {
+                                // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
+                                // when applied to the specific case of range sizes
+                                relPos += (opts.flipped ? opts.paddingStart : opts.paddingEnd)*100;
+                                elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*(100 - relPos)/100) + 'px');
+                            } else {
+                                if (!info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
+                                    elemRange.$range.css(elemRange.getPropMin(), relPos + '%');
+                                }
                             }
                             break;
                         case true:
@@ -1180,8 +1193,6 @@
                 if (info.isFixedHandle) {
                     if (opts.ruler.visible || opts.ruler.onDraw) {
                         elemMagnif.$elem1st.css('transform', translate);
-                        pos += 50;
-                        translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)');
                         elemOrig.$svg.css('transform', translate);
                     } else {
                         elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
@@ -1234,7 +1245,6 @@
                 areTheSame: function(a, b, maxDelta) {
                     return Math.abs(a - b) < (maxDelta === undefined ? 0.00005 : maxDelta);
                 },
-
                 createSvgDom: function (tag, attrs) {
                     var el = document.createElementNS(info.ns, tag);
                     for (var k in attrs) {
@@ -1242,7 +1252,6 @@
                     }
                     return $(el);
                 },
-
                 createSvg: function (width, height) {
                     return util.createSvgDom('svg', {
                         width: width,
@@ -1256,7 +1265,6 @@
                         'pointer-events': 'none'
                     });
                 },
-
                 renderSvg: function ($svg, width, height, doScale) {
                     var widest = info.isHoriz ? width : height,
                         shortest = info.isHoriz ? height : width,
