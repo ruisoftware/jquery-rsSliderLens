@@ -24,12 +24,16 @@
                 tabindexAttr: null,
                 autofocusable: false,
                 initSvgOutsideHandle: function () {
-                    this.$svg = util.createSvg(this.width, this.height).css({
+                    var css = {
                         left: (info.isFixedHandle ? (info.isHoriz ? elemHandle.fixedHandleRelPos*100 : 50) : 0) + '%',
-                        top: (info.isFixedHandle ? (info.isHoriz ? 50 : elemHandle.fixedHandleRelPos*100) : 0) + '%',
-                        width: '100%',
-                        height: '100%'
-                    });
+                        top: (info.isFixedHandle ? (info.isHoriz ? 50 : elemHandle.fixedHandleRelPos*100) : 0) + '%'
+                    };
+                    if (info.isFixedHandle) {
+                        css[info.isHoriz ? 'height' : 'width'] = '100%';
+                    } else {
+                        css['height'] = css['width'] = '100%';
+                    }
+                    this.$svg = util.createSvg(this.width, this.height).css(css);
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$svg, this.width, this.height);
                     }
@@ -37,7 +41,7 @@
                         opts.ruler.onDraw(this.$svg, this.width, this.height, util.createSvgDom);
                     }
                     this.$svg.prependTo(this.$wrapper);
-                    $elem.css('visibility', 'hidden'); // because the ruler is used instead of the original slider
+                    $elem.css('visibility', 'hidden'); // because the svg ruler is used instead of the original slider content
                 },
                 init: function () {
                     this.tabindexAttr = $elem.attr('tabindex');
@@ -90,6 +94,9 @@
                     if (opts.ruler.visible || opts.ruler.onDraw) {
                         this.width = this.$wrapper.width();
                         this.height = this.$wrapper.height();
+                        if (info.isFixedHandle) {
+                            this[info.isHoriz ? 'width' : 'height'] = (opts.max - opts.min)*(opts.ruler.tickMarks.gap + 1);
+                        }
                     } else {
                         this.width = $elem.width();
                         this.height = $elem.height();
@@ -148,7 +155,18 @@
                             css.transform = 'translateX(-50%)';
                         }
 
-                        if (!info.isFixedHandle) {
+                        if (info.isFixedHandle) {
+                            switch (opts.range.type) {
+                                case 'min': css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : 1 - elemHandle.fixedHandleRelPos)*100 + '%';
+                                            break;
+                                case 'max': css[this.getPropMin()] = (opts.flipped ? 1 - elemHandle.fixedHandleRelPos : elemHandle.fixedHandleRelPos)*100 + '%';
+                                            break;
+                                default:
+                                    if (info.isRangeFromToDefined) {
+                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep + 'px';
+                                    }
+                            }
+                        } else {
                             switch (opts.range.type) {
                                 case 'min': css[elemRange.getPropMin()] = opts.paddingStart*100 + '%';
                                             break;
@@ -162,10 +180,10 @@
                                             start, end;
                                         if (opts.flipped) {
                                             start = (opts.paddingEnd + relStart)*100 + '%';
-                                            end = (1 - relEnd - opts.paddingEnd)*100 + '%'
+                                            end = (1 - relEnd - opts.paddingEnd)*100 + '%';
                                         } else {
                                             start = (opts.paddingStart + relStart)*100 + '%';
-                                            end = (1 - relEnd - opts.paddingStart)*100 + '%'
+                                            end = (1 - relEnd - opts.paddingStart)*100 + '%';
                                         }
 
                                         if (info.isHoriz) {
@@ -177,13 +195,6 @@
                                         }
                                     }
                             }
-                        } else {
-                            switch (opts.range.type) {
-                                case 'min': css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : 1 - elemHandle.fixedHandleRelPos)*100 + '%';
-                                            break;
-                                case 'max': css[this.getPropMin()] = (opts.flipped ? 1 - elemHandle.fixedHandleRelPos : elemHandle.fixedHandleRelPos)*100 + '%';
-                                            break;
-                            }
                         }
 
                         this.$range = $("<div>").css(css).addClass(opts.style.classHighlightRange);
@@ -194,9 +205,10 @@
                 },
                 update: function (pos, isFirstHandle) {
                     var $e = opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem,
-                        relPos = opts.flipped ? 100 - pos : pos;
+                        relPos;
                     switch (opts.range.type) {
                         case 'min':
+                            relPos = opts.flipped ? 100 - pos : pos;
                             if (info.isFixedHandle) {
                                 // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
                                 // when applied to the specific case of range sizes
@@ -209,6 +221,7 @@
                             }
                             break;
                         case 'max':
+                            relPos = opts.flipped ? 100 - pos : pos;
                             if (info.isFixedHandle) {
                                 // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
                                 // when applied to the specific case of range sizes
@@ -227,6 +240,11 @@
                             } else {
                                 elemRange.$range.css(opts.flipped ? elemRange.getPropMin() : elemRange.getPropMax(), (100 - pos) + '%');
                             }
+                    }
+
+                    if (info.isFixedHandle && info.isRangeFromToDefined) {
+                        var prop = info.isHoriz ? 'left' : 'top';
+                        elemRange.$range.css(prop, $e.position()[prop] + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0])) + 'px');
                     }
                 }
             },
@@ -278,7 +296,7 @@
                 },
                 init: function () {
                     this.width = elemOrig.width*opts.handle.zoom;
-                        this.height = elemOrig.height*opts.handle.zoom;
+                    this.height = elemOrig.height*opts.handle.zoom;
                     if (opts.ruler.visible || opts.ruler.onDraw) { 
                         this.initSvgHandle();
                     } else {
@@ -286,10 +304,16 @@
                     }
                 },
                 resizeUpdate: function () {
-                    elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
-                        width: elemOrig.$wrapper.width()*opts.handle.zoom,
-                        height: elemOrig.$wrapper.height()*opts.handle.zoom
-                    });
+                    if (info.isFixedHandle) {
+                        if (info.isRangeFromToDefined) {
+                            setValue(info.currValue[0], elemHandle.$elem1st, true);
+                        }
+                    } else {
+                        elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
+                            width: elemOrig.$wrapper.width()*opts.handle.zoom,
+                            height: elemOrig.$wrapper.height()*opts.handle.zoom
+                        });
+                    }
                 },
                 initRanges: function () {
                     if (info.isRangeFromToDefined || opts.range.type === 'min' || opts.range.type === 'max') {
@@ -444,7 +468,7 @@
                         css.width = opts.handle.size*100 + '%';
                         if (info.isFixedHandle) {
                             css.left = this.fixedHandleRelPos*100 + '%';
-                            css.top = 0;
+                            css.top = 55;
                             css.height = '100%';
                             css.transform = 'translateX(-50%)';
                         } else {
@@ -989,7 +1013,7 @@
                     }
                 },
                 updateTicksStep: function () {
-                    var $e = info.isFixedHandle ? $elem : elemOrig.$wrapper,
+                    var $e = info.isFixedHandle ? (opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem) : elemOrig.$wrapper,
                         size = info.isHoriz ? $e.width() : $e.height();
                     this.ticksStep = size*(1 - opts.paddingStart)*(1 - opts.paddingEnd)/(opts.max - opts.min);
                     this.startPixel = size*(opts.flipped ? opts.paddingEnd : opts.paddingStart);
@@ -1258,6 +1282,7 @@
                         height: height,
                         viewBox: '0 0 ' + width + ' ' + height,
                         preserveAspectRatio: 'none',
+                        'shape-rendering': 'geometricPrecision',
                         xmlns: info.ns,
                         version: '1.1'
                     }).css({
@@ -1771,10 +1796,10 @@
             }
         },
         resizeUpdate = function () {
-            this.trigger('resizeUpdate.rsSliderLens');
+            return this.trigger('resizeUpdate.rsSliderLens');
         },
         destroy = function () {
-            this.trigger('destroy.rsSliderLens');
+            return this.trigger('destroy.rsSliderLens');
         };
 
         if (typeof options === 'string') {
@@ -1967,6 +1992,7 @@
                                         */
             },
             tickMarks: {
+                gap: 3,
                 short: {
                     visible: true,
                     step: 1,
