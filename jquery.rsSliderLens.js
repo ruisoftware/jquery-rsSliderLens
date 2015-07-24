@@ -95,7 +95,7 @@
                         this.width = this.$wrapper.width();
                         this.height = this.$wrapper.height();
                         if (info.isFixedHandle) {
-                            this[info.isHoriz ? 'width' : 'height'] = (opts.max - opts.min)*(opts.ruler.tickMarks.gap + 1);
+                            this[info.isHoriz ? 'width' : 'height'] = opts.ruler.relativeSize*(info.isHoriz ? this.width : this.height);
                         }
                     } else {
                         this.width = $elem.width();
@@ -468,7 +468,7 @@
                         css.width = opts.handle.size*100 + '%';
                         if (info.isFixedHandle) {
                             css.left = this.fixedHandleRelPos*100 + '%';
-                            css.top = 55;
+                            css.top = 0;
                             css.height = '100%';
                             css.transform = 'translateX(-50%)';
                         } else {
@@ -1303,18 +1303,20 @@
                     if (optsTicks.short.visible || optsTicks.long.visible) {
                         var marker = {
                                 getMarker: function (id, size, stroke) {
+                                    var scale = doScale ? opts.handle.zoom : 1;
                                     return util.createSvgDom('marker', {
                                         id: id,
-                                        markerWidth: info.isHoriz ? 1 : size,
-                                        markerHeight: info.isHoriz ? size : 1,
-                                        refX: 1,
-                                        refY: 1
+                                        markerWidth: info.isHoriz ? scale : size,
+                                        markerHeight: info.isHoriz ? size : scale,
+                                        refX: info.isHoriz ? scale/2 : 0,
+                                        refY: info.isHoriz ? 0 : scale/2
                                     }).append(util.createSvgDom('line', {
-                                        x1: 1,
-                                        y1: 1,
-                                        x2: info.isHoriz ? 1 : size,
-                                        y2: info.isHoriz ? size : 1,
-                                        stroke: stroke
+                                        x1: info.isHoriz ? scale/2 : 0,
+                                        y1: info.isHoriz ? 0 : scale/2,
+                                        x2: info.isHoriz ? scale/2 : size,
+                                        y2: info.isHoriz ? size : scale/2,
+                                        stroke: stroke,
+                                        'stroke-width': scale
                                     }));
                                 },
                                 generateTicks: function (type) {
@@ -1967,6 +1969,10 @@
                                     // Note: If the plug-in is attached to a DOM element that contains no content at all (no children),
                                     //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
                                     // There is more to this, please see onDraw below.
+            relativeSize: 1,    // Specifies the relative width (for horizontal sliders) or height (for vertical sliders) of the svg ruler. Type: floating pointer number >= 0.
+                                // Only applicable to fixed handle sliders.
+                                // A value of 1, means that the ruler has the same (100%) width of the parent container (or height for vertical sliders).
+                                // A value of 1.7, means that the ruler is wider (or taller) 170% than the parent container.
 
             labels: {               // Configuration data for the labels that appear in the ruler.
                 visible: true,          // Determines whether value labels are displayed. Type: boolean.
@@ -1992,7 +1998,6 @@
                                         */
             },
             tickMarks: {
-                gap: 3,
                 short: {
                     visible: true,
                     step: 1,

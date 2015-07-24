@@ -25,9 +25,10 @@
               zoom: 1.25
             },
             range: {
-              //type: [30, 260]
+              type: [30, 260]
             },
             ruler: {
+              relativeSize: 20,
               labels: {
                 relativePos: .7,
                 onSvgTransform: function (x, y) {
@@ -37,16 +38,14 @@
               tickMarks: {
                 short: {
                   relativePos:.5
-                }
-              },
-              visible: true,
-              tickMarks: {
+                },
                 long: {
                   relativePos: 0.05,
                   relativeSize: .9,
                   stroke: 'red'
                 }
               },
+              visible: true,
               on__Draw: function ($svg, width, height, createSvgDomFunc) {
                 $svg.append(createSvgDomFunc('rect', {
                   x: 0,
