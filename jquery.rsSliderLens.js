@@ -212,7 +212,7 @@
                             if (info.isFixedHandle) {
                                 // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
                                 // when applied to the specific case of range sizes
-                                relPos -= (opts.flipped ? opts.paddingEnd : opts.paddingStart)*100;
+                                relPos -= opts.paddingStart*100;
                                 elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
                             } else {
                                 if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
@@ -225,7 +225,7 @@
                             if (info.isFixedHandle) {
                                 // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
                                 // when applied to the specific case of range sizes
-                                relPos += (opts.flipped ? opts.paddingStart : opts.paddingEnd)*100;
+                                relPos += opts.paddingEnd*100;
                                 elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*(100 - relPos)/100) + 'px');
                             } else {
                                 if (!info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
@@ -283,7 +283,7 @@
                     this.$elem1st = util.createSvg(this.width, this.height).
                         css(this.getRelativePosition());
                     if (opts.ruler.visible) {
-                        util.renderSvg(this.$elem1st, this.width, this.height, opts.handle.zoom !== 1);
+                        util.renderSvg(this.$elem1st, this.width, this.height, !util.areTheSame(opts.handle.zoom, 1));
                     }
                     if (opts.ruler.onDraw) {
                         opts.ruler.onDraw(this.$elem1st, this.width, this.height, util.createSvgDom);
@@ -317,30 +317,76 @@
                 },
                 initRanges: function () {
                     if (info.isRangeFromToDefined || opts.range.type === 'min' || opts.range.type === 'max') {
-                        var createMagnifRange = function ($thisRange) {
-                            return ($thisRange === null ? elemRange.$range.clone().removeAttr('id') : $thisRange).css({
-                                width: (elemRange.width * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px',
-                                height: (elemRange.height * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px',
-                                'z-index': (opts.ruler.visible ? '' : util.toInt($thisRange.css('z-index')) + 2),
-                                // clear these cloned properties, do not need them
-                                position: 'relative', 'top': '', 'right': '', 'bottom': '', 'left': '' 
-                            });
-                        },
-                        scaleIfNeeded = function ($thisRange) {
-                            if (!opts.ruler.visible) {
-                                $thisRange.css(util.getScaleCss(opts.handle.zoom));
+                        var createMagnifRange = function (isFirstHandle) {
+                            var css = {};
+                            switch (opts.range.type) {
+                                case 'min': css[elemRange.getPropMax()] = info.doubleHandles ? (isFirstHandle || opts.flipped ? 0 : '100%') : '50%';
+                                            css[elemRange.getPropMin()] = ''; // needed to delete this property after the clone() below
+                                            break;
+                                case 'max': css[elemRange.getPropMin()] = info.doubleHandles ? 0 : '50%';
+                                            css[elemRange.getPropMax()] = ''; // needed to delete this property after the clone() below
+                                            break;
+                                default:
+                                    if (info.isRangeFromToDefined) {
+                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep + 'px';
+                                    }
+
                             }
+
+                            if (!util.areTheSame(opts.handle.zoom, 1)) {
+                                if (info.isHoriz) {
+                                    css['transform'] = 'translateY(-50%) scale(' + opts.handle.zoom + ')';
+                                } else {
+                                    css['transform'] = 'translateX(-50%) scale(' + opts.handle.zoom + ')';
+                                }
+                            }
+                            return elemRange.$range.clone().css(css);
                         };
                         
-                        this.$elemRange1st = createMagnifRange(this.$elemRange1st);
-                        scaleIfNeeded(this.$elemRange1st);
-                        if (info.doubleHandles) {
-                            this.$elemRange2nd = createMagnifRange(this.$elemRange2nd);
-                            scaleIfNeeded(this.$elemRange2nd);
-                        } else {
-                            if (info.isHoriz && elemRange.getRangeName(opts.range.type) === 'max') {
-                                this.$elemRange1st.css('left', getHandleHotPoint(elemHandle.$elem1st) / (opts.ruler.visible ? 1 : opts.handle.zoom));
-                            }
+                        if (!info.doubleHandles || elemRange.getRangeName(opts.range.type) !== 'max') {
+                            this.$elemRange1st = createMagnifRange(true);
+                        }
+                        if (info.doubleHandles && elemRange.getRangeName(opts.range.type) !== 'min') {
+                            this.$elemRange2nd = createMagnifRange(false);
+                        }
+                    }
+                },
+                updateRanges: function (pos, isFirstHandle) {
+                    var $e = isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd,
+                        $range = isFirstHandle ? elemMagnif.$elemRange1st : elemMagnif.$elemRange2nd,
+                        relPos;
+
+                    if ($range) {
+                        switch (opts.range.type) {
+                            case 'min':
+                                relPos = (opts.flipped ? 100 - pos : pos) - opts.paddingStart*100;
+                                if (info.isFixedHandle || !info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
+                                    // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
+                                    // when applied to the specific case of range sizes
+                                    $range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
+                                }
+                                break;
+                            case 'max':
+                                relPos = (opts.flipped ? 100 - pos : pos) + opts.paddingEnd*100;
+                                if (info.isFixedHandle || !info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
+                                    // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
+                                    // when applied to the specific case of range sizes
+                                    $range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*(100 - relPos)/100) + 'px');
+                                }
+                                break;
+                            case true:
+                            case 'between':
+                                if (isFirstHandle) {
+                                    $range.css(opts.flipped ? elemRange.getPropMax() : elemRange.getPropMin(), pos + '%');
+                                } else {
+                                    $range.css(opts.flipped ? elemRange.getPropMin() : elemRange.getPropMax(), (100 - pos) + '%');
+                                }
+                        }
+
+                        if (info.isRangeFromToDefined) {
+                            var prop = info.isHoriz ? 'left' : 'top';
+                            console.log($e.position()[prop]);
+                            $range.css(prop, $e.position()[prop] + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0])) + 'px');
                         }
                     }
                 },
@@ -592,25 +638,25 @@
                         switch (event.which) {
                             case key.left:
                             case key.down:
-                                elemHandle.navigate(info.isHoriz ? -1 : 1, info.isHoriz ? -opts.step: opts.step, 0, opts.keyboard.easing, limits);
+                                elemHandle.navigate(info.isHoriz ? -1 : 1, info.isHoriz ? -opts.step: opts.step, info.isStepDefined ? opts.handle.animation/opts.step : 0, opts.keyboard.easing, limits);
                                 break;
                             case key.right: 
                             case key.up:
-                                elemHandle.navigate(info.isHoriz ? 1 : -1, info.isHoriz ? opts.step : -opts.step, 0, opts.keyboard.easing, limits);
+                                elemHandle.navigate(info.isHoriz ? 1 : -1, info.isHoriz ? opts.step : -opts.step, info.isStepDefined ? opts.handle.animation/opts.step : 0, opts.keyboard.easing, limits);
                                 break;
                             case key.pgUp:
                             case key.pgDown:
-                                event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits)
-                                                         : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.keyboard.animation, opts.keyboard.easing, limits);
+                                event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits)
+                                                         : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits);
                                 break;
-                            case key.home: panUtil.gotoAnim(currValue, limits[0], opts.keyboard.animation, opts.keyboard.easing); break;
-                            case key.end:  panUtil.gotoAnim(currValue, limits[1], opts.keyboard.animation, opts.keyboard.easing); break;
+                            case key.home: panUtil.gotoAnim(currValue, limits[0], opts.handle.animation, opts.keyboard.easing); break;
+                            case key.end:  panUtil.gotoAnim(currValue, limits[1], opts.handle.animation, opts.keyboard.easing); break;
                             case key.esc:
                                 if (info.doubleHandles) {
-                                    panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.keyboard.animation, opts.keyboard.easing, elemHandle.$elem1st);
-                                    panUtil.gotoAnim(info.currValue[1], info.uncommitedValue[1], opts.keyboard.animation, opts.keyboard.easing, elemHandle.$elem2nd);
+                                    panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem1st);
+                                    panUtil.gotoAnim(info.currValue[1], info.uncommitedValue[1], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem2nd);
                                 } else {
-                                    panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.keyboard.animation, opts.keyboard.easing);
+                                    panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.handle.animation, opts.keyboard.easing);
                                 }
                                 info.currValue[0] = info.uncommitedValue[0];
                                 info.currValue[1] = info.uncommitedValue[1];
@@ -745,15 +791,15 @@
                                 if (twoValues) {
                                     checkValuesData(value);
                                     if (value[0] !== null) {
-                                        panUtil.gotoAnim(info.currValue[0], value[0], opts.keyboard.animation, opts.keyboard.easing, elemHandle.$elem1st);
+                                        panUtil.gotoAnim(info.currValue[0], value[0], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem1st);
                                     }
                                     if (value[1] !== null) {
-                                        panUtil.gotoAnim(info.currValue[1], value[1], opts.keyboard.animation, opts.keyboard.easing, elemHandle.$elem2nd);
+                                        panUtil.gotoAnim(info.currValue[1], value[1], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem2nd);
                                     }
                                 }
                             } else {
                                 if (!twoValues) {
-                                    panUtil.gotoAnim(info.currValue[0], info.getCurrValue(value), opts.keyboard.animation, opts.keyboard.easing);
+                                    panUtil.gotoAnim(info.currValue[0], info.getCurrValue(value), opts.handle.animation, opts.keyboard.easing);
                                 }
                             }
                             break;
@@ -998,7 +1044,7 @@
                     if (opts.fixedHandle !== false && opts.value && (typeof opts.value === 'object') && opts.value.length === 2) {
                         opts.value = opts.value[0];
                     }
-                    this.doubleHandles = opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
+                    this.doubleHandles = !!opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
                     this.isRangeFromToDefined = (typeof opts.range.type === 'object') && opts.range.type.length === 2;
                     var delta = opts.max - opts.min;
                     opts.step = opts.step < 0 ? 0 : (opts.step > delta ? delta : opts.step);
@@ -1010,6 +1056,10 @@
                     }
                     if (util.isAlmostZero(opts.handle.otherSize)) {
                         opts.handle.otherSize = 1;
+                    }
+                    opts.handle.animation = util.getSpeedMs(opts.handle.animation);
+                    if (opts.keyboard.numPages < 1) {
+                        opts.keyboard.numPages = 5;
                     }
                 },
                 updateTicksStep: function () {
@@ -1049,12 +1099,18 @@
                 elemMagnif.init();
                 info.init();
                 elemRange.init();
-                //elemMagnif.initRanges();
+                elemMagnif.initRanges();
                 elemHandle.init();
 
                 // insert into DOM
                 if (elemRange.$range) {
                     elemRange.$range.appendTo(elemOrig.$wrapper);
+                }
+                if (elemMagnif.$elemRange1st) {
+                    elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
+                }
+                if (elemMagnif.$elemRange2nd) {
+                    elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
                 }
                 elemHandle.$elem1st.add(elemHandle.$elem2nd).appendTo(elemOrig.$wrapper);
 
@@ -1133,7 +1189,7 @@
                     events.processFinalChange(true);
                     events.processFinalChange(false);
                 } else {
-                    setValue(flipped ? info.getCurrValue(values) : values, info.isFixedHandle ? elemOrig.$wrapper : elemHandle.$elem1st, info.isStepDefined);
+                    setValue(flipped ? info.getCurrValue(values) : values, elemHandle.$elem1st, info.isStepDefined);
                     events.processFinalChange(true);
                 }
             },
@@ -1222,13 +1278,13 @@
                         elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
                         $elem.css('transform', translate);
                     }
-                    elemRange.update(-pos, isFirstHandle);
                 } else {
                     $handleElem.css(info.isHoriz ? 'left' : 'top', (-pos) + '%');
                     (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', opts.ruler.visible || opts.ruler.onDraw ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
                     elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
-                    elemRange.update(-pos, isFirstHandle);
                 }
+                elemRange.update(-pos, isFirstHandle);
+                elemMagnif.updateRanges(-pos, isFirstHandle);
 
                 //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
 
@@ -1422,7 +1478,7 @@
                         }
                     }
                     if (ms === undefined) {
-                        ms = 400;
+                        ms = 150;
                     }
                     return ms;
                 }
@@ -1493,7 +1549,7 @@
                         }
                     }
                     if (animDuration === undefined) {
-                        animDuration = util.getSpeedMs(opts.handle.animation);
+                        animDuration = opts.handle.animation;
                     }
                     if ($animHandle === undefined) {
                         $animHandle = panUtil.$handle;
@@ -1593,7 +1649,7 @@
                 },
                 dragHorizVert: function (event, attr) {
                     if (info.isFixedHandle) {
-                        setValue(util.pixel2Value(-event[attr] + panUtil.fixedHandleStartDragPos), elemOrig.$wrapper, opts.snapOnDrag);
+                        setValue(util.pixel2Value(-event[attr] + panUtil.fixedHandleStartDragPos), panUtil.$handle, opts.snapOnDrag);
                     } else {
                         panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
                         setValue(util.pixel2Value(event[attr] - panUtil.dragDelta), panUtil.$handle, opts.snapOnDrag);
@@ -1948,7 +2004,7 @@
                                // If set to a loating point number, it represents a relative size, e.g. if set to 1, then handle size will have
                                // the same size (100%) of the slider element.
 
-            animation: 100,   // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
+            animation: 150,   // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
                               // Use 0 to disable animation. Type: positive integer or string.
 
             easing: 'swing', // Easing function used for the handle animation (@see http://api.jquery.com/animate/#easing). Type: string.
@@ -2036,7 +2092,6 @@
         },
         keyboard: {
             allowed: ['left', 'right', 'up', 'down', 'home', 'end', 'pgup', 'pgdown', 'esc'], // Allowed keys. Type: String array.
-            animation: 250, // Duration (ms or jQuery string alias) of the animation that the handle takes. Type: positive integer or string.
             easing: 'swing',    // Easing function used in keyboard animation (@see http://api.jquery.com/animate/#easing). Type: string.
             numPages: 5         // Number of pages in a slider (how many times can you page up/down to go through the whole range). Type: positive integer.
         },
