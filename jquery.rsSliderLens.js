@@ -82,7 +82,7 @@
                         addClass(opts.style.classSlider).
                         addClass(info.isFixedHandle ? opts.style.classFixed : null).
                         addClass(info.isHoriz ? opts.style.classHoriz : opts.style.classVert).
-                        addClass(opts.enabled ? null : opts.style.classHandleDisabled);
+                        addClass(opts.enabled ? null : opts.style.classDisabled);
 
                     if (info.isFixedHandle) {
                         $elem.css(info.isHoriz ? 'left' : 'top', elemHandle.fixedHandleRelPos*100 + '%');
@@ -203,6 +203,12 @@
                         }
                     }
                 },
+                setFromToRangePosition: function ($e, $range, zoom) {
+                    var prop = info.isHoriz ? 'left' : 'top',
+                        // Hack to get the position. Could simply be done as $e.position()[prop], but due to a Firefox bug related with wrong position(), it has to be this ugly way
+                        position = $e.offset()[prop] - $e.parent().offset()[prop];
+                    $range.css(prop, position + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]))*zoom + 'px');
+                },
                 update: function (pos, isFirstHandle) {
                     var $e = opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem,
                         relPos;
@@ -243,8 +249,7 @@
                     }
 
                     if (info.isFixedHandle && info.isRangeFromToDefined) {
-                        var prop = info.isHoriz ? 'left' : 'top';
-                        elemRange.$range.css(prop, $e.position()[prop] + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0])) + 'px');
+                        this.setFromToRangePosition($e, elemRange.$range, 1);
                     }
                 }
             },
@@ -304,15 +309,21 @@
                     }
                 },
                 resizeUpdate: function () {
-                    if (info.isFixedHandle) {
-                        if (info.isRangeFromToDefined) {
-                            setValue(info.currValue[0], elemHandle.$elem1st, true);
-                        }
-                    } else {
+                    info.updateTicksStep();
+                    if (!info.isFixedHandle) {
                         elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
                             width: elemOrig.$wrapper.width()*opts.handle.zoom,
                             height: elemOrig.$wrapper.height()*opts.handle.zoom
                         });
+                    }
+                    if (info.isRangeFromToDefined) {
+                        this.initRanges();
+                        if (info.doubleHandles) {
+                            setValue(info.currValue[0], opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, true);
+                            setValue(info.currValue[1], opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, true);
+                        } else {
+                            setValue(info.currValue[0], elemHandle.$elem1st, true);
+                        }
                     }
                 },
                 initRanges: function () {
@@ -328,17 +339,20 @@
                                             break;
                                 default:
                                     if (info.isRangeFromToDefined) {
-                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep + 'px';
+                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep*opts.handle.zoom + 'px';
+                                        css['right'] = css['bottom'] = '';
                                     }
-
                             }
 
                             if (!util.areTheSame(opts.handle.zoom, 1)) {
-                                if (info.isHoriz) {
-                                    css['transform'] = 'translateY(-50%) scale(' + opts.handle.zoom + ')';
-                                } else {
-                                    css['transform'] = 'translateX(-50%) scale(' + opts.handle.zoom + ')';
-                                }
+                                css['transform'] = 'translate' + info.isHoriz ? 'Y(-50%)' : 'X(-50%)';
+                                css[info.isHoriz ? 'height' : 'width'] = opts.range.size*opts.handle.size*100*opts.handle.zoom + '%';
+                            }
+                            if (isFirstHandle && elemMagnif.$elemRange1st) {
+                                return elemMagnif.$elemRange1st.css(css);
+                            }
+                            if (!isFirstHandle && elemMagnif.$elemRange2nd) {
+                                return elemMagnif.$elemRange2nd.css(css);
                             }
                             return elemRange.$range.clone().css(css);
                         };
@@ -384,115 +398,12 @@
                         }
 
                         if (info.isRangeFromToDefined) {
-                            var prop = info.isHoriz ? 'left' : 'top';
-                            console.log($e.position()[prop]);
-                            $range.css(prop, $e.position()[prop] + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0])) + 'px');
-                        }
-                    }
-                },
-                applyMeasurements: function () {
-                    if (info.usingScaleTransf && !info.doubleHandles && info.isHoriz && elemRange.getRangeName(opts.range.type) === 'max') {
-                        this.$elemRange1st.css('left', getHandleHotPoint(elemHandle.$elem1st));
-                    }
-                },
-                move: function (isFirst, valuePixel, offset) {
-                    if (!opts.ruler.visible) {
-                        offset /= opts.handle.zoom;
-                    }
-                    
-                    // move the magnified content inside the handle(s)
-                    //(isFirst ? this.$elem1st : this.$elem2nd).css(info.isHoriz? 'margin-left' : 'margin-top', offset * (info.usingScaleTransf && !opts.ruler.visible ? opts.handle.zoom : 1) + 'px');
-
-                    // move the magnified ranges (if applicable)
-                    switch (elemRange.getRangeName(opts.range.type)) {
-                        case 'min': if (isFirst) {
-                                        elemRange.$range.css(info.isHoriz ? 'width' : 'height', ++valuePixel + 'px');
-                                        if (info.isHoriz) {
-                                            if (elemOrig.right !== null && !info.isFixedHandle) {
-                                                elemRange.$range.css('right', (util.toInt(elemHandle.$elem1st.css('right')) + opts.handle.size - getHandleHotPoint(elemHandle.$elem1st)) + 'px'); 
-                                            }
-                                            this.$elemRange1st.css({
-                                                'left': Math.round(info.beginOffset * opts.handle.zoom + offset * (info.usingScaleTransf && !opts.ruler.visible ? opts.handle.zoom : 1)) + 'px',
-                                                'width': Math.round(valuePixel * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px'
-                                            });
-                                        } else {
-                                            if (elemOrig.bottom !== null && !info.isFixedHandle) {
-                                                elemRange.$range.css('bottom', (util.toInt(elemHandle.$elem1st.css('bottom')) + opts.handle.size - getHandleHotPoint(elemHandle.$elem1st)) + 'px'); 
-                                            }
-
-                                            var top = getHandleHotPoint(elemHandle.$elem1st) - valuePixel * opts.handle.zoom;
-                                            if (!info.usingScaleTransf && !opts.ruler.visible) {
-                                                top /= opts.handle.zoom;
-                                            }
-                                            this.$elemRange1st.css({
-                                                'top': Math.round(top) + 'px',
-                                                'height': Math.round(valuePixel * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px'
-                                            });
-                                        }
-                                    }
-                                    break;
-                        case 'max': if (!info.doubleHandles || info.doubleHandles && !isFirst) {
-                                        var $range = info.doubleHandles ? this.$elemRange2nd : this.$elemRange1st;
-                                        
-                                        if (info.isHoriz) {
-                                            if (elemOrig.right === null || info.isFixedHandle) {
-                                                elemRange.$range.css('left', Math.round(info.isFixedHandle ? elemHandle.fixedHandleRelPos : elemOrig.pos.value().left + valuePixel + info.beginOffset) + 'px');
-                                            }
-                                            elemRange.$range.css('width', Math.round(elemOrig.outerWidth - valuePixel - info.beginOffset - info.endOffset) + 'px');
-                                            $range.css('width', (Math.round(elemOrig.outerWidth - valuePixel - info.beginOffset - info.endOffset) * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px');
-                                        } else {
-                                            if (elemOrig.bottom === null || info.isFixedHandle) {
-                                                elemRange.$range.css('top', Math.round(info.isFixedHandle ? elemHandle.fixedHandleRelPos : elemOrig.pos.value().top + valuePixel + info.beginOffset) + 'px');
-                                            }
-                                            elemRange.$range.css('height', Math.round(elemOrig.outerHeight - valuePixel - info.beginOffset - info.endOffset) + 'px');
-                            
-                                            var top = getHandleHotPoint(info.doubleHandles ? elemHandle.$elem2nd : elemHandle.$elem1st) / 
-                                                        (opts.ruler.visible || info.usingScaleTransf ? 1 : opts.handle.zoom);
-
-                                            $range.css({
-                                                'height': (Math.round(elemOrig.outerHeight - valuePixel - info.beginOffset - info.endOffset) * (opts.ruler.visible ? opts.handle.zoom : 1)) + 'px',
-                                                'top': top + 'px'
-                                            });
-                                        }
-                                    }
-                                    break;
-                        case true:  if (info.isHoriz) {
-                                        if (elemOrig.right === null || info.isFixedHandle) {
-                                            elemRange.$range.css('left', (elemOrig.pos.value().left + elemHandle.stopPosition[0]) + 'px');
-                                        } else {
-                                            elemRange.$range.css('right', (util.toInt(elemHandle.$elem2nd.css('right')) + opts.handle.size) + 'px');
-                                        }
-                                        elemRange.$range.css('width', (elemHandle.stopPosition[1] - elemHandle.stopPosition[0] + 1) + 'px');
-                                    } else {
-                                        if (elemOrig.bottom === null || info.isFixedHandle) {
-                                            elemRange.$range.css('top', (elemOrig.pos.value().top + elemHandle.stopPosition[0]) + 'px');
-                                        } else {
-                                            elemRange.$range.css('bottom', (util.toInt(elemHandle.$elem2nd.css('bottom')) + opts.handle.size) + 'px');
-                                        }
-                                        elemRange.$range.css('height', (elemHandle.stopPosition[1] - elemHandle.stopPosition[0] + 1) + 'px');
-                                    }
-                    }
-                    
-                    if (info.isRangeFromToDefined) {
-                        var $range = isFirst ? this.$elemRange1st : this.$elemRange2nd;
-                        if (info.usingScaleTransf && !opts.ruler.visible) {
-                            if (info.isHoriz) {
-                                $range.css('left', ((info.fromPixel + offset) * opts.handle.zoom) + 'px');
-                            } else {
-                                var marginTop = info.fromPixel * opts.handle.zoom - this.height / opts.handle.zoom,
-                                    handlePos = - util.toInt((isFirst ? this.$elem1st : this.$elem2nd).css('top'));
-                                if (handlePos >= elemOrig.height) {
-                                    marginTop -= handlePos - elemOrig.height;
-                                }
-                                $range.css('top', marginTop + 'px');
-                            }
-                        } else {
-                            $range.css(info.isHoriz ? 'left' : 'top', (info.fromPixel * (opts.ruler.visible ? opts.handle.zoom : 1) + offset) + 'px');
+                            elemRange.setFromToRangePosition($e, $range, opts.handle.zoom);
                         }
                     }
                 }
             },
-            
+
             // the handle(s)
             elemHandle = {
                 $elem1st: null,
@@ -550,17 +461,17 @@
                         var bindForSecondHandle = function () {
                             elemHandle.$elem2nd.
                                 attr('tabindex', elemOrig.tabindexAttr).
-                                bind('focus.rsSliderLens', panUtil.gotFocus2nd).
-                                bind('blur.rsSliderLens', panUtil.loseFocus);
+                                bind('focusin.rsSliderLens', panUtil.gotFocus2nd).
+                                bind('focusout.rsSliderLens', panUtil.loseFocus);
                         };
 
                         if (firstHandle || firstHandle === undefined) {
                             $elem.removeAttr('tabindex');
                             this.$elem1st.
                                 attr('tabindex', elemOrig.tabindexAttr).
-                                bind('focus.rsSliderLens', panUtil.gotFocus1st).
-                                bind('blur.rsSliderLens', panUtil.loseFocus);
-
+                                bind('focusin.rsSliderLens', panUtil.gotFocus1st).
+                                bind('focusout.rsSliderLens', panUtil.loseFocus);
+                            
                             if (elemOrig.autofocusable) {
                                 $elem.removeAttr('autofocus');
                                 this.$elem1st.attr('autofocus', 'autofocus');
@@ -576,10 +487,10 @@
                 },
                 unbindTabEvents: function () {
                     if (elemOrig.tabindexAttr && !opts.enabled) {
-                        this.$elem1st.add(this.$elem2nd).removeAttr('tabindex autofocus').unbind('blur.rsSliderLens', panUtil.loseFocus);
-                        this.$elem1st.unbind('focus.rsSliderLens', panUtil.gotFocus1st);
+                        this.$elem1st.add(this.$elem2nd).removeAttr('tabindex autofocus').unbind('focusout.rsSliderLens', panUtil.loseFocus);
+                        this.$elem1st.unbind('focusin.rsSliderLens', panUtil.gotFocus1st);
                         if (this.$elem2nd) {
-                            this.$elem2nd.unbind('focus.rsSliderLens', panUtil.gotFocus2nd);
+                            this.$elem2nd.unbind('focusin.rsSliderLens', panUtil.gotFocus2nd);
                         }
                     }
                 },
@@ -760,12 +671,7 @@
                                 if (opts.enabled) {
                                     // from enabled to disabled
                                     opts.enabled = false;
-                                    $elem.add(elemOrig.$canvas).add(elemOrig.$wrapper).add(elemRange.$range).addClass(opts.style.classHandleDisabled);
-                                    elemMagnif.$elem1st.add(elemMagnif.$elem2nd).add(elemMagnif.$elemRange1st).add(elemMagnif.$elemRange2nd).addClass(opts.style.classHandleDisabled);
-                                    elemHandle.$elem1st.children().addClass(opts.style.classHandleDisabled);
-                                    if (elemHandle.$elem2nd) {
-                                        elemHandle.$elem2nd.children().addClass(opts.style.classHandleDisabled);
-                                    }
+                                    elemOrig.$wrapper.addClass(opts.style.classDisabled);
                                     elemHandle.unbindTabEvents();
                                 }
                             } else {
@@ -773,12 +679,7 @@
                                     if (!opts.enabled) {
                                         // from disabled to enabled
                                         opts.enabled = true;
-                                        $elem.add(elemOrig.$canvas).add(elemOrig.$wrapper).add(elemRange.$range).removeClass(opts.style.classHandleDisabled);
-                                        elemMagnif.$elem1st.add(elemMagnif.$elem2nd).add(elemMagnif.$elemRange1st).add(elemMagnif.$elemRange2nd).removeClass(opts.style.classHandleDisabled);
-                                        elemHandle.$elem1st.children().removeClass(opts.style.classHandleDisabled);
-                                        if (elemHandle.$elem2nd) {
-                                            elemHandle.$elem2nd.children().removeClass(opts.style.classHandleDisabled);
-                                        }
+                                        elemOrig.$wrapper.removeClass(opts.style.classDisabled);
                                         elemHandle.bindTabEvents();
                                     }
                                 }
@@ -875,15 +776,15 @@
                         unbind('mousemove.rsSliderLens', panRangeUtil.drag);
 
                     elemHandle.$elem1st.
-                        unbind('focus.rsSliderLens', panUtil.gotFocus1st).
-                        unbind('blur.rsSliderLens', panUtil.loseFocus).
+                        unbind('focusin.rsSliderLens', panUtil.gotFocus1st).
+                        unbind('focusout.rsSliderLens', panUtil.loseFocus).
                         unbind('mousedown.rsSliderLens', panUtil.startDrag).
                         unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
 
                     if (elemHandle.$elem2nd) {
                         elemHandle.$elem2nd.
-                            unbind('focus.rsSliderLens', panUtil.gotFocus2nd).
-                            unbind('blur.rsSliderLens', panUtil.loseFocus).
+                            unbind('focusin.rsSliderLens', panUtil.gotFocus2nd).
+                            unbind('focusout.rsSliderLens', panUtil.loseFocus).
                             unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
                     }
 
@@ -904,7 +805,6 @@
                         'position': '',
                         'display': ''
                     });
-                    $elem.css(info.isHoriz ? 'margin-left' : 'margin-top', '');
                     if ($elem.attr('style') === '') { 
                         $elem.removeAttr('style');
                     }
@@ -960,7 +860,6 @@
                 toPixel: 0,
                 beginOffset: 0,
                 endOffset: 0,
-                usingScaleTransf: false,
                 
                 doubleHandles: false,
                 isRangeFromToDefined: false,
@@ -1065,7 +964,7 @@
                 updateTicksStep: function () {
                     var $e = info.isFixedHandle ? (opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem) : elemOrig.$wrapper,
                         size = info.isHoriz ? $e.width() : $e.height();
-                    this.ticksStep = size*(1 - opts.paddingStart)*(1 - opts.paddingEnd)/(opts.max - opts.min);
+                    this.ticksStep = size*(1 - opts.paddingStart - opts.paddingEnd)/(opts.max - opts.min);
                     this.startPixel = size*(opts.flipped ? opts.paddingEnd : opts.paddingStart);
                 },
                 init: function () {
@@ -1113,9 +1012,6 @@
                     elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
                 }
                 elemHandle.$elem1st.add(elemHandle.$elem2nd).appendTo(elemOrig.$wrapper);
-
-                info.usingScaleTransf = !opts.ruler.visible && (util.isDefined(elemHandle.$elem1st.css('-moz-transform')) || util.isDefined(elemHandle.$elem1st.css('-o-transform')));
-                elemMagnif.applyMeasurements();
 
                 if (opts.enabled) {
                     if (Math.abs(opts.handle.mousewheel) > 0.5) {
@@ -1182,29 +1078,16 @@
                 }
                 $elem.triggerHandler('create.rsSliderLens');
             },
-            updateHandles = function (values, flipped) {
+            updateHandles = function (values) {
                 if (info.doubleHandles) {
-                    setValue(flipped ? info.getCurrValue(values[0]) : values[0], flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
-                    setValue(flipped ? info.getCurrValue(values[1]) : values[1], flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
+                    setValue(info.getCurrValue(values[0]), opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
+                    setValue(info.getCurrValue(values[1]), opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
                     events.processFinalChange(true);
                     events.processFinalChange(false);
                 } else {
-                    setValue(flipped ? info.getCurrValue(values) : values, elemHandle.$elem1st, info.isStepDefined);
+                    setValue(info.getCurrValue(values), elemHandle.$elem1st, info.isStepDefined);
                     events.processFinalChange(true);
                 }
-            },
-            getHandleHotPoint = function ($handleElem) {
-                if (info.doubleHandles) {
-                    if ($handleElem === elemHandle.$elem1st) {
-                        // top/left handle: measure point is located on the handle bottom/right side
-                        return opts.handle.size;
-                    } else {
-                        // bottom/right handle: measure point is located on the handle up/left side
-                        return 0;
-                    }
-                }
-                // one handle: measure point is located on the handle center
-                return opts.handle.size / 2;
             },
             checkLimits = function (value) {
                 var limit = info.isRangeFromToDefined ? info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) : opts.min;
@@ -1235,7 +1118,7 @@
                     valueNoMinPx = valueNoMin;
 
                 if (info.isStepDefined) {
-                    valueNoMin = Math.round(valueNoMin / opts.step) * opts.step;
+                    valueNoMin = Math.round(valueNoMin/opts.step)*opts.step;
                     if (info.isRangeFromToDefined) {
                         // make sure the handle is within range limits
                         var rangeBoundary = info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min;
@@ -1285,8 +1168,6 @@
                 }
                 elemRange.update(-pos, isFirstHandle);
                 elemMagnif.updateRanges(-pos, isFirstHandle);
-
-                //elemMagnif.move(onlyOneHandle, valuePixel, getHandleHotPoint($handleElem) - (info.beginOffset + valuePixel) * opts.handle.zoom);
 
                 if (info.isInputTypeRange && onlyOneHandle) {
                     $elem.attr('value', info.getCurrValue(info.currValue[0]));
@@ -1713,7 +1594,7 @@
                 loseFocus: function (event) {
                     if (panUtil.$animObj) {
                         // lost focus while a focused handle was still moving, so restore the focus back to the moving handle
-                        if (!!panUtil.$handle) {
+                        if (panUtil.$handle) {
                             setTimeout(function () {
                                 panUtil.$handle.focus();
                             });
@@ -1754,11 +1635,11 @@
                         panRangeUtil.origPixelLimits.from = info.fromPixel;
                         panRangeUtil.origPixelLimits.to = info.toPixel;
                         panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemOrig.offsetPos.value().left : event.pageY - elemOrig.offsetPos.value().top;
-                        panRangeUtil.dragValue[0] = (info.currValue[0] - opts.min) * info.ticksStep;
+                        panRangeUtil.dragValue[0] = (info.currValue[0] - opts.min)*info.ticksStep;
                         panRangeUtil.dragged = false;
 
                         if (info.doubleHandles) {
-                            panRangeUtil.dragValue[1] = (info.currValue[1] - opts.min) * info.ticksStep;
+                            panRangeUtil.dragValue[1] = (info.currValue[1] - opts.min)*info.ticksStep;
                             if (!info.isRangeFromToDefined) {
                                 panRangeUtil.origPixelLimits.from = panRangeUtil.dragValue[0] + info.beginOffset;
                                 panRangeUtil.origPixelLimits.to = panRangeUtil.dragValue[1] + info.beginOffset;
@@ -1781,8 +1662,8 @@
                         if (info.isRangeFromToDefined) {
                             info.fromPixel = candidateFromPixel;
                             info.toPixel = candidateToPixel;
-                            var range0 = info.getCurrValue((info.fromPixel - info.beginOffset - 1) / info.ticksStep + opts.min),
-                                range1 = info.getCurrValue((info.toPixel - info.beginOffset + 1) / info.ticksStep + opts.min);
+                            var range0 = info.getCurrValue((info.fromPixel - info.beginOffset - 1)/info.ticksStep + opts.min),
+                                range1 = info.getCurrValue((info.toPixel - info.beginOffset + 1)/info.ticksStep + opts.min);
                             opts.range = opts.flipped ? [range1, range0] : [range0, range1];
                         }
 
@@ -1841,7 +1722,7 @@
                 }
             };
         init();
-        updateHandles(opts.value, opts.flipped);
+        updateHandles(opts.value);
     };
     
     $.fn.rsSliderLens = function (options) {
@@ -1959,22 +1840,7 @@
             classHandle2: 'handle2',
             classHighlightRange: 'range',                        // range bar (used when range is not false)
             classHighlightRangeDraggable: 'drag',                           // added to the range bar when user can drag it
-            classDragging: 'dragging',                         // style applied while the handle is being dragged by the mouse
-
-
-            classSliderlensHoriz: 'sliderlens-horiz',                       // class added to the original horizontal slider markup and to the unscaled canvas (when ruler is used)
-            classSliderlensVert: 'sliderlens-vert',                         // class added to the original vertical slider markup and to the unscaled canvas (when ruler is used)
-            classSliderLensHorizOverflow: 'sliderlens-horiz-overflow',      // class added to the parent of the original horizontal slider markup and to the unscaled canvas (when ruler is used).
-            classSliderLensVertOverflow: 'sliderlens-vert-overflow',        // class added to the parent of the original vertical slider markup and to the unscaled canvas (when ruler is used).
-            classHorizHandle: 'sliderlens-horiz-handle round flare',             // non fixed handle used in in horizontal sliders
-            classVertHandle: 'sliderlens-vert-handle round flare',               // non fixed handle used in in vertical sliders
-            classHorizFixedHandle: 'sliderlens-horiz-fixedhandle round flare',   // fixed handle used in in horizontal sliders
-            classVertFixedHandle: 'sliderlens-vert-fixedhandle round flare',     // fixed handle used in in vertical sliders
-            classHorizHandle1: 'sliderlens-horiz-handle1 round flare',           // non fixed leftmost handle in horizontal sliders
-            classHorizHandle2: 'sliderlens-horiz-handle2 round flare',           // non fixed rightmost handle in horizontal sliders
-            classVertHandle1: 'sliderlens-vert-handle1 round flare',             // non fixed topmost handle in vertical sliders
-            classVertHandle2: 'sliderlens-vert-handle2 round flare',             // non fixed bottommost handle in vertical sliders
-            classHandleDisabled: 'sliderlens-disabled'                     // disabled handle
+            classDragging: 'dragging'                         // style applied while the handle is being dragged by the mouse
         },
 
         // handle is the cursor that the user can drag around to select values
