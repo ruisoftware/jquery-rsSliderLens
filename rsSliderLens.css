@@ -38,6 +38,13 @@
   background-color: blue;
 }
 
+.sliderlens > .range.drag {
+  cursor: ew-resize;
+}
+.sliderlens.vert > .range.drag {
+  cursor: ns-resize;
+}
+
 
 .v {
   display: inline-block;
@@ -51,7 +58,6 @@
   background-color: #aaa;
   box-shadow: 0 0 2px black;
   opacity: .6;
-  overflow: visible !important;
 }
 
 .sliderlens {

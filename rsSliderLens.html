@@ -13,7 +13,8 @@
             //value: [40, 50],
             min: 20,
             max: 60,
-            step: 5,
+            step: 10,
+            enabled: true,
             snapOnDrag: false,
             contentOffset: .5,
             paddingStart: 0.2,
@@ -25,20 +26,20 @@
               zoom: 2
             },
             range: {
-              type: [30, 40]
+              type: [20, 55],
+              relativePos: 1,
+              draggable: true
             },
             ruler: {
-              relativeSize: 2,
               labels: {
-                relativePos: .7,
-                //values: [30],
+                relativePos: 0.5,
                 onSvgTransform: function (x, y) {
-                  //return 'rotate(45 ' + x + ',' + y + ')';
+                    //return 'rotate(45 ' + x + ',' + y + ')';
                 }
               },
               tickMarks: {
                 short: {
-                  relativePos:.5,
+                  relativePos: .5,
                   step: 2
                 },
                 long: {
