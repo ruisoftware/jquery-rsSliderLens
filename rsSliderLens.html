@@ -9,7 +9,7 @@
     <script>
         $(document).ready(function () {
            $("input[type=range], .h, .v").rsSliderLens({
-            fixedHandle: .35,
+            //fixedHandle: .35,
             //value: [40, 50],
             min: 20,
             max: 60,
@@ -21,30 +21,28 @@
             paddingEnd: 0.1,
             flipped: false,
             handle: {
-              relativePos: .5,
-              //otherSize: 2,
+              pos: .5,
               zoom: 2
             },
             range: {
               type: [20, 55],
-              relativePos: 1,
               draggable: true
             },
             ruler: {
               labels: {
-                relativePos: 0.5,
+                pos: 0.5,
                 onSvgTransform: function (x, y) {
                     //return 'rotate(45 ' + x + ',' + y + ')';
                 }
               },
               tickMarks: {
                 short: {
-                  relativePos: .5,
+                  pos: .5,
                   step: 2
                 },
                 long: {
-                  relativePos: 0.05,
-                  relativeSize: .9,
+                  pos: 0.05,
+                  size: .9,
                   stroke: 'red'
                 }
               },

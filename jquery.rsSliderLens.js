@@ -1,7 +1,3 @@
-// tests TODO
-// instantiate a new plugin with disabled state. Then call setter to enabled it, then test if tabindex attribute works
-
-
 /**
 * jQuery SliderLens - Slider with magnification
 * ====================================================
@@ -52,7 +48,6 @@
                     } else {
                         elemHandle.fixedHandleRelPos = 0;
                     }
-
                     this.width = $elem.width();
                     this.height = $elem.height();
                     if (this.width === 0) {
@@ -95,7 +90,7 @@
                         this.width = this.$wrapper.width();
                         this.height = this.$wrapper.height();
                         if (info.isFixedHandle) {
-                            this[info.isHoriz ? 'width' : 'height'] = opts.ruler.relativeSize*(info.isHoriz ? this.width : this.height);
+                            this[info.isHoriz ? 'width' : 'height'] = opts.ruler.size*(info.isHoriz ? this.width : this.height);
                         }
                     } else {
                         this.width = $elem.width();
@@ -146,12 +141,12 @@
                             };
 
                         if (info.isHoriz) {
-                            css.top = opts.range.relativePos*100 + '%';
-                            css.height = opts.range.size*opts.handle.size*100 + '%';
+                            css.top = opts.range.pos*100 + '%';
+                            css.height = opts.range.size*100 + '%';
                             css.transform = 'translateY(-50%)';
                         } else {
-                            css.left = opts.range.relativePos*100 + '%';
-                            css.width = opts.range.size*opts.handle.size*100 + '%';
+                            css.left = opts.range.pos*100 + '%';
+                            css.width = opts.range.size*100 + '%';
                             css.transform = 'translateX(-50%)';
                         }
 
@@ -254,7 +249,7 @@
                 getRelativePosition: function () {
                     var contentOffset = opts.ruler.visible || opts.ruler.onDraw ? 0.5 : opts.contentOffset,
                         otherSize = info.isFixedHandle ? 1 : (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize),
-                        pos = ((contentOffset - (info.isFixedHandle ? .5 : opts.handle.relativePos))/otherSize + 0.5)*100 + '%';
+                        pos = ((contentOffset - (info.isFixedHandle ? .5 : opts.handle.pos))/otherSize + 0.5)*100 + '%';
                     return info.isHoriz ? {
                             left: (info.doubleHandles ? '100%' : '50%'),
                             top: pos
@@ -335,7 +330,7 @@
 
                             if (!util.areTheSame(opts.handle.zoom, 1)) {
                                 css['transform'] = 'translate' + info.isHoriz ? 'Y(-50%)' : 'X(-50%)';
-                                css[info.isHoriz ? 'height' : 'width'] = opts.range.size*opts.handle.size*100*opts.handle.zoom + '%';
+                                css[info.isHoriz ? 'height' : 'width'] = opts.range.size*100 + '%';
                             }
                             if (isFirstHandle && elemMagnif.$elemRange1st) {
                                 return elemMagnif.$elemRange1st.css(css);
@@ -418,7 +413,7 @@
                             css.height = '100%';
                             css.transform = 'translateX(-50%)';
                         } else {
-                            css.top = opts.handle.relativePos*100 + '%';
+                            css.top = opts.handle.pos*100 + '%';
                             css.height = (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize)*100 + '%';
                             css.transform = 'translate(-' + (info.doubleHandles ? 100 : 50) + '%, -50%)';
                         }
@@ -430,7 +425,7 @@
                             css.width = '100%';
                             css.transform = 'translateY(-50%)';
                         } else {
-                            css.left = opts.handle.relativePos*100 + '%';
+                            css.left = opts.handle.pos*100 + '%';
                             css.width = (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize)*100 + '%';
                             css.transform = 'translate(-50%, -' + (info.doubleHandles ? 100 : 50) + '%)';
                         }
@@ -1151,14 +1146,14 @@
                                     var step = optsTicks[type].step,
                                         tickStep = (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*usableArea,
                                         points = '',
-                                        s = optsTicks[type].relativePos*(1 - optsTicks[type].relativeSize)*shortest,
+                                        s = optsTicks[type].pos*(1 - optsTicks[type].size)*shortest,
                                         id = type.charAt(0) + (+ new Date()),
                                         url = 'url(#' + id + ')';
 
                                     if (!this.$defs) {
                                         this.$defs = util.createSvgDom('defs');
                                     }
-                                    this.$defs.append(this.getMarker(id, optsTicks[type].relativeSize*shortest, optsTicks[type].stroke));
+                                    this.$defs.append(this.getMarker(id, optsTicks[type].size*shortest, optsTicks[type].stroke));
 
                                     for (var w = padStart; w <= widest - padEnd; w += tickStep) {
                                         points += (info.isHoriz ? w + ',' + s : s + ',' + w) + ' ';
@@ -1191,7 +1186,7 @@
                             renderText = function (value) {
                                 var textData = {},
                                     w = opts.flipped ? opts.max - value : value - opts.min,
-                                    s = opts.ruler.labels.relativePos*shortest/(doScale ? opts.handle.zoom : 1),
+                                    s = opts.ruler.labels.pos*shortest/(doScale ? opts.handle.zoom : 1),
                                     svgTextTransform;
                                 w = w/range*usableArea/(doScale ? opts.handle.zoom : 1) + (doScale ? padStart/opts.handle.zoom : padStart);
                                 textData.x = info.isHoriz ? w : s;
@@ -1773,12 +1768,12 @@
                         // If greater than 1, the content is magnified.
                         // If 1, the content remains the same size.
                         // If smaller than 1, the content is shrinked.
-            relativePos: 0.5,  // Indicates the middle handle relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
-                               // NOT aplicable for fixed handled sliders.
-                               // For horizontal sliders, a value of 0 aligns the middle of the handle to the top of the slider,
-                               // 1 aligns the middle of the handle to the bottom of the slider.
-                               // For vertical sliders, a value of 0 aligns the middle of the handle to the left of the slider,
-                               // 1 aligns the middle of the handle to the right of the slider.
+            pos: 0.5,   // Indicates the middle handle relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                        // NOT aplicable for fixed handled sliders.
+                        // For horizontal sliders, a value of 0 aligns the middle of the handle to the top of the slider,
+                        // 1 aligns the middle of the handle to the bottom of the slider.
+                        // For vertical sliders, a value of 0 aligns the middle of the handle to the left of the slider,
+                        // 1 aligns the middle of the handle to the right of the slider.
             otherSize: 'zoom', // Relative handle height (for horizontal sliders) or relative handle width (for vertical sliders). Type: string or floating point number >= 0.
                                // NOT aplicable for fixed handled sliders.
                                // If set to string 'zoom' the otherSize is set according to the handle.zoom value,
@@ -1804,7 +1799,7 @@
                                 // Note: If the plug-in is attached to a DOM element that contains no content at all (no children),
                                 //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
                                 // There is more to this, please see onDraw below.
-            relativeSize: 1.5,  // Specifies the relative width (for horizontal sliders) or height (for vertical sliders) of the svg ruler. Type: floating pointer number >= 0.
+            size: 1.5,          // Specifies the relative width (for horizontal sliders) or height (for vertical sliders) of the svg ruler. Type: floating pointer number >= 0.
                                 // Only applicable to fixed handle sliders.
                                 // A value of 1, means that the ruler has the same (100%) width of the parent container (or height for vertical sliders).
                                 // A value of 1.7, means that the ruler is wider (or taller) 170% than the parent container.
@@ -1817,7 +1812,7 @@
                                         //           true - Same as 'step'.
                                         //          false - Values are not displayed.
                                         //   number array - Only the numbers in the array are displayed.
-                relativePos: 0.5,       // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+                pos: 0.5,               // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
                 onSvgTransform: null    // For each label, the result of this event is added as a transform parameter to the SVG text element. Type: function (x, y).
@@ -1837,10 +1832,10 @@
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
                     step: 1,            // Interval between each short tick mark. Type: floating number.
                     stroke: 'black',    // Short tick mark color. Type: string.
-                    relativePos: .1,    // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: .1,            // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    relativeSize: .15   // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: .15           // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 },
@@ -1848,10 +1843,10 @@
                     visible: true,      // Determines whether long tick marks are visible. Type: boolean.
                     step: 10,           // Interval between each long tick mark. Type: floating number.
                     stroke: 'black',    // Long tick mark color. Type: string.
-                    relativePos: .1,    // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: .1,            // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    relativeSize: .3    // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: .3            // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
@@ -1876,7 +1871,7 @@
                               //   false - range cannot be dragged.
                               //    true - range can be dragged (only if type is 'between', true or [from, to])
                               // Not applicable for fixed handle sliders.
-            relativePos: .5,  // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
+            pos: .5,          // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the vertical position of the horizontal range, with 0 aligned to the top of the slider, and 1 to the bottom.
                               // For vertical sliders, represents the horizontal position of the vertical range, with 0 aligned to the left of the slider, and 1 to the right.
             size: .25         // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
