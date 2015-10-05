@@ -11,6 +11,7 @@
 * For info, please scroll to the bottom.
 */
 (function ($, undefined) {
+    'use strict';
     var SliderLensClass = function ($elem, opts) {
         var
             // content that appears outside the handle 
@@ -27,7 +28,7 @@
                     if (info.isFixedHandle) {
                         css[info.isHoriz ? 'height' : 'width'] = '100%';
                     } else {
-                        css['height'] = css['width'] = '100%';
+                        css.height = css.width = '100%';
                     }
                     this.$svg = util.createSvg(this.width, this.height).css(css);
                     if (opts.ruler.visible) {
@@ -174,7 +175,7 @@
                             }
                         }
 
-                        this.$range = $("<div>").css(css).addClass(opts.style.classHighlightRange);
+                        this.$range = $('<div>').css(css).addClass(opts.style.classHighlightRange);
                         if (info.canDragRange) {
                             this.$range.addClass(opts.style.classHighlightRangeDraggable);
                         }
@@ -249,7 +250,7 @@
                 getRelativePosition: function () {
                     var contentOffset = opts.ruler.visible || opts.ruler.onDraw ? 0.5 : opts.contentOffset,
                         otherSize = info.isFixedHandle ? 1 : (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize),
-                        pos = ((contentOffset - (info.isFixedHandle ? .5 : opts.handle.pos))/otherSize + 0.5)*100 + '%';
+                        pos = ((contentOffset - (info.isFixedHandle ? 0.5 : opts.handle.pos))/otherSize + 0.5)*100 + '%';
                     return info.isHoriz ? {
                             left: (info.doubleHandles ? '100%' : '50%'),
                             top: pos
@@ -257,7 +258,6 @@
                             left: pos,
                             top: (info.doubleHandles ? '100%' : '50%')
                         };
-                    ;
                 },
                 initClone: function () {
                     this.$elem1st = $elem.clone().css('transform-origin', '0 0').
@@ -324,12 +324,12 @@
                                 default:
                                     if (info.isRangeFromToDefined) {
                                         css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep*opts.handle.zoom + 'px';
-                                        css['right'] = css['bottom'] = '';
+                                        css.right = css.bottom = '';
                                     }
                             }
 
                             if (!util.areTheSame(opts.handle.zoom, 1)) {
-                                css['transform'] = 'translate' + info.isHoriz ? 'Y(-50%)' : 'X(-50%)';
+                                css.transform = 'translate' + info.isHoriz ? 'Y(-50%)' : 'X(-50%)';
                                 css[info.isHoriz ? 'height' : 'width'] = opts.range.size*100 + '%';
                             }
                             if (isFirstHandle && elemMagnif.$elemRange1st) {
@@ -430,12 +430,12 @@
                             css.transform = 'translate(-50%, -' + (info.doubleHandles ? 100 : 50) + '%)';
                         }
                     }
-                    this.$elem1st = elemMagnif.$elem1st.wrap("<div>").parent().
+                    this.$elem1st = elemMagnif.$elem1st.wrap('<div>').parent().
                         addClass(info.doubleHandles ? opts.style.classHandle1 : opts.style.classHandle).css(css);
                     this.bindTabEvents(true);
                     
                     if (info.doubleHandles) {
-                        this.$elem2nd = elemMagnif.$elem2nd.wrap("<div>").parent().
+                        this.$elem2nd = elemMagnif.$elem2nd.wrap('<div>').parent().
                             addClass(opts.style.classHandle2).css(css).css('transform', 'translate' + (info.isHoriz ? 'Y(-50%)' : 'X(-50%)'));
                         this.bindTabEvents(false);
                     }
@@ -539,6 +539,7 @@
                                 break;
                             case key.pgUp:
                             case key.pgDown:
+                                /*jshint -W030 */
                                 event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits)
                                                          : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits);
                                 break;
@@ -605,6 +606,7 @@
                             } else {
                                 return info.getCurrValue(info.currValue[0]);
                             }
+                            break;
                         case 'range':
                             return opts.range.type;
                         case 'enabled':
@@ -622,7 +624,7 @@
                             var limits = [info.isRangeFromToDefined ? info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) : opts.min,
                                           info.isRangeFromToDefined ? info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) : opts.max];
  
-                            if (values[1] != null) {
+                            if (values[1] !== null) {
                                 values[1] = info.getCurrValue(values[1]);
                                 if (values[1] < limits[0]) { values[1] = limits[0]; }
                                 if (values[1] > limits[1]) { values[1] = limits[1]; }
@@ -711,7 +713,7 @@
                     }
                     return events.onGetter(event, field);
                 },
-                onResizeUpdate: function (event) {
+                onResizeUpdate: function () {
                     elemMagnif.resizeUpdate();
                 },
                 onChange: function (event, value, isFirstHandle) {
@@ -724,7 +726,7 @@
                         opts.onCreate(event);
                     }
                 },
-                onDestroy: function (event) {
+                onDestroy: function () {
                     $elem.add(elemOrig.$wrapper).add(elemOrig.$canvas).add(elemRange.$range).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).
                         unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
                     
@@ -927,7 +929,7 @@
                     opts.step = opts.step < 0 ? 0 : (opts.step > delta ? delta : opts.step);
                     this.isStepDefined = opts.step > 0.00005;
                     this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
-                    this.isInputTypeRange = $elem.is("input[type=range]");
+                    this.isInputTypeRange = $elem.is('input[type=range]');
                     if (util.isAlmostZero(opts.handle.zoom)) {
                         opts.handle.zoom = 1;
                     }
@@ -1071,11 +1073,11 @@
                     return v !== undefined && v !== null;
                 },
                 toInt: function (str) {
-                    var value = !str || str == 'auto' || str == '' ? 0 : parseInt(str, 10);
+                    var value = !str || str === 'auto' || str === '' ? 0 : parseInt(str, 10);
                     return isNaN(value) ? 0 : value;
                 },
                 toFloat: function (str) {
-                    var value = !str || str == 'auto' || str == '' ? 0.0 : parseFloat(str);
+                    var value = !str || str === 'auto' || str === '' ? 0.0 : parseFloat(str);
                     return isNaN(value) ? 0.0 : value;
                 },
                 roundToDecimalPlaces: function (num, decimals) {
@@ -1179,6 +1181,7 @@
                     if ((opts.ruler.labels.values === 'step' || opts.ruler.labels.values === true) && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
                         var $allText = util.createSvgDom('g'),
                             range = opts.max - opts.min,
+                            x,
                             withinBounds = function (value) {
                                 value = +value; // strToInt
                                 return value >= opts.min && value <= opts.max;
@@ -1203,13 +1206,14 @@
                             };
                         if (opts.ruler.labels.values instanceof Array) {
                             opts.ruler.labels.values.sort(function (a, b) { return a - b; });
-                            for (var x in opts.ruler.labels.values) {
+                            for (x in opts.ruler.labels.values) {
+                                if (opts.ruler.labels.values)
                                 if (withinBounds(opts.ruler.labels.values[x])) {
                                     renderText(opts.ruler.labels.values[x]);
                                 }
                             }
                         } else {
-                            for (var x = opts.min; x <= opts.max; x += opts.step) {
+                            for (x = opts.min; x <= opts.max; x += opts.step) {
                                 renderText(x);
                             }
                         }
@@ -1221,7 +1225,7 @@
                     if (typeof speed === 'string') {
                         ms = $.fx.speeds[speed];
                         if (ms === undefined) {
-                            ms = $.fx.speeds['_default'];
+                            ms = $.fx.speeds._default;
                         }
                     }
                     if (ms === undefined) {
@@ -1241,7 +1245,7 @@
                 fixedHandleStartDragPos: 0,
                 textSelection: function (enable) {
                     var value = enable ? '' : 'none';
-                    $("body").css({
+                    $('body').css({
                         '-webkit-touch-callout': value,
                         '-webkit-user-select': value,
                         '-khtml-user-select': value,
@@ -1462,7 +1466,7 @@
                         panUtil.gotFocus();
                     }
                 },
-                loseFocus: function (event) {
+                loseFocus: function () {
                     if (panUtil.$animObj) {
                         // lost focus while a focused handle was still moving, so restore the focus back to the moving handle
                         if (panUtil.$handle) {
@@ -1554,8 +1558,7 @@
 
             init = function () {
                 info.initVars();
-                var noRangeCreatedBefore = elemRange.$range === null,
-                    noIEdrag = function(elem) {
+                var noIEdrag = function(elem) {
                         if (elem) { elem[0].ondragstart = elem[0].onselectstart = function () { return false; }; }
                     };
 
@@ -1639,7 +1642,7 @@
     };
     
     $.fn.rsSliderLens = function (options) {
-        var option = function (options) {
+        var option = function () {
             if (typeof arguments[0] === 'string') {
                 var op = arguments.length == 1 ? 'getter' : (arguments.length == 2 ? 'setter' : null);
                 if (op) {
@@ -1678,10 +1681,10 @@
             var $this = $(this),
                 allOpts = $.extend(true, {}, opts),
                 toFloat = function (str) {
-                    var value = !str || str == 'auto' || str == '' ? 0.0 : parseFloat(str);
+                    var value = !str || str === 'auto' || str === '' ? 0.0 : parseFloat(str);
                     return isNaN(value) ? 0.0 : value;
                 };
-            if ($this.is("input[type=range]")) {
+            if ($this.is('input[type=range]')) {
                 var attrValue = $this.attr('value'),
                     doubleHandles = opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
                     
@@ -1759,7 +1762,7 @@
 
         // handle is the cursor that the user can drag around to select values
         handle: {
-            size: .3,   // Relative handle size. Type: Floating number between 0 and 1, inclusive.
+            size: 0.3,  // Relative handle size. Type: Floating number between 0 and 1, inclusive.
                         // For horizontal sliders, it is the handle width relative to the slider width, e.g.,
                         // if slider width is 500px and handle size is .3, then handle size becomes (500px * 30%) = 150px in width.
                         // For vertical sliders, it is the handle height relative to the slider height.
@@ -1832,10 +1835,10 @@
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
                     step: 1,            // Interval between each short tick mark. Type: floating number.
                     stroke: 'black',    // Short tick mark color. Type: string.
-                    pos: .1,            // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.1,           // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: .15           // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.15          // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 },
@@ -1843,10 +1846,10 @@
                     visible: true,      // Determines whether long tick marks are visible. Type: boolean.
                     step: 10,           // Interval between each long tick mark. Type: floating number.
                     stroke: 'black',    // Long tick mark color. Type: string.
-                    pos: .1,            // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.1,           // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: .3            // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.3           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
@@ -1871,10 +1874,10 @@
                               //   false - range cannot be dragged.
                               //    true - range can be dragged (only if type is 'between', true or [from, to])
                               // Not applicable for fixed handle sliders.
-            pos: .5,          // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
+            pos: 0.5,         // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the vertical position of the horizontal range, with 0 aligned to the top of the slider, and 1 to the bottom.
                               // For vertical sliders, represents the horizontal position of the vertical range, with 0 aligned to the left of the slider, and 1 to the right.
-            size: .25         // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
+            size: 0.25        // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the height of the horizontal range.
                               // For vertical sliders, represents the width of the vertical range.
         },
@@ -1891,5 +1894,4 @@
     // "value", "min", "max", "step" and "enabled" are set according to their respective html attributes present in the markup.
     // A particular case is the "enabled" option that retrieves the value from the "disabled" html attribute.
     // If the markup does not contain these attributes, then these options take their values from the rsSliderLens constructor instead.
-
 })(jQuery);
