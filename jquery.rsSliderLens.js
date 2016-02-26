@@ -40,15 +40,7 @@
                     this.$svg.prependTo(this.$wrapper);
                     $elem.css('visibility', 'hidden'); // because the svg ruler is used instead of the original slider content
                 },
-                init: function () {
-                    this.tabindexAttr = $elem.attr('tabindex');
-                    this.autofocusable = $elem.attr('autofocus');
-                    info.isFixedHandle = opts.fixedHandle !== false;
-                    if (info.isFixedHandle) {
-                        elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
-                    } else {
-                        elemHandle.fixedHandleRelPos = 0;
-                    }
+                initSize: function () {
                     this.width = $elem.width();
                     this.height = $elem.height();
                     if (this.width === 0) {
@@ -60,17 +52,40 @@
                         $elem.height(25);
                     }
                     info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
+                },
+                init: function () {
+                    this.tabindexAttr = $elem.attr('tabindex');
+                    this.autofocusable = $elem.attr('autofocus');
+                    info.isFixedHandle = opts.fixedHandle !== false;
+                    if (info.isFixedHandle) {
+                        elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
+                    } else {
+                        elemHandle.fixedHandleRelPos = 0;
+                    }
+                    this.initSize();
+                    if (!info.hasRuler) {
+                        if (info.isHoriz) {
+                            $elem.css('width', 'auto');
+                            this.width = $elem.width();
+                            this.initSize();
+                        } else {
+                            $elem.css('height', 'auto');
+                            this.height = $elem.height();
+                            this.initSize();
+                        }
+                    }
 
                     var elemPosition = $elem.css('position'),
-                        elemPos = $elem.position();
-
-                    this.$wrapper = $elem.css({
-                        display: 'inline-block',
-                        position: 'relative',
-                        'white-space': 'nowrap'
-                    }).css(
-                        info.isHoriz ? 'top' : 'left', opts.contentOffset*100 + '%'
-                    ).wrap('<div>').parent().
+                        elemPos = $elem.position(),
+                        elemCss = {
+                            display: 'inline-block',
+                            position: 'relative',
+                            'white-space': 'nowrap'
+                        };
+                    if (!info.isHoriz) {
+                        elemCss.left = opts.contentOffset*100 + '%';
+                    }
+                    this.$wrapper = $elem.css(elemCss).wrap('<div>').parent().
                         css({
                             overflow: (info.isFixedHandle ? 'hidden' : 'visible'),
                             display: 'inline-block'
@@ -83,11 +98,15 @@
                     if (info.isFixedHandle) {
                         $elem.css(info.isHoriz ? 'left' : 'top', elemHandle.fixedHandleRelPos*100 + '%');
                     } else {
-                        $elem.css('transform', 'translate' + (info.isHoriz ? 'Y' : 'X') + '(-50%)');
+                        if (info.isHoriz) {
+                            $elem.css('transform', 'translateY(' + (opts.contentOffset*100 - 50) + '%)');
+                        } else {
+                            $elem.css('transform', 'translateX(-50%)');
+                        }
                     }
 
                     // set again width and height, as css set above might change dimensions
-                    if (opts.ruler.visible || opts.ruler.onDraw) {
+                    if (info.hasRuler) {
                         this.width = this.$wrapper.width();
                         this.height = this.$wrapper.height();
                         if (info.isFixedHandle) {
@@ -195,7 +214,7 @@
                     $range.css(prop, position + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]))*zoom + 'px');
                 },
                 update: function (pos, isFirstHandle) {
-                    var $e = opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem,
+                    var $e = info.hasRuler ? elemOrig.$svg : $elem,
                         relPos;
                     switch (opts.range.type) {
                         case 'min':
@@ -248,7 +267,7 @@
                 width: 0,
                 height: 0,
                 getRelativePosition: function () {
-                    var contentOffset = opts.ruler.visible || opts.ruler.onDraw ? 0.5 : opts.contentOffset,
+                    var contentOffset = info.hasRuler ? 0.5 : opts.contentOffset,
                         otherSize = info.isFixedHandle ? 1 : (opts.handle.otherSize === 'zoom' ? opts.handle.zoom : opts.handle.otherSize),
                         pos = ((contentOffset - (info.isFixedHandle ? 0.5 : opts.handle.pos))/otherSize + 0.5)*100 + '%';
                     return info.isHoriz ? {
@@ -262,6 +281,9 @@
                 initClone: function () {
                     this.$elem1st = $elem.clone().css('transform-origin', '0 0').
                         css(this.getRelativePosition()).removeAttr('tabindex autofocus');
+                    if (info.isHoriz && info.isFixedHandle && !info.hasRuler) {
+                        this.$elem1st.css('top', '');
+                    }
 
                     if (info.doubleHandles) {
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
@@ -277,7 +299,6 @@
                     if (opts.ruler.onDraw) {
                         opts.ruler.onDraw(this.$elem1st, this.width, this.height, util.createSvgDom);
                     }
-
                     if (info.doubleHandles) {
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
@@ -286,7 +307,7 @@
                 init: function () {
                     this.width = elemOrig.width*opts.handle.zoom;
                     this.height = elemOrig.height*opts.handle.zoom;
-                    if (opts.ruler.visible || opts.ruler.onDraw) { 
+                    if (info.hasRuler) { 
                         this.initSvgHandle();
                     } else {
                         this.initClone();
@@ -410,7 +431,7 @@
                         if (info.isFixedHandle) {
                             css.left = this.fixedHandleRelPos*100 + '%';
                             css.top = 0;
-                            css.height = '100%';
+                            css.bottom = 0;
                             css.transform = 'translateX(-50%)';
                         } else {
                             css.top = opts.handle.pos*100 + '%';
@@ -422,7 +443,7 @@
                         if (info.isFixedHandle) {
                             css.top = this.fixedHandleRelPos*100 + '%';
                             css.left = 0;
-                            css.width = '100%';
+                            css.right = 0;
                             css.transform = 'translateY(-50%)';
                         } else {
                             css.left = opts.handle.pos*100 + '%';
@@ -837,10 +858,9 @@
                 isFixedHandle: false,
                 isInputTypeRange: false, // whether the markup for this plugin in an <input type="range">
                 isHoriz: true,
-
+                hasRuler: false,
                 fromPixel: 0,
                 toPixel: 0,
-
                 doubleHandles: false,
                 isRangeFromToDefined: false,
                 isStepDefined: false,
@@ -930,6 +950,7 @@
                     this.isStepDefined = opts.step > 0.00005;
                     this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
                     this.isInputTypeRange = $elem.is('input[type=range]');
+                    this.hasRuler = opts.ruler.visible || opts.ruler.onDraw;
                     if (util.isAlmostZero(opts.handle.zoom)) {
                         opts.handle.zoom = 1;
                     }
@@ -940,9 +961,12 @@
                     if (opts.keyboard.numPages < 1) {
                         opts.keyboard.numPages = 5;
                     }
+                    if (info.doubleHandles) {
+                        opts.handle.size /= 2;
+                    }
                 },
                 updateTicksStep: function () {
-                    var $e = info.isFixedHandle ? (opts.ruler.visible || opts.ruler.onDraw ? elemOrig.$svg : $elem) : elemOrig.$wrapper,
+                    var $e = info.isFixedHandle ? (info.hasRuler ? elemOrig.$svg : $elem) : elemOrig.$wrapper,
                         size = info.isHoriz ? $e.width() : $e.height();
                     this.ticksStep = size*(1 - opts.paddingStart - opts.paddingEnd)/(opts.max - opts.min);
                     this.startPixel = size*(opts.flipped ? opts.paddingEnd : opts.paddingStart);
@@ -1040,16 +1064,21 @@
 
                     info.currValue[onlyOneHandle ? 0 : 1] = valueNoMin + opts.min;
                     if (info.isFixedHandle) {
-                        if (opts.ruler.visible || opts.ruler.onDraw) {
+                        if (info.hasRuler) {
                             elemMagnif.$elem1st.css('transform', translate);
                             elemOrig.$svg.css('transform', translate);
                         } else {
-                            elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
-                            $elem.css('transform', translate);
+                            if (info.isHoriz) {
+                                elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate.replace(/-50%\)$/, (opts.contentOffset*100/opts.handle.zoom - 50) + '%)'));
+                                $elem.css('transform', 'translate(' + pos + '%, ' + (opts.contentOffset*100 - 50) + '%)');
+                            } else {
+                                elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
+                                $elem.css('transform', 'translate(-50%, ' + (pos + elemHandle.fixedHandleRelPos*100) + '%)');
+                            }
                         }
                     } else {
                         $handleElem.css(info.isHoriz ? 'left' : 'top', (-pos) + '%');
-                        (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', opts.ruler.visible || opts.ruler.onDraw ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
+                        (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', info.hasRuler ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
                         elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                     }
                     elemRange.update(-pos, isFirstHandle);
@@ -1127,7 +1156,7 @@
 
                     if (optsTicks.short.visible || optsTicks.long.visible) {
                         var marker = {
-                                getMarker: function (id, size, stroke) {
+                                getMarker: function (id, size) {
                                     var scale = doScale ? opts.handle.zoom : 1;
                                     return util.createSvgDom('marker', {
                                         id: id,
@@ -1140,7 +1169,6 @@
                                         y1: info.isHoriz ? 0 : scale/2,
                                         x2: info.isHoriz ? scale/2 : size,
                                         y2: info.isHoriz ? size : scale/2,
-                                        stroke: stroke,
                                         'stroke-width': scale
                                     }));
                                 },
@@ -1155,7 +1183,7 @@
                                     if (!this.$defs) {
                                         this.$defs = util.createSvgDom('defs');
                                     }
-                                    this.$defs.append(this.getMarker(id, optsTicks[type].size*shortest, optsTicks[type].stroke));
+                                    this.$defs.append(this.getMarker(id, optsTicks[type].size*shortest));
 
                                     for (var w = padStart; w <= widest - padEnd; w += tickStep) {
                                         points += (info.isHoriz ? w + ',' + s : s + ',' + w) + ' ';
@@ -1165,7 +1193,7 @@
                                         'marker-start': url,
                                         'marker-mid': url,
                                         'marker-end': url,
-                                        'stroke': 'transparent'
+                                        stroke: 'transparent'
                                     }));
                                 }
                             };
@@ -1179,7 +1207,11 @@
                     }
 
                     if ((opts.ruler.labels.values === 'step' || opts.ruler.labels.values === true) && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
-                        var $allText = util.createSvgDom('g'),
+                        var gAttrs = {
+                                'dominant-baseline': 'central',
+                                'text-anchor': 'middle'
+                            },
+                            $allText,
                             range = opts.max - opts.min,
                             x,
                             withinBounds = function (value) {
@@ -1187,23 +1219,25 @@
                                 return value >= opts.min && value <= opts.max;
                             },
                             renderText = function (value) {
-                                var textData = {},
+                                var pntX, pntY,
                                     w = opts.flipped ? opts.max - value : value - opts.min,
                                     s = opts.ruler.labels.pos*shortest/(doScale ? opts.handle.zoom : 1),
-                                    svgTextTransform;
+                                    textAttrs;
                                 w = w/range*usableArea/(doScale ? opts.handle.zoom : 1) + (doScale ? padStart/opts.handle.zoom : padStart);
-                                textData.x = info.isHoriz ? w : s;
-                                textData.y = info.isHoriz ? s : w;
-                                svgTextTransform = opts.ruler.labels.onSvgTransform ? opts.ruler.labels.onSvgTransform(textData.x, textData.y) : undefined;
-                                if (typeof svgTextTransform === 'string') {
-                                    textData.transform = (doScale ? 'scale(' + opts.handle.zoom + ') ' : '') + svgTextTransform;
-                                } else {
-                                    if (doScale) {
-                                        textData.transform = 'scale(' + opts.handle.zoom + ')';
-                                    }
+                                pntX = info.isHoriz ? w : s;
+                                pntY = info.isHoriz ? s : w;
+                                textAttrs = opts.ruler.labels.onCustomAttrs ? opts.ruler.labels.onCustomAttrs(value, pntX, pntY) : undefined;
+                                if (Object.prototype.toString.call(textAttrs) !== '[object Object]') {
+                                    textAttrs = {};
                                 }
-                                $allText.append(util.createSvgDom('text', textData).append(value));
+                                textAttrs.x = pntX;
+                                textAttrs.y = pntY;
+                                $allText.append(util.createSvgDom('text', textAttrs).append(value));
                             };
+                        if (doScale) {
+                            gAttrs.transform = 'scale(' + opts.handle.zoom + ')';
+                        }
+                        $allText = util.createSvgDom('g', gAttrs);
                         if (opts.ruler.labels.values instanceof Array) {
                             opts.ruler.labels.values.sort(function (a, b) { return a - b; });
                             for (x in opts.ruler.labels.values) {
@@ -1556,89 +1590,83 @@
                 }
             },
 
-            init = function () {
-                info.initVars();
-                var noIEdrag = function(elem) {
-                        if (elem) { elem[0].ondragstart = elem[0].onselectstart = function () { return false; }; }
-                    };
-
-                if (info.doubleHandles) {
-                    opts.handle.size /= 2;
-                }
-                elemOrig.init();
-                elemMagnif.init();
-                info.init();
-                elemRange.init();
-                elemMagnif.initRanges();
-                elemHandle.init();
-
-                // insert into DOM
-                if (elemRange.$range) {
-                    elemRange.$range.appendTo(elemOrig.$wrapper);
-                }
-                if (elemMagnif.$elemRange1st) {
-                    elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
-                }
-                if (elemMagnif.$elemRange2nd) {
-                    elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
-                }
-                elemHandle.$elem1st.add(elemHandle.$elem2nd).appendTo(elemOrig.$wrapper);
-
-                $elem.
-                    bind('getter.rsSliderLens', events.onGetter).
-                    bind('setter.rsSliderLens', events.onSetter).
-                    bind('resizeUpdate.rsSliderLens', events.onResizeUpdate).
-                    bind('change.rsSliderLens', events.onChange).
-                    bind('finalchange.rsSliderLens', events.onFinalChange).
-                    bind('create.rsSliderLens', events.onCreate).
-                    bind('destroy.rsSliderLens', events.onDestroy);
-
-                if (Math.abs(opts.handle.mousewheel) > 0.5) {
-                    $elem.
-                        add(elemOrig.$canvas).
-                        add(elemRange.$range).
-                        add(elemHandle.$elem1st).
-                        add(elemHandle.$elem2nd).bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
-                }
-
-                if (info.canDragRange) {
-                    elemRange.$range.
-                        bind('mousedown.rsSliderLens', panRangeUtil.startDrag);
-                }
-                if (info.isFixedHandle) {
-                    elemOrig.$wrapper.
-                        bind('mousedown.rsSliderLens', panUtil.startDrag).
-                        bind('mouseup.rsSliderLens', panUtil.stopDrag);
-                } else {
-                    elemOrig.$wrapper.
-                        bind('mousedown.rsSliderLens', panUtil.startDrag).
-                        bind('mouseup.rsSliderLens', panUtil.stopDrag);
-                    elemHandle.$elem1st.
-                        bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
-                }
-
-                // to prevent the default behaviour in IE when dragging an element
-                noIEdrag($elem);
-                noIEdrag(elemMagnif.$elem1st);
-                noIEdrag(elemHandle.$elem1st);
-                noIEdrag(elemOrig.$canvas);
-                noIEdrag(elemRange.$range);
-                noIEdrag(elemMagnif.$elemRange1st);
-                
-                if (info.doubleHandles) {
-                    noIEdrag(elemMagnif.$elem2nd);
-                    noIEdrag(elemHandle.$elem2nd);
-                    noIEdrag(elemMagnif.$elemRange2nd);
-                    elemHandle.$elem2nd.
-                        bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
-                }
-                if (opts.enabled && info.isAutoFocusable) {
-                    elemHandle.$elem1st.focus();
-                }
-                $elem.triggerHandler('create.rsSliderLens');
-                info.updateHandles(opts.value);
+            noIEdrag = function(elem) {
+                if (elem) { elem[0].ondragstart = elem[0].onselectstart = function () { return false; }; }
             };
-        init();
+
+        info.initVars();
+        elemOrig.init();
+        elemMagnif.init();
+        info.init();
+        elemRange.init();
+        elemMagnif.initRanges();
+        elemHandle.init();
+
+        // insert into DOM
+        if (elemRange.$range) {
+            elemRange.$range.appendTo(elemOrig.$wrapper);
+        }
+        if (elemMagnif.$elemRange1st) {
+            elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
+        }
+        if (elemMagnif.$elemRange2nd) {
+            elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
+        }
+        elemHandle.$elem1st.add(elemHandle.$elem2nd).appendTo(elemOrig.$wrapper);
+
+        $elem.
+            bind('getter.rsSliderLens', events.onGetter).
+            bind('setter.rsSliderLens', events.onSetter).
+            bind('resizeUpdate.rsSliderLens', events.onResizeUpdate).
+            bind('change.rsSliderLens', events.onChange).
+            bind('finalchange.rsSliderLens', events.onFinalChange).
+            bind('create.rsSliderLens', events.onCreate).
+            bind('destroy.rsSliderLens', events.onDestroy);
+
+        if (Math.abs(opts.handle.mousewheel) > 0.5) {
+            $elem.
+                add(elemOrig.$canvas).
+                add(elemRange.$range).
+                add(elemHandle.$elem1st).
+                add(elemHandle.$elem2nd).bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
+        }
+
+        if (info.canDragRange) {
+            elemRange.$range.
+                bind('mousedown.rsSliderLens', panRangeUtil.startDrag);
+        }
+        if (info.isFixedHandle) {
+            elemOrig.$wrapper.
+                bind('mousedown.rsSliderLens', panUtil.startDrag).
+                bind('mouseup.rsSliderLens', panUtil.stopDrag);
+        } else {
+            elemOrig.$wrapper.
+                bind('mousedown.rsSliderLens', panUtil.startDrag).
+                bind('mouseup.rsSliderLens', panUtil.stopDrag);
+            elemHandle.$elem1st.
+                bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
+        }
+
+        // to prevent the default behaviour in IE when dragging an element
+        noIEdrag($elem);
+        noIEdrag(elemMagnif.$elem1st);
+        noIEdrag(elemHandle.$elem1st);
+        noIEdrag(elemOrig.$canvas);
+        noIEdrag(elemRange.$range);
+        noIEdrag(elemMagnif.$elemRange1st);
+        
+        if (info.doubleHandles) {
+            noIEdrag(elemMagnif.$elem2nd);
+            noIEdrag(elemHandle.$elem2nd);
+            noIEdrag(elemMagnif.$elemRange2nd);
+            elemHandle.$elem2nd.
+                bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
+        }
+        if (opts.enabled && info.isAutoFocusable) {
+            elemHandle.$elem1st.focus();
+        }
+        $elem.triggerHandler('create.rsSliderLens');
+        info.updateHandles(opts.value);
     };
     
     $.fn.rsSliderLens = function (options) {
@@ -1741,11 +1769,14 @@
         flipped: false,     // Indicates the direction. Type: boolean.
                             //   false - for horizontal sliders, the minimum is located on the left, maximum on the right. For vertical sliders, the minimum on the top, maximum on the bottom.
                             //   true - for horizontal sliders, the maximum is located on the left, minimum on the right. For vertical sliders, the maximum on the top, minimum on the bottom.
-        contentOffset: 0.5, // For horizontal sliders: Relative vertical position for content.
-                            // For vertical sliders: Relative horizontal position for content. Ignored when SVG ruler is used.
-                            // Type: Floating point number.
+        contentOffset: .4, // Relative position of the content (0% - 100%). Type: Floating number between 0 and 1, inclusive.
+                            // For horizontal sliders: Relative vertical position of the content.
+                            // For vertical sliders: Relative horizontal position for content.
+                            // Only applicable to sliders that show original content. Ignored for sliders with SVG rulers.
         paddingStart: 0,    // Relative start padding (0% - 100%). Type: Floating number between 0 and 1, inclusive.
         paddingEnd: 0,      // Relative end padding (0% - 100%). Type: Floating number between 0 and 1, inclusive.
+                            // On SVG rulers, if the first or last labels are not displayed at all, or partially displayed, then use this to add some extra padding in order for the labels to be displayed correctly.
+                            // When displaying the original content (see ruler.visible property)
         style: {            // CSS style classes. You can use more than one class, separated by a space. Type: string.
             classSlider: 'sliderlens',      // Class added to the wrapper div created at run-time.
             classFixed: 'fixed',            // Class added to the wrapper div created at run-time, when slider has a fixed handle.
@@ -1772,7 +1803,7 @@
                         // If 1, the content remains the same size.
                         // If smaller than 1, the content is shrinked.
             pos: 0.5,   // Indicates the middle handle relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
-                        // NOT aplicable for fixed handled sliders.
+                        // Not aplicable for fixed handled sliders.
                         // For horizontal sliders, a value of 0 aligns the middle of the handle to the top of the slider,
                         // 1 aligns the middle of the handle to the bottom of the slider.
                         // For vertical sliders, a value of 0 aligns the middle of the handle to the left of the slider,
@@ -1797,8 +1828,8 @@
         // Ruler rendering data. Should you decide to use a ruler, SliderLens can automatically render one for you, or you can render a customized one.
         ruler: {
             visible: true,      // Determines whether the SVG ruler is shown. Type: boolean.
-                                // true - svg ruler is displayed.
-                                // false - the original content is displayed.
+                                // true - the original markup content is hidden and a SVG ruler is displayed instead.
+                                // false - the original markup content is displayed.
                                 // Note: If the plug-in is attached to a DOM element that contains no content at all (no children),
                                 //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
                                 // There is more to this, please see onDraw below.
@@ -1815,18 +1846,24 @@
                                         //           true - Same as 'step'.
                                         //          false - Values are not displayed.
                                         //   number array - Only the numbers in the array are displayed.
-                pos: 0.5,               // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+                pos: 0.7,               // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
-                onSvgTransform: null    // For each label, the result of this event is added as a transform parameter to the SVG text element. Type: function (x, y).
-                                        /* Example: to rotate labels 45 degrees use:
+                onCustomAttrs: null     // Event called for each label. Type: function (value, x, y).
+                                        // This event should return an Javascript object with all the attributes that should be applied to a text label.
+                                        // All three parameters are floating point numbers, and represent the current label value and the X and Y coordinates, respectively.
+                                        /* Example: to rotate labels 45 degrees and left justified, use:
                                             $(".myElement").rsSliderLens({
                                                 ruler: {
                                                     labels: {
-                                                        onSvgTransform: function (x, y) {
-                                                            return 'rotate(45 ' + x + ',' + y + ')';
+                                                        onCustomAttrs: function (value, x, y) {
+                                                            return {
+                                                                transform: 'rotate(45 ' + x + ',' + y + ')',
+                                                                'text-anchor': 'start'
+                                                            }
                                                         }
                                                     }
+                                                }
                                             });
                                         */
             },
@@ -1834,8 +1871,7 @@
                 short: {
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
                     step: 1,            // Interval between each short tick mark. Type: floating number.
-                    stroke: 'black',    // Short tick mark color. Type: string.
-                    pos: 0.1,           // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.25,          // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
                     size: 0.15          // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
@@ -1845,11 +1881,10 @@
                 long: {
                     visible: true,      // Determines whether long tick marks are visible. Type: boolean.
                     step: 10,           // Interval between each long tick mark. Type: floating number.
-                    stroke: 'black',    // Long tick mark color. Type: string.
-                    pos: 0.1,           // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.2,           // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: 0.3           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.2           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
@@ -1859,6 +1894,15 @@
                            // If onDraw event is undefined and ruler.visible is false, then no ruler is displayed and the original content is shown.
                            // If onDraw event is defined and ruler.visible is true, then onDraw is used to draw on top of the generated ruler.
                            // If onDraw event is defined and ruler.visible is false, then use onDraw to create your own custom ruler from scratch.
+                           // $svg: <svg> element to be added later to the document. Any extra DOM elements created by your onDraw should be appended as children to $svg.
+                           // width: width in pixels of the $svg element.
+                           // height: height in pixels of the $svg element.
+                           // createSvgDomFunc: function(tag, attrs), where tag is a String and attrs a JS object.
+                           //  A function provided to your convenience, that returns a new SVG element (without adding it to the DOM).
+                           //  The returned element contains the given tag and attributes, if any.
+                           //  For example, the following code
+                           //    var $line = createSvgDomFunc('line', {x1: 0, y1: 0, x2: 0.5, y2: 5, 'stroke-width': 1});
+                           //  sets $line to the element <line x1="0" y1="0" x2="0.5" y2="5" stroke-width="1"></line>
         },
         range: {
             type: 'hidden',   // Specifies a range contained in [min, max]. This range can be used to restrict input even further, or to simply highlight intervals.
