@@ -291,8 +291,7 @@
                 },
                 initSvgHandle: function () {
                     elemOrig.initSvgOutsideHandle();
-                    this.$elem1st = util.createSvg(this.width, this.height).
-                        css(this.getRelativePosition());
+                    this.$elem1st = util.createSvg(this.width, this.height).css(this.getRelativePosition());
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$elem1st, this.width, this.height, !util.areTheSame(opts.handle.zoom, 1));
                     }
@@ -315,12 +314,10 @@
                 },
                 resizeUpdate: function () {
                     info.updateTicksStep();
-                    if (!info.isFixedHandle) {
-                        elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
-                            width: elemOrig.$wrapper.width()*opts.handle.zoom,
-                            height: elemOrig.$wrapper.height()*opts.handle.zoom
-                        });
-                    }
+                    elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
+                        width: elemOrig.$wrapper.width()*opts.handle.zoom,
+                        height: elemOrig.$wrapper.height()*opts.handle.zoom
+                    });
                     if (info.isRangeFromToDefined) {
                         this.initRanges();
                         if (info.doubleHandles) {
@@ -1152,59 +1149,60 @@
                         paddingEnd = opts.paddingEnd*widest,
                         usableArea = widest - paddingStart - paddingEnd,
                         padStart = opts.flipped ? paddingEnd : paddingStart,
-                        padEnd = opts.flipped ? paddingStart : paddingEnd;
-
-                    if (optsTicks.short.visible || optsTicks.long.visible) {
-                        var marker = {
-                                getMarker: function (id, size) {
-                                    var scale = doScale ? opts.handle.zoom : 1;
-                                    return util.createSvgDom('marker', {
-                                        id: id,
-                                        markerWidth: info.isHoriz ? scale : size,
-                                        markerHeight: info.isHoriz ? size : scale,
-                                        refX: info.isHoriz ? scale/2 : 0,
-                                        refY: info.isHoriz ? 0 : scale/2
-                                    }).append(util.createSvgDom('line', {
-                                        x1: info.isHoriz ? scale/2 : 0,
-                                        y1: info.isHoriz ? 0 : scale/2,
-                                        x2: info.isHoriz ? scale/2 : size,
-                                        y2: info.isHoriz ? size : scale/2,
-                                        'stroke-width': scale
-                                    }));
+                        padEnd = opts.flipped ? paddingStart : paddingEnd,
+                        generateTicks = function () {
+                            var createObj = function (type) {
+                                    var step = optsTicks[type].step;
+                                    return optsTicks[type].visible ? {
+                                            step: step,
+                                            tickStep: (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*usableArea,
+                                            pos: optsTicks[type].pos*(1 - optsTicks[type].size)*shortest,
+                                            size: optsTicks[type].size*shortest
+                                        } : null;
                                 },
-                                generateTicks: function (type) {
-                                    var step = optsTicks[type].step,
-                                        tickStep = (step > 0 && !util.isAlmostZero(opts.max - opts.min) ? step : 1)/(opts.max - opts.min)*usableArea,
-                                        points = '',
-                                        s = optsTicks[type].pos*(1 - optsTicks[type].size)*shortest,
-                                        id = type.charAt(0) + (+ new Date()),
-                                        url = 'url(#' + id + ')';
-
-                                    if (!this.$defs) {
-                                        this.$defs = util.createSvgDom('defs');
+                                drawMark = function (step, pos, size) { // step is the X coordinate for horizontal sliders or the Y coordinate for verticanl sliders
+                                    if (info.isHoriz) {
+                                        path += 'M' + step + ' ' + pos + ' v' + size + ' ';
+                                    } else {
+                                        path += 'M' + pos + ' ' + step + ' h' + size + ' ';
                                     }
-                                    this.$defs.append(this.getMarker(id, optsTicks[type].size*shortest));
+                                },
+                                short = createObj('short'),
+                                long = createObj('long'),
+                                smallestStepObj = null,
+                                largestStepObj = null,
+                                path = '';
 
-                                    for (var w = padStart; w <= widest - padEnd; w += tickStep) {
-                                        points += (info.isHoriz ? w + ',' + s : s + ',' + w) + ' ';
+                            if (short && long) {
+                                smallestStepObj = short.tickStep > long.tickStep ? long : short;
+                                largestStepObj = short.tickStep > long.tickStep ? short : long;
+                            } else {
+                                smallestStepObj = short || long;
+                            }
+                            if (smallestStepObj) {
+                                for (var smallStep = padStart, nextLargeStep = padStart;
+                                        smallStep <= widest - padEnd + 0.00005;
+                                        smallStep += smallestStepObj.tickStep) {
+
+                                    var sameMark = false;
+                                    if (largestStepObj) {
+                                        sameMark = util.areTheSame(smallStep, nextLargeStep, 0.00005);
+                                        if (sameMark || smallStep + smallestStepObj.tickStep - nextLargeStep > 0.00005) {
+                                            drawMark(nextLargeStep, largestStepObj.pos, largestStepObj.size);
+                                            nextLargeStep += largestStepObj.tickStep;
+                                        }
                                     }
-                                    $svg.append(util.createSvgDom('polyline', {
-                                        points: points,
-                                        'marker-start': url,
-                                        'marker-mid': url,
-                                        'marker-end': url,
-                                        stroke: 'transparent'
-                                    }));
+                                    if (!sameMark) {
+                                        drawMark(smallStep, smallestStepObj.pos, smallestStepObj.size);
+                                    }
                                 }
-                            };
-                        if (optsTicks.short.visible) {
-                            marker.generateTicks('short');
-                        }
-                        if (optsTicks.long.visible) {
-                            marker.generateTicks('long');
-                        }
-                        marker.$defs.prependTo($svg);
-                    }
+                                $svg.append(util.createSvgDom('path', {
+                                    d: path,
+                                    'stroke-width': (doScale ? opts.handle.zoom : 1)
+                                }));
+                            }
+                        };
+                    generateTicks();
 
                     if ((opts.ruler.labels.values === 'step' || opts.ruler.labels.values === true) && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
                         var gAttrs = {
@@ -1213,7 +1211,6 @@
                             },
                             $allText,
                             range = opts.max - opts.min,
-                            x,
                             withinBounds = function (value) {
                                 value = +value; // strToInt
                                 return value >= opts.min && value <= opts.max;
@@ -1240,14 +1237,14 @@
                         $allText = util.createSvgDom('g', gAttrs);
                         if (opts.ruler.labels.values instanceof Array) {
                             opts.ruler.labels.values.sort(function (a, b) { return a - b; });
-                            for (x in opts.ruler.labels.values) {
+                            for (var x in opts.ruler.labels.values) {
                                 if (opts.ruler.labels.values)
                                 if (withinBounds(opts.ruler.labels.values[x])) {
                                     renderText(opts.ruler.labels.values[x]);
                                 }
                             }
                         } else {
-                            for (x = opts.min; x <= opts.max; x += opts.step) {
+                            for (var x = opts.min; x <= opts.max; x += opts.step) {
                                 renderText(x);
                             }
                         }
@@ -1671,19 +1668,19 @@
     
     $.fn.rsSliderLens = function (options) {
         var option = function () {
-            if (typeof arguments[0] === 'string') {
-                var op = arguments.length == 1 ? 'getter' : (arguments.length == 2 ? 'setter' : null);
-                if (op) {
-                    return this.eq(0).triggerHandler(op + '.rsSliderLens', arguments);
+                if (typeof arguments[0] === 'string') {
+                    var op = arguments.length == 1 ? 'getter' : (arguments.length == 2 ? 'setter' : null);
+                    if (op) {
+                        return this.eq(0).triggerHandler(op + '.rsSliderLens', arguments);
+                    }
                 }
-            }
-        },
-        resizeUpdate = function () {
-            return this.trigger('resizeUpdate.rsSliderLens');
-        },
-        destroy = function () {
-            return this.trigger('destroy.rsSliderLens');
-        };
+            },
+            resizeUpdate = function () {
+                return this.trigger('resizeUpdate.rsSliderLens');
+            },
+            destroy = function () {
+                return this.trigger('destroy.rsSliderLens');
+            };
 
         if (typeof options === 'string') {
             var otherArgs = Array.prototype.slice.call(arguments, 1);
@@ -1769,7 +1766,7 @@
         flipped: false,     // Indicates the direction. Type: boolean.
                             //   false - for horizontal sliders, the minimum is located on the left, maximum on the right. For vertical sliders, the minimum on the top, maximum on the bottom.
                             //   true - for horizontal sliders, the maximum is located on the left, minimum on the right. For vertical sliders, the maximum on the top, minimum on the bottom.
-        contentOffset: .4, // Relative position of the content (0% - 100%). Type: Floating number between 0 and 1, inclusive.
+        contentOffset: 0.5, // Relative position of the content (0% - 100%). Type: Floating number between 0 and 1, inclusive.
                             // For horizontal sliders: Relative vertical position of the content.
                             // For vertical sliders: Relative horizontal position for content.
                             // Only applicable to sliders that show original content. Ignored for sliders with SVG rulers.
@@ -1870,7 +1867,7 @@
             tickMarks: {
                 short: {
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
-                    step: 1,            // Interval between each short tick mark. Type: floating number.
+                    step: 2,            // Interval between each short tick mark. Type: floating number.
                     pos: 0.25,          // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
