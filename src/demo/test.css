@@ -1,0 +1,36 @@
+table {
+    font-size: .75em;
+}
+
+table td {
+    padding: .5em;
+}
+
+table tbody tr td + td {
+    padding: 2em;
+}
+
+
+table th, table td {
+    border: 1px dotted grey;
+}
+
+input[type=range].h {
+    width: 200px;
+}
+
+input[type=range].v {
+    width: 40px;
+    height: 150px;
+}
+
+span.h {
+    width: 250px;
+    height: 30px;
+    line-height: 30px;
+}
+
+span.v {
+    height: 230px;
+    line-height: 30px;
+}

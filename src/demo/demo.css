@@ -1,0 +1,138 @@
+body {
+    line-height: 1.5em;
+}
+
+pre {
+    margin: 0 5em;
+    padding: 1em 1em 0;
+    background-color: #ccc;
+    display: inline-block;
+    line-height: 1.25em;
+}
+
+h1, p, aside {
+    color: white;
+}
+
+aside label {
+    display: block;
+    cursor: pointer;
+}
+
+p {
+    margin-top: 3em;
+    font-size: 1.25em;
+}
+
+p.small {
+    margin: 0 0 0 4em;
+    font-size: 1em;
+    color: #ccc;
+}
+
+pre + input[type=range],
+pre + div {
+    display: inline-block;
+    vertical-align: top;
+}
+
+pre + input[type=range] + label,
+pre + div + label,
+#changeLabels,
+#doubleHandleLabels {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 1em;
+    color: white;
+}
+#changeLabels label,
+#doubleHandleLabels label {
+    cursor: inherit;
+}
+#changeLabels label:before,
+#doubleHandleLabels label:before {
+    content: 'onChange:';
+    width: 7em;
+    display: inline-block;
+}
+#changeLabels label:last-child:before {
+    content: 'onFinalChange:';
+}
+#doubleHandleLabels label:first-child:before {
+    content: 'first handle:';
+}
+#doubleHandleLabels label:last-child:before {
+    content: 'second handle:';
+}
+
+
+code {
+    background-color: #555;
+    padding: 0 .5em;
+    border-radius: 1em;
+}
+
+pre span {
+    font-weight: bold;
+}
+
+pre mark {
+    color: grey;
+    background-color: inherit;
+    font-style: italic;
+    font-weight: normal;
+}
+
+#o1 input[type=range] {
+    width: 400px;
+}
+
+#o3 input[type=range] {
+    width: 40px;
+    height: 300px;
+}
+
+#o1, #o2, #o3, #o4, #o5 {
+    margin-top: 1em;
+}
+
+aside.opt1 ~ #o1,
+aside.opt2 ~ #o2,
+aside.opt3 ~ #o3,
+aside.opt4 ~ #o4,
+aside.opt5 ~ #o5 {
+    display: block !important;
+}
+
+#custom + .range,
+#custom ~ .handle .range {
+    background: -moz-linear-gradient(left, red 0%, green 100%);
+    background: -webkit-linear-gradient(left, red 0%, green 100%);
+    background: linear-gradient(to right, red 0%, green 100%);
+}
+#custom ~ .handle {
+    top: 80% !important;
+    height: 200% !important;
+}
+#custom ~ .handle svg {
+    top: 35% !important;
+}
+#custom ~ .handle .range {
+    top: 32% !important;
+}
+#custom ~ .handle label {
+    position: absolute;
+    bottom: .3em;
+    left: 0;
+    right: 0;
+    line-height: 1em;
+    text-align: center;
+    font-family: monospace;
+    font-size: .9em;
+    letter-spacing: .15em;
+    color: white;
+    text-shadow: 0.0625em 0.0625em 0.0625em #777,
+                 -0.0625em -0.0625em 0.0625em #777,
+                 0.0625em -0.0625em 0.0625em #777,
+                 -0.0625em 0.0625em 0.0625em #777;
+}

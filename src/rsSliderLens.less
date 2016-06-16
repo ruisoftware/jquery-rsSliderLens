@@ -1,0 +1,315 @@
+@background: #454545;     // recommended #454545 for dark layout and #f2f2f2 for light layout
+@deltaContrast: 20%;
+
+//@background: #f2f2f2;     // recommended #454545 for dark layout and #f2f2f2 for light layout
+
+@text: fadeout(#fff - @background, 40%);
+@tickmarks: @text;
+
+
+// scalar values
+// ===============
+@refScale: 1em;   // Allowed units are: px, pt (for fixed layout) or em, rem, vw, vh, vmin, vmax (for elastic layout).
+                  // To try other sizes, you only need to change this line. All the rest will resize according to this @refScale
+                  // 1em corresponds to 16px in most browsers, which is the default font size.
+                  // However, some users might define another default font size for accessibility reasons.
+                  // To convert px to em, do em = px/16. Example: 8px = .5em
+
+@fromGradientOuter: darken(@background, @deltaContrast);
+@toGradientOuter: lighten(@background, @deltaContrast);
+
+@fromGradientInner: darken(@toGradientOuter, 10%);
+@toGradientInner: darken(@fromGradientOuter, 2%);
+
+@borderColor: darken(@fromGradientOuter, lightness(@background)/5 + 3%);
+@rangeWrapper: darken(@fromGradientOuter, 5%);
+@range: lighten(@fromGradientOuter, 12%);
+
+
+body {
+    background-color: @background;
+}
+
+.sliderlens {
+    opacity: .8;
+    &.focus {
+        opacity: 1;
+    }
+    cursor: pointer;
+
+    @zero: 0%;
+    @half: 50%;
+    @full: 100%;
+    @grad1: fade(darken(@fromGradientInner, 10%), 95%);
+    @grad2: fade(lighten(@fromGradientInner, 10%), 25%);
+    @grad3: fade(darken(@fromGradientInner, 15%), 25%);
+    @grad4: fade(darken(@fromGradientInner, 15%), 95%);
+    > .handle,
+    > .handle1,
+    > .handle2 {
+        &:before,
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+        }
+        border-radius: ~"3em/.75em";
+        cursor: ew-resize;
+        background-color: @background;
+        box-shadow: 0 0 @refScale*0.3125 -@refScale*0.03125 @borderColor;
+        border: 0 solid @toGradientOuter;
+        border-width: @refScale*0.0625 0;
+        &.dragging {
+            box-shadow: 0 0 @refScale*0.3125 -@refScale*0.0625 @borderColor;
+        }
+    }
+    > .handle {
+        &:before {
+            right: 50%;
+            bottom: 55%;
+            border-right: @refScale*0.0625 solid @text;
+            z-index: 1;
+        }
+        &:after {
+            .lineargradient(left, @grad1 @zero, @grad2 @half, @grad3 @half, @grad4 @full, to right);
+        }
+    }
+    > .handle1 {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        &:after {
+            .lineargradient(left, @grad1 @zero, @grad2 @full, to right);
+        }
+    }
+    > .handle2 {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        &:after {
+            .lineargradient(left, @grad3 @zero, @grad4 @full, to right);
+        }
+    }
+
+    svg {
+        > path {
+            stroke: @tickmarks;
+        }
+        > g > text {
+            fill: @text;
+            font-size: .6em;
+        }
+    }
+
+    &.vert {
+        > .handle,
+        > .handle1,
+        > .handle2 {
+            cursor: ns-resize;
+            border-radius: ~"3em/.75em";
+        }
+        > .handle {
+            &:before {
+                right: 55%;
+                bottom: 50%;
+                border-right: none;
+                border-bottom: @refScale*0.0625 solid @text;
+            }
+            &:after {
+                .lineargradient(top, @grad1 @zero, @grad2 @half, @grad3 @half, @grad4 @full, to bottom);
+            }
+        }
+        > .handle1 {
+            border-bottom: none;
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            &:after {
+                .lineargradient(top, @grad1 @zero, @grad2 @full, to bottom);
+            }
+        }
+        > .handle2 {
+            border-top: none;
+            border-top-left-radius: 0;
+            border-top-right-radius: 0;
+            &:after {
+                .lineargradient(top, @grad3 @zero, @grad4 @full, to bottom);
+            }
+        }
+    }
+
+    &.fixed {
+        border-width: @refScale*0.0625;
+        border-style: solid;
+        .borderlineargradient2grads(top, @fromGradientOuter, @toGradientOuter, to bottom);
+        background-color: darken(@background, 5%);
+        box-shadow:
+            inset 0 0 @refScale*.25 @borderColor,
+            inset @refScale 0 @refScale*1.25 -@refScale*.5 @borderColor,
+            inset -@refScale 0 @refScale*1.25 -@refScale*.5 @borderColor;
+        cursor: ew-resize;
+
+        &:before,
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            border-width: 0 0 @refScale*0.0625 0;
+            border-style: solid;
+            pointer-events: none;
+            .borderlineargradient2grads(top, darken(@fromGradientOuter, 5%), darken(@toGradientOuter, 10%), to bottom);
+        }
+        &:after {
+            border-width: 0 @refScale*0.0625;
+        }
+        &.vert {
+            box-shadow:
+                inset 0 0 @refScale*.25 @borderColor,
+                inset 0 @refScale @refScale*1.25 -@refScale*.5 @borderColor,
+                inset 0 -@refScale @refScale*1.25 -@refScale*.5 @borderColor;
+            cursor: ns-resize;
+
+            &:before {
+                border-width: 0 @refScale*0.0625;
+            }
+            &:after {
+                border-width: 0 0 @refScale*0.0625 0;
+            }
+        }
+        > .handle {
+            border-radius: 0;
+            border: none;
+        }
+    }
+
+    .range {
+        background-color: @rangeWrapper;
+        border-width: @refScale*0.0625;
+        border-style: solid;
+        .borderlineargradient2grads(top, @fromGradientOuter, @toGradientOuter, to bottom);
+        > div {
+            background-color: @range;
+        }
+        &.drag {
+            > div {
+                cursor: ew-resize;
+            }
+            &.dragging > div {
+                cursor: none;
+            }
+        }
+    }
+
+    &.vert {
+        .range {
+            &.drag > div {
+                cursor: ns-resize;
+            }
+        }
+    }
+
+    &.dragging {
+        cursor: none;
+        > .handle,
+        > .handle1,
+        > .handle2 {
+            cursor: none;
+        }
+    }
+}
+
+
+// mixins
+// ===============
+.padding(@padding) {
+    .padding(@padding, @padding, @padding, @padding);
+}
+
+.padding(@topBottom, @rightLeft) {
+    .padding(@topBottom, @rightLeft, @topBottom, @rightLeft);
+}
+
+.padding(@top, @right, @bottom) {
+    .padding(@top, @right, @bottom, @right);
+}
+
+.padding(@top, @right, @bottom, @left) when(@top = @right) and (@right = @bottom) and (@bottom = @left) {
+    padding: @top;
+}
+
+.padding(@top, @right, @bottom, @left) when (@top = @bottom) and (@right = @left) and not (@top = @right) {
+    padding: @top @right;
+}
+
+.padding(@top, @right, @bottom, @left) when not (@top = @bottom), not (@right = @left) {
+    padding: @top @right @bottom @left;
+}
+
+.margin(@margin) {
+    .margin(@margin, @margin, @margin, @margin);
+}
+
+.margin(@topBottom, @rightLeft) {
+    .margin(@topBottom, @rightLeft, @topBottom, @rightLeft);
+}
+
+.margin(@top, @right, @bottom) {
+    .margin(@top, @right, @bottom, @right);
+}
+
+.margin(@top, @right, @bottom, @left) when (@top = @right) and (@right = @bottom) and (@bottom = @left) {
+    margin: @top;
+}
+
+.margin(@top, @right, @bottom, @left) when (@top = @bottom) and (@right = @left) and not (@top = @right) {
+    margin: @top @right;
+}
+
+.margin(@top, @right, @bottom, @left) when not (@top = @bottom), not (@right = @left) {
+    margin: @top @right @bottom @left;
+}
+
+.lineargradient(@dir, @g1, @g2, @w3cDir) {
+    background: -webkit-linear-gradient(@dir, @g1, @g2);
+    background: -moz-linear-gradient(@dir, @g1, @g2);
+    background: -o-linear-gradient(@dir, @g1, @g2);
+    background: -ms-linear-gradient(@dir, @g1, @g2);
+    background: linear-gradient(@w3cDir, @g1, @g2);
+}
+.lineargradient(@dir, @g1, @g2, @g3, @w3cDir) {
+    background: -webkit-linear-gradient(@dir, @g1, @g2, @g3);
+    background: -moz-linear-gradient(@dir, @g1, @g2, @g3);
+    background: -o-linear-gradient(@dir, @g1, @g2, @g3);
+    background: -ms-linear-gradient(@dir, @g1, @g2, @g3);
+    background: linear-gradient(@w3cDir, @g1, @g2, @g3);
+}
+.lineargradient(@dir, @g1, @g2, @g3, @g4, @w3cDir) {
+    background: -webkit-linear-gradient(@dir, @g1, @g2, @g3, @g4);
+    background: -moz-linear-gradient(@dir, @g1, @g2, @g3, @g4);
+    background: -o-linear-gradient(@dir, @g1, @g2, @g3, @g4);
+    background: -ms-linear-gradient(@dir, @g1, @g2, @g3, @g4);
+    background: linear-gradient(@w3cDir, @g1, @g2, @g3, @g4);
+}
+.lineargradient2grads(@g1, @g2, @w3cG1, @w3cG2) {
+    background: -webkit-linear-gradient(@g1), -webkit-linear-gradient(@g2);
+    background: -moz-linear-gradient(@g1), -moz-linear-gradient(@g2);
+    background: -o-linear-gradient(@g1), -o-linear-gradient(@g2);
+    background: -ms-linear-gradient(@g1), -ms-linear-gradient(@g2);
+    background: linear-gradient(@w3cG1), linear-gradient(@w3cG2);
+}
+.borderlineargradient2grads(@dir, @g1, @g2, @w3cDir) {
+    -webkit-border-image: -webkit-linear-gradient(@dir, @g1, @g2) 1;
+    -moz-border-image: -moz-linear-gradient(@dir, @g1, @g2) 1;
+    -o-border-image: -o-linear-gradient(@dir, @g1, @g2) 1;
+    -ms-border-image: -ms-linear-gradient(@dir, @g1, @g2) 1;
+    border-image: linear-gradient(@w3cDir, @g1, @g2) 1;
+}
+.user-select(@s) {
+    -o-user-select: @s;
+    -moz-user-select: @s;
+    -webkit-user-select: @s;
+    user-select: @s;
+}

@@ -26,7 +26,7 @@
                         top: (info.isFixedHandle ? (info.isHoriz ? 50 : elemHandle.fixedHandleRelPos*100) : 0) + '%'
                     };
                     if (info.isFixedHandle) {
-                        css[info.isHoriz ? 'height' : 'width'] = '100%';
+                        $elem.css(info.isHoriz ? 'height' : 'width', (info.isHoriz ? elemMagnif.height : elemMagnif.width) + 'px');
                     } else {
                         css.height = css.width = '100%';
                     }
@@ -34,24 +34,26 @@
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$svg, this.width, this.height);
                     }
-                    if (opts.ruler.onDraw) {
-                        opts.ruler.onDraw(this.$svg, this.width, this.height, util.createSvgDom);
-                    }
+                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$svg, this.width, this.height, 1, util.createSvgDom]);
                     this.$svg.prependTo(this.$wrapper);
                     $elem.css('visibility', 'hidden'); // because the svg ruler is used instead of the original slider content
                 },
-                initSize: function () {
-                    this.width = $elem.width();
-                    this.height = $elem.height();
-                    if (this.width === 0) {
-                        this.width = 25;
-                        $elem.width(25);
+                initSize: function ($e) {
+                    var $sizeElem = $e || $elem;
+                    if ($e === undefined) {
+                        this.width = (opts.width === 'auto' ? $sizeElem.width() : opts.width) || 150;
+                        this.height = (opts.height === 'auto' ? $sizeElem.height() : opts.height) || 50;
                     }
-                    if (this.height === 0) {
-                        this.height = 25;
-                        $elem.height(25);
+                    
+                    if ($sizeElem.width() === 0 || opts.width !== 'auto' || $e !== undefined && info.isHoriz) {
+                        $sizeElem.width(this.width);
                     }
-                    info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
+                    if ($sizeElem.height() === 0 || opts.height !== 'auto' || $e !== undefined && !info.isHoriz) {
+                        $sizeElem.height(this.height);
+                    }
+                    if ($e === undefined) {
+                        info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
+                    }
                 },
                 init: function () {
                     this.tabindexAttr = $elem.attr('tabindex');
@@ -64,15 +66,8 @@
                     }
                     this.initSize();
                     if (!info.hasRuler) {
-                        if (info.isHoriz) {
-                            $elem.css('width', 'auto');
-                            this.width = $elem.width();
-                            this.initSize();
-                        } else {
-                            $elem.css('height', 'auto');
-                            this.height = $elem.height();
-                            this.initSize();
-                        }
+                        $elem.css(info.isHoriz ? 'width' : 'height', 'auto');
+                        this.initSize();
                     }
 
                     var elemPosition = $elem.css('position'),
@@ -107,14 +102,12 @@
 
                     // set again width and height, as css set above might change dimensions
                     if (info.hasRuler) {
-                        this.width = this.$wrapper.width();
-                        this.height = this.$wrapper.height();
-                        if (info.isFixedHandle) {
-                            this[info.isHoriz ? 'width' : 'height'] = opts.ruler.size*(info.isHoriz ? this.width : this.height);
-                        }
+                        this.initSize(this.$wrapper);
                     } else {
-                        this.width = $elem.width();
-                        this.height = $elem.height();
+                        this.initSize($elem);
+                    }
+                    if (info.hasRuler && info.isFixedHandle) {
+                        this[info.isHoriz ? 'width' : 'height'] *= opts.ruler.size;
                     }
 
                     if (elemPosition === 'static') {
@@ -131,16 +124,8 @@
 
             // range that appears outside the handle
             elemRange = {
+                $rangeWrapper: null,
                 $range: null,
-                getRangeName: function (name) {
-                    if (opts.flipped) {
-                        switch (name) {
-                            case 'min': return 'max';
-                            case 'max': return 'min';
-                        }
-                    }
-                    return name;
-                },
                 getPropMin: function () {
                     if (opts.flipped) {
                         return info.isHoriz ? 'right' : 'bottom';
@@ -154,110 +139,91 @@
                     return info.isHoriz ? 'right' : 'bottom';
                 },
                 init: function () {
+                    var cssCommon = {
+                            display: 'inline-block',
+                            position: 'absolute'
+                        },
+                        cssWrapper = {},
+                        cssInner = {},
+                        value;
+
+                    if (info.isHoriz) {
+                        cssWrapper.top = opts.range.pos*100 + '%';
+                        cssWrapper.height = info.isFixedHandle ? elemOrig.height*opts.range.size + 'px' : opts.range.size*100 + '%';
+                        cssWrapper.transform = 'translateY(-50%)';
+                        cssInner.height = '100%';
+                    } else {
+                        cssWrapper.left = opts.range.pos*100 + '%';
+                        cssWrapper.width = info.isFixedHandle ? elemOrig.width*opts.range.size + 'px' : opts.range.size*100 + '%';
+                        cssWrapper.transform = 'translateX(-50%)';
+                        cssInner.width = '100%';
+                    }
+
+                    switch (opts.range.type) {
+                        case 'min': cssInner[this.getPropMin()] = '0%';
+                                    value = (info.getCurrValue(info.currValue[0]) - opts.min)/(opts.max - opts.min)*100;
+                                    cssInner[this.getPropMax()] = (opts.flipped ? value : 100 - value) + '%';
+                                    break;
+                        case 'max': cssInner[this.getPropMax()] = '0%';
+                                    value = (info.getCurrValue(info.currValue[0]) - opts.min)/(opts.max - opts.min)*100;
+                                    cssInner[this.getPropMin()] = (opts.flipped ? 100 - value : value) + '%';
+                                    break;
+                        default:
+                            if (info.isRangeFromToDefined) {
+                                cssInner[this.getPropMin()] = (opts.range.type[0] - opts.min)/(opts.max - opts.min)*100 + '%';
+                                cssInner[this.getPropMax()] = (opts.max - opts.range.type[1])/(opts.max - opts.min)*100 + '%';
+                            }
+                    }
+                    if (info.isFixedHandle) {
+                        cssWrapper[info.isHoriz ? 'width' : 'height'] = Math.round(elemOrig[info.isHoriz ? 'width' : 'height']*(1 - opts.paddingStart - opts.paddingEnd)) + 'px';
+                        cssWrapper[info.isHoriz ? 'left' : 'top'] = elemHandle.fixedHandleRelPos*100 + '%';
+                    } else {
+                        cssWrapper[this.getPropMin()] = opts.paddingStart*100 + '%';
+                        cssWrapper[this.getPropMax()] = opts.paddingEnd*100 + '%';
+                    }
+
+                    this.$rangeWrapper = $('<div>').css(cssCommon).css(cssWrapper).addClass(opts.style.classRange);
+                    if (!info.hasRuler) {
+                        this.$rangeWrapper.hide();
+                    }
                     if (opts.range.type && opts.range.type !== 'hidden') {
-                        var css = {
-                                display: 'inline-block',
-                                position: 'absolute'
-                            };
-
-                        if (info.isHoriz) {
-                            css.top = opts.range.pos*100 + '%';
-                            css.height = opts.range.size*100 + '%';
-                            css.transform = 'translateY(-50%)';
-                        } else {
-                            css.left = opts.range.pos*100 + '%';
-                            css.width = opts.range.size*100 + '%';
-                            css.transform = 'translateX(-50%)';
-                        }
-
-                        if (info.isFixedHandle) {
-                            switch (opts.range.type) {
-                                case 'min': css[this.getPropMax()] = (opts.flipped ? elemHandle.fixedHandleRelPos : 1 - elemHandle.fixedHandleRelPos)*100 + '%';
-                                            break;
-                                case 'max': css[this.getPropMin()] = (opts.flipped ? 1 - elemHandle.fixedHandleRelPos : elemHandle.fixedHandleRelPos)*100 + '%';
-                                            break;
-                                default:
-                                    if (info.isRangeFromToDefined) {
-                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep + 'px';
-                                    }
-                            }
-                        } else {
-                            switch (opts.range.type) {
-                                case 'min': css[elemRange.getPropMin()] = opts.paddingStart*100 + '%';
-                                            break;
-                                case 'max': css[elemRange.getPropMax()] = opts.paddingEnd*100 + '%';
-                                            break;
-                                default:
-                                    if (info.isRangeFromToDefined) {
-                                        this.nonFixedHandleSetFromToRangePosition(css);
-                                    }
-                            }
-                        }
-
-                        this.$range = $('<div>').css(css).addClass(opts.style.classHighlightRange);
-                        if (info.canDragRange) {
-                            this.$range.addClass(opts.style.classHighlightRangeDraggable);
-                        }
+                        this.$range = $('<div>').css(cssCommon).css(cssInner);
+                        this.$rangeWrapper.append(this.$range);
+                    }
+                    if (info.canDragRange) {
+                        this.$rangeWrapper.addClass(opts.style.classRangeDraggable);
                     }
                 },
-                nonFixedHandleSetFromToRangePosition: function (css) {
-                    var factor = (1 - opts.paddingStart - opts.paddingEnd)/(opts.max - opts.min),
-                        relStart = (info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min)*factor,
-                        relEnd = (info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) - opts.min)*factor;
-                    css[info.isHoriz ? 'left' : 'top'] = ((opts.flipped ? opts.paddingEnd : opts.paddingStart) + relStart)*100 + '%';
-                    css[info.isHoriz ? 'right' : 'bottom'] = (1 - relEnd - (opts.flipped ? opts.paddingEnd : opts.paddingStart))*100 + '%';
-                },
-                fixedHandleSetFromToRangePosition: function ($e, $range, zoom) {
-                    var prop = info.isHoriz ? 'left' : 'top',
-                        // Hack to get the position. Could simply be done as $e.position()[prop], but due to a Firefox bug related with wrong position(), it has to be this ugly way
-                        position = $e.offset()[prop] - $e.parent().offset()[prop];
-                    $range.css(prop, position + util.value2Pixel(info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]))*zoom + 'px');
+                doUpdate: function (pos, isFirstHandle, $range, minCond, maxCond) {
+                    if ($range) {
+                        switch (opts.range.type) {
+                            case 'min':
+                                if (minCond) {
+                                    $range.css(elemRange.getPropMax(), (opts.flipped ? pos : 100 - pos) + '%');
+                                }
+                                break;
+                            case 'max':
+                                if (maxCond) {
+                                    $range.css(elemRange.getPropMin(), (opts.flipped ? 100 - pos : pos) + '%');
+                                }
+                                break;
+                            case true:
+                            case 'between':
+                                if (isFirstHandle) {
+                                    $range.css(opts.flipped ? elemRange.getPropMax() : elemRange.getPropMin(), pos + '%');
+                                } else {
+                                    $range.css(opts.flipped ? elemRange.getPropMin() : elemRange.getPropMax(), (100 - pos) + '%');
+                                }
+                        }
+                    }
                 },
                 update: function (pos, isFirstHandle) {
-                    var $e = info.hasRuler ? elemOrig.$svg : $elem,
-                        relPos;
-                    switch (opts.range.type) {
-                        case 'min':
-                            relPos = opts.flipped ? 100 - pos : pos;
-                            if (info.isFixedHandle) {
-                                // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
-                                // when applied to the specific case of range sizes
-                                relPos -= opts.paddingStart*100;
-                                elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
-                            } else {
-                                if (!info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
-                                    elemRange.$range.css(elemRange.getPropMax(), (100 - relPos) + '%');
-                                }
-                            }
-                            break;
-                        case 'max':
-                            relPos = opts.flipped ? 100 - pos : pos;
-                            if (info.isFixedHandle) {
-                                // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
-                                // when applied to the specific case of range sizes
-                                relPos += opts.paddingEnd*100;
-                                elemRange.$range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*(100 - relPos)/100) + 'px');
-                            } else {
-                                if (!info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
-                                    elemRange.$range.css(elemRange.getPropMin(), relPos + '%');
-                                }
-                            }
-                            break;
-                        case true:
-                        case 'between':
-                            if (isFirstHandle) {
-                                elemRange.$range.css(opts.flipped ? elemRange.getPropMax() : elemRange.getPropMin(), pos + '%');
-                            } else {
-                                elemRange.$range.css(opts.flipped ? elemRange.getPropMin() : elemRange.getPropMax(), (100 - pos) + '%');
-                            }
-                    }
-
-                    if (info.isFixedHandle && info.isRangeFromToDefined) {
-                        this.fixedHandleSetFromToRangePosition($e, elemRange.$range, 1);
-                    }
+                    elemRange.doUpdate(pos, isFirstHandle, elemRange.$range,
+                        !info.doubleHandles || !opts.flipped && isFirstHandle || opts.flipped && !isFirstHandle,
+                        !info.doubleHandles || opts.flipped && isFirstHandle || !opts.flipped && !isFirstHandle);
                 }
             },
-            
+
             // magnified content inside the handle(s), which might also include the range(s)
             elemMagnif = {
                 $elem1st: null,
@@ -280,8 +246,8 @@
                 },
                 initClone: function () {
                     this.$elem1st = $elem.clone().css('transform-origin', '0 0').
-                        css(this.getRelativePosition()).removeAttr('tabindex autofocus');
-                    if (info.isHoriz && info.isFixedHandle && !info.hasRuler) {
+                        css(this.getRelativePosition()).removeAttr('tabindex autofocus id');
+                    if (info.isHoriz && info.isFixedHandle) {
                         this.$elem1st.css('top', '');
                     }
 
@@ -295,9 +261,7 @@
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$elem1st, this.width, this.height, !util.areTheSame(opts.handle.zoom, 1));
                     }
-                    if (opts.ruler.onDraw) {
-                        opts.ruler.onDraw(this.$elem1st, this.width, this.height, util.createSvgDom);
-                    }
+                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$elem1st, this.width, this.height, opts.handle.zoom, util.createSvgDom]);
                     if (info.doubleHandles) {
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
@@ -314,12 +278,16 @@
                 },
                 resizeUpdate: function () {
                     info.updateTicksStep();
-                    elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
-                        width: elemOrig.$wrapper.width()*opts.handle.zoom,
-                        height: elemOrig.$wrapper.height()*opts.handle.zoom
-                    });
+                    var newWidth = elemOrig.$wrapper.width(),
+                        newHeight = elemOrig.$wrapper.height();
+                    if (!info.isFixedHandle) {
+                        elemMagnif.$elem1st.add(elemMagnif.$elem2nd).css({
+                            width: newWidth*opts.handle.zoom,
+                            height: newHeight*opts.handle.zoom
+                        });
+                    }
+                    this.initRanges(newWidth, newHeight);
                     if (info.isRangeFromToDefined) {
-                        this.initRanges();
                         if (info.doubleHandles) {
                             info.setValue(info.currValue[0], opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, true);
                             info.setValue(info.currValue[1], opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, true);
@@ -328,81 +296,45 @@
                         }
                     }
                 },
-                initRanges: function () {
-                    if (info.isRangeFromToDefined || opts.range.type === 'min' || opts.range.type === 'max') {
-                        var createMagnifRange = function (isFirstHandle) {
-                            var css = {};
-                            switch (opts.range.type) {
-                                case 'min': css[elemRange.getPropMax()] = info.doubleHandles ? (isFirstHandle || opts.flipped ? 0 : '100%') : '50%';
-                                            css[elemRange.getPropMin()] = ''; // needed to delete this property after the clone() below
-                                            break;
-                                case 'max': css[elemRange.getPropMin()] = info.doubleHandles ? 0 : '50%';
-                                            css[elemRange.getPropMax()] = ''; // needed to delete this property after the clone() below
-                                            break;
-                                default:
-                                    if (info.isRangeFromToDefined) {
-                                        css[info.isHoriz ? 'width' : 'height'] = Math.abs(opts.range.type[1] - opts.range.type[0])*info.ticksStep*opts.handle.zoom + 'px';
-                                        css.right = css.bottom = '';
-                                    }
-                            }
-
-                            if (!util.areTheSame(opts.handle.zoom, 1)) {
-                                css.transform = 'translate' + info.isHoriz ? 'Y(-50%)' : 'X(-50%)';
-                                css[info.isHoriz ? 'height' : 'width'] = opts.range.size*100 + '%';
-                            }
-                            if (isFirstHandle && elemMagnif.$elemRange1st) {
-                                return elemMagnif.$elemRange1st.css(css);
-                            }
-                            if (!isFirstHandle && elemMagnif.$elemRange2nd) {
-                                return elemMagnif.$elemRange2nd.css(css);
-                            }
-                            return elemRange.$range.clone().css(css);
-                        };
-                        
-                        if (!info.doubleHandles || elemRange.getRangeName(opts.range.type) !== 'max') {
-                            this.$elemRange1st = createMagnifRange(true);
-                        }
-                        if (info.doubleHandles && elemRange.getRangeName(opts.range.type) !== 'min') {
-                            this.$elemRange2nd = createMagnifRange(false);
+                createMagnifRange: function (isFirstHandle, newWidth, newHeight) {
+                    var cssWrapper = {};
+                    cssWrapper[info.isHoriz ? 'width' : 'height'] = Math.round((info.isHoriz ? newWidth : newHeight)*(1 - opts.paddingStart - opts.paddingEnd)*opts.handle.zoom) + 'px';
+                    cssWrapper[info.isHoriz ? 'left' : 'top'] = info.doubleHandles ? (isFirstHandle ? '100%' : '0%') : '50%';
+                    cssWrapper[info.isHoriz ? 'height' : 'width'] = info.isFixedHandle ? opts.range.size*elemMagnif[info.isHoriz ? 'height' : 'width'] + 'px' : opts.range.size*100 + '%';
+                    if (isFirstHandle && elemMagnif.$elemRange1st) {
+                        return elemMagnif.$elemRange1st.css(cssWrapper);
+                    }
+                    if (!isFirstHandle && elemMagnif.$elemRange2nd) {
+                        return elemMagnif.$elemRange2nd.css(cssWrapper);
+                    }
+                    return elemRange.$rangeWrapper.clone().css(cssWrapper);
+                },
+                initRanges: function (newWidth, newHeight) {
+                    if (newWidth === undefined) {
+                        newWidth = elemOrig.width;
+                    }
+                    if (newHeight === undefined) {
+                        newHeight = elemOrig.height;
+                    }
+                    this.$elemRange1st = elemMagnif.createMagnifRange(true, newWidth, newHeight);
+                    if (info.doubleHandles) {
+                        this.$elemRange2nd = elemMagnif.createMagnifRange(false, newWidth, newHeight);
+                        switch (opts.range.type) {
+                            case 'min':
+                                (opts.flipped ? this.$elemRange1st : this.$elemRange2nd).empty();
+                                break;
+                            case 'max':
+                                (opts.flipped ? this.$elemRange2nd : this.$elemRange1st).empty();
+                                break;
+                            case true:
+                            case 'between':
+                                this.$elemRange1st.add(this.$elemRange2nd).empty();
                         }
                     }
                 },
                 updateRanges: function (pos, isFirstHandle) {
-                    var $e = isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd,
-                        $range = isFirstHandle ? elemMagnif.$elemRange1st : elemMagnif.$elemRange2nd,
-                        relPos;
-
-                    if ($range) {
-                        switch (opts.range.type) {
-                            case 'min':
-                                relPos = (opts.flipped ? 100 - pos : pos) - opts.paddingStart*100;
-                                if (info.isFixedHandle || !info.doubleHandles || isFirstHandle && !opts.flipped || !isFirstHandle && opts.flipped) {
-                                    // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
-                                    // when applied to the specific case of range sizes
-                                    $range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*relPos/100) + 'px');
-                                }
-                                break;
-                            case 'max':
-                                relPos = (opts.flipped ? 100 - pos : pos) + opts.paddingEnd*100;
-                                if (info.isFixedHandle || !info.doubleHandles || !isFirstHandle && !opts.flipped || isFirstHandle && opts.flipped) {
-                                    // this is very special case of fixed unit (px) that actually still serves a flexible purpose,
-                                    // when applied to the specific case of range sizes
-                                    $range.css(info.isHoriz ? 'width' : 'height', ((info.isHoriz ? $e.width() : $e.height())*(100 - relPos)/100) + 'px');
-                                }
-                                break;
-                            case true:
-                            case 'between':
-                                if (isFirstHandle) {
-                                    $range.css(opts.flipped ? elemRange.getPropMax() : elemRange.getPropMin(), pos + '%');
-                                } else {
-                                    $range.css(opts.flipped ? elemRange.getPropMin() : elemRange.getPropMax(), (100 - pos) + '%');
-                                }
-                        }
-
-                        if (info.isRangeFromToDefined) {
-                            elemRange.fixedHandleSetFromToRangePosition($e, $range, opts.handle.zoom);
-                        }
-                    }
+                    elemRange.doUpdate(pos, isFirstHandle,
+                        isFirstHandle ? elemMagnif.$elemRange1st.children() : elemMagnif.$elemRange2nd.children(), true, true);
                 }
             },
 
@@ -414,13 +346,23 @@
                                       // For horizontal slider, stopPosition[0] is the rightmost pos for the left handle, stopPosition[1] is the leftmost pos for the right handle
                                       // For vertical slider, stopPosition[0] is the bottommost pos for the top handle, stopPosition[1] is the topmost pos for the bottom handle
                 fixedHandleRelPos: 0,
+                key: {
+                    left: 37,
+                    up: 38,
+                    right: 39,
+                    down: 40,
+                    pgUp: 33,
+                    pgDown: 34,
+                    home: 36,
+                    end: 35,
+                    esc: 27
+                },
                 init: function () {
                     var css = {
                             display: 'inline-block',
                             overflow: 'hidden',
                             outline: 'none',
-                            position: 'absolute',
-                            'z-index': $elem.css('z-index')
+                            position: 'absolute'
                         };
 
                     if (info.isHoriz) {
@@ -459,10 +401,10 @@
                     }
                 },
                 bindTabEvents: function (firstHandle) {
-                    if (elemOrig.tabindexAttr && opts.enabled) {
+                    if ((elemOrig.tabindexAttr || info.isInputTypeRange) && opts.enabled) {
                         var bindForSecondHandle = function () {
                             elemHandle.$elem2nd.
-                                attr('tabindex', elemOrig.tabindexAttr).
+                                attr('tabindex', elemOrig.tabindexAttr || 0).
                                 bind('focusin.rsSliderLens', panUtil.gotFocus2nd).
                                 bind('focusout.rsSliderLens', panUtil.loseFocus);
                         };
@@ -470,7 +412,7 @@
                         if (firstHandle || firstHandle === undefined) {
                             $elem.removeAttr('tabindex');
                             this.$elem1st.
-                                attr('tabindex', elemOrig.tabindexAttr).
+                                attr('tabindex', elemOrig.tabindexAttr || 0).
                                 bind('focusin.rsSliderLens', panUtil.gotFocus1st).
                                 bind('focusout.rsSliderLens', panUtil.loseFocus);
                             
@@ -488,7 +430,7 @@
                     }
                 },
                 unbindTabEvents: function () {
-                    if (elemOrig.tabindexAttr && !opts.enabled) {
+                    if ((elemOrig.tabindexAttr || info.isInputTypeRange) && !opts.enabled) {
                         this.$elem1st.add(this.$elem2nd).removeAttr('tabindex autofocus').unbind('focusout.rsSliderLens', panUtil.loseFocus);
                         this.$elem1st.unbind('focusin.rsSliderLens', panUtil.gotFocus1st);
                         if (this.$elem2nd) {
@@ -497,43 +439,35 @@
                     }
                 },
                 navigate: function (pixelOffset, valueOffset, duration, easingFunc, limits, $animHandle) {
-                    var currValue = info.currValue[!info.doubleHandles || panUtil.$handle === elemHandle.$elem1st? 0 : 1],
-                        toValue;
-                    if (info.isStepDefined) {
-                        toValue = Math.round((currValue + valueOffset)/opts.step)*opts.step;
-                    } else {
-                        toValue = currValue + pixelOffset/info.ticksStep;
+                    if (!panUtil.$animObj) { // continue only if there is not an old animation still runing
+                        var currValue = info.currValue[!info.doubleHandles || panUtil.$handle === elemHandle.$elem1st? 0 : 1],
+                            toValue;
+                        if (info.isStepDefined) {
+                            toValue = Math.round((currValue + valueOffset - opts.min)/opts.step)*opts.step + opts.min;
+                        } else {
+                            toValue = currValue + pixelOffset/info.ticksStep;
+                        }
+                        if (limits !== undefined) {
+                            if (toValue < limits[0]) { toValue = limits[0]; }
+                            if (toValue > limits[1]) { toValue = limits[1]; }
+                        }
+                        if (toValue < opts.min) { toValue = opts.min; }
+                        if (toValue > opts.max) { toValue = opts.max; }
+                        panUtil.gotoAnim(currValue, toValue, duration, easingFunc, $animHandle);
                     }
-                    if (limits !== undefined) {
-                        if (toValue < limits[0]) { toValue = limits[0]; }
-                        if (toValue > limits[1]) { toValue = limits[1]; }
-                    }
-                    if (toValue < opts.min) { toValue = opts.min; }
-                    if (toValue > opts.max) { toValue = opts.max; }
-                    panUtil.gotoAnim(currValue, toValue, duration, easingFunc, $animHandle);
                 },
                 keydown: function (event) {
-                    var key = {
-                        left: 37,
-                        up: 38,
-                        right: 39,
-                        down: 40,
-                        pgUp: 33,
-                        pgDown: 34,
-                        home: 36,
-                        end: 35,
-                        esc: 27
-                    }, allowedKey = function () {
+                    var allowedKey = function () {
                         switch (event.which) {
-                            case key.left:   return $.inArray('left', opts.keyboard.allowed) > -1;
-                            case key.down:   return $.inArray('down', opts.keyboard.allowed) > -1; 
-                            case key.right:  return $.inArray('right', opts.keyboard.allowed) > -1;
-                            case key.up:     return $.inArray('up', opts.keyboard.allowed) > -1;
-                            case key.pgUp:   return $.inArray('pgup', opts.keyboard.allowed) > -1;
-                            case key.pgDown: return $.inArray('pgdown', opts.keyboard.allowed) > -1;
-                            case key.home:   return $.inArray('home', opts.keyboard.allowed) > -1;
-                            case key.end:    return $.inArray('end', opts.keyboard.allowed) > -1;
-                            case key.esc:    return $.inArray('esc', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.left:   return $.inArray('left', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.down:   return $.inArray('down', opts.keyboard.allowed) > -1; 
+                            case elemHandle.key.right:  return $.inArray('right', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.up:     return $.inArray('up', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.pgUp:   return $.inArray('pgup', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.pgDown: return $.inArray('pgdown', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.home:   return $.inArray('home', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.end:    return $.inArray('end', opts.keyboard.allowed) > -1;
+                            case elemHandle.key.esc:    return $.inArray('esc', opts.keyboard.allowed) > -1;
                         }
                         return false;
                     }, 
@@ -547,23 +481,26 @@
                         var currValue = info.currValue[!info.doubleHandles || panUtil.$handle === elemHandle.$elem1st? 0 : 1];
 
                         switch (event.which) {
-                            case key.left:
-                            case key.down:
-                                elemHandle.navigate(info.isHoriz ? -1 : 1, info.isHoriz ? -opts.step: opts.step, info.isStepDefined ? opts.handle.animation/opts.step : 0, opts.keyboard.easing, limits);
+                            case elemHandle.key.left:
+                            case elemHandle.key.down:
+                                panUtil.beingDraggedByKeyboard = true;
+                                elemHandle.navigate(info.isHoriz ? -1 : 1, info.isHoriz ? -opts.step: opts.step, info.isStepDefined ? opts.handle.animation*opts.step/(opts.max - opts.min) : 0, opts.keyboard.easing, limits);
                                 break;
-                            case key.right: 
-                            case key.up:
-                                elemHandle.navigate(info.isHoriz ? 1 : -1, info.isHoriz ? opts.step : -opts.step, info.isStepDefined ? opts.handle.animation/opts.step : 0, opts.keyboard.easing, limits);
+                            case elemHandle.key.right: 
+                            case elemHandle.key.up:
+                                panUtil.beingDraggedByKeyboard = true;
+                                elemHandle.navigate(info.isHoriz ? 1 : -1, info.isHoriz ? opts.step : -opts.step, info.isStepDefined ? opts.handle.animation*opts.step/(opts.max - opts.min) : 0, opts.keyboard.easing, limits);
                                 break;
-                            case key.pgUp:
-                            case key.pgDown:
+                            case elemHandle.key.pgUp:
+                            case elemHandle.key.pgDown:
                                 /*jshint -W030 */
-                                event.which === key.pgUp ? elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits)
-                                                         : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits);
+                                event.which === elemHandle.key.pgUp ?
+                                    elemHandle.navigate((info.fromPixel - info.toPixel)/opts.keyboard.numPages, (opts.min - opts.max)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits)
+                                    : elemHandle.navigate((info.toPixel - info.fromPixel)/opts.keyboard.numPages, (opts.max - opts.min)/opts.keyboard.numPages, opts.handle.animation/opts.keyboard.numPages, opts.keyboard.easing, limits);
                                 break;
-                            case key.home: panUtil.gotoAnim(currValue, limits[0], opts.handle.animation, opts.keyboard.easing); break;
-                            case key.end:  panUtil.gotoAnim(currValue, limits[1], opts.handle.animation, opts.keyboard.easing); break;
-                            case key.esc:
+                            case elemHandle.key.home: panUtil.gotoAnim(currValue, limits[0], opts.handle.animation, opts.keyboard.easing); break;
+                            case elemHandle.key.end:  panUtil.gotoAnim(currValue, limits[1], opts.handle.animation, opts.keyboard.easing); break;
+                            case elemHandle.key.esc:
                                 if (info.doubleHandles) {
                                     panUtil.gotoAnim(info.currValue[0], info.uncommitedValue[0], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem1st);
                                     panUtil.gotoAnim(info.currValue[1], info.uncommitedValue[1], opts.handle.animation, opts.keyboard.easing, elemHandle.$elem2nd);
@@ -573,6 +510,18 @@
                                 info.currValue[0] = info.uncommitedValue[0];
                                 info.currValue[1] = info.uncommitedValue[1];
                         }
+                    }
+                },
+                keyup: function (event) {
+                    switch (event.which) {
+                        case elemHandle.key.left:
+                        case elemHandle.key.down:
+                        case elemHandle.key.right: 
+                        case elemHandle.key.up:
+                            if (!panUtil.beingDraggedByKeyboard) {
+                                events.processFinalChange(panUtil.$handle);
+                            }
+                            panUtil.beingDraggedByKeyboard = false;
                     }
                 },
                 onMouseWheel: function (event) {
@@ -600,7 +549,7 @@
                     event.preventDefault(); // prevents scrolling
 
                     delta.y *= opts.handle.mousewheel;
-                    var step = opts.step * opts.handle.mousewheel,
+                    var step = opts.step*opts.handle.mousewheel,
                         moveHandler = function () {
                             elemHandle.navigate(- delta.y, delta.y < 0 ? step : - step, opts.handle.animation, opts.handle.easing, undefined, panUtil.$handle);
                         };
@@ -720,10 +669,9 @@
                                         elemMagnif.$elemRange2nd.remove();
                                         elemMagnif.$elemRange2nd = null;
                                     }
-                                    
-                                    if (value === false && !!elemRange.$range) {
-                                        elemRange.$range.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown mouseup click').remove();
-                                        elemRange.$range = null;
+                                    if (value === false && elemRange.$range) {
+                                        elemRange.$rangeWrapper.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown mouseup click').remove();
+                                        elemRange.$rangeWrapper = elemRange.$range = null;
                                     }
                                 }
                                 opts.range = value;
@@ -745,9 +693,9 @@
                     }
                 },
                 onDestroy: function () {
-                    $elem.add(elemOrig.$wrapper).add(elemOrig.$canvas).add(elemRange.$range).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).
+                    $elem.add(elemOrig.$wrapper).add(elemOrig.$canvas).add(elemRange.$rangeWrapper).add(elemHandle.$elem1st).add(elemHandle.$elem2nd).
                         unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
-                    
+
                     $elem.
                         unbind('getter.rsSliderLens', events.onGetter).
                         unbind('setter.rsSliderLens', events.onSetter).
@@ -756,21 +704,25 @@
                         unbind('finalchange.rsSliderLens', events.onFinalChange).
                         unbind('create.rsSliderLens', events.onCreate).
                         unbind('destroy.rsSliderLens', events.onDestroy).
-                        unbind('fmtValue.rsSliderLens', events.onFmtValue).
-                        unbind('drawRuler.rsSliderLens', events.onDrawRuler);
+                        unbind('customLabel.rsSliderLens', events.onCustomLabel).
+                        unbind('customLabelAttrs.rsSliderLens', events.onCustomLabelAttrs).
+                        unbind('customRuler.rsSliderLens', events.onCustomRuler);
 
                     elemOrig.$wrapper.
                         unbind('mousedown.rsSliderLens', panUtil.startDrag).
                         unbind('mouseup.rsSliderLens', panUtil.stopDrag);
 
+                    elemRange.$rangeWrapper.
+                        unbind('mousedown.rsSliderLens', panUtil.startDrag);
+
                     if (elemRange.$range) {
                         elemRange.$range.
-                            unbind('mousedown.rsSliderLens', panRangeUtil.startDrag).
-                            unbind('mousedown.rsSliderLens', panUtil.startDrag);
+                            unbind('mousedown.rsSliderLens', panRangeUtil.startDrag);
                     }
 
                     $(document).
                         unbind('keydown.rsSliderLens', elemHandle.keydown).
+                        unbind('keyup.rsSliderLens', elemHandle.keyup).
                         unbind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
                         unbind('mouseup.rsSliderLens', panUtil.stopDragFromDoc).
                         unbind('mousemove.rsSliderLens', panRangeUtil.drag);
@@ -794,9 +746,7 @@
                     if (elemOrig.$canvas) {
                         elemOrig.$canvas.remove();
                     }
-                    if (elemRange.$range) {
-                        elemRange.$range.remove();
-                    }
+                    elemRange.$rangeWrapper.remove();
                     elemHandle.$elem1st.remove();
                     if (elemHandle.$elem2nd) {
                         elemHandle.$elem2nd.remove();
@@ -812,15 +762,20 @@
                         $elem.attr('tabindex', elemOrig.tabindexAttr);
                     }
                 },
-                onFmtValue: function (event, num) {
-                    if (opts.ruler.labels.onFmtValue) {
-                        return opts.ruler.labels.onFmtValue(event, num);
+                onCustomLabel: function (event, value) {
+                    if (opts.ruler.labels.onCustomLabel) {
+                        return opts.ruler.labels.onCustomLabel(event, value);
                     }
-                    return num;
+                    return value;
                 },
-                onDrawRuler: function (event, ctx, width, height, pixelOffsets) {
-                    if (opts.ruler.onDraw) {
-                        return opts.ruler.onDraw(event, ctx, width, height, pixelOffsets);
+                onCustomLabelAttrs: function (event, value, x, y) {
+                    if (opts.ruler.labels.onCustomAttrs) {
+                        return opts.ruler.labels.onCustomAttrs(event, value, x, y);
+                    }
+                },
+                onCustomRuler: function (event, $svg, width, height, zoom, createSvgDomFunc) {
+                    if (opts.ruler.onCustom) {
+                        return opts.ruler.onCustom(event, $svg, width, height, zoom, createSvgDomFunc);
                     }
                 },
                 finalChangeValueFirst: null,
@@ -853,7 +808,7 @@
                 ticksStep: 0,
                 startPixel: 0,
                 isFixedHandle: false,
-                isInputTypeRange: false, // whether the markup for this plugin in an <input type="range">
+                isInputTypeRange: false, // whether the markup for this plug-in in an <input type="range">
                 isHoriz: true,
                 hasRuler: false,
                 fromPixel: 0,
@@ -861,7 +816,7 @@
                 doubleHandles: false,
                 isRangeFromToDefined: false,
                 isStepDefined: false,
-                isAutoFocusable: $elem.attr('tabindex') !== undefined && $elem.attr('autofocus') !== undefined,
+                isAutoFocusable: false,
                 canDragRange: false,
                 isDocumentEventsBound: false,
                 uncommitedValue: [0, 0],
@@ -929,14 +884,14 @@
                         }
                     }
                     if (info.doubleHandles) {
-                        info.currValue[0] = opts.value[0];
-                        info.currValue[1] = opts.value[1];
+                        elemHandle.stopPosition[0] = info.currValue[0] = opts.value[0];
+                        elemHandle.stopPosition[1] = info.currValue[1] = opts.value[1];
                     } else {
                         info.currValue[0] = opts.value;
                     }
                 },
                 initVars: function () {
-                    // if fixed handle and two values are provied, then the second is discarded, as double handlers are not supported when a fixedHandle is used
+                    // if fixed handle and two values are provided, then the second is discarded, as double handlers are not supported when a fixedHandle is used
                     if (opts.fixedHandle !== false && opts.value && (typeof opts.value === 'object') && opts.value.length === 2) {
                         opts.value = opts.value[0];
                     }
@@ -947,7 +902,8 @@
                     this.isStepDefined = opts.step > 0.00005;
                     this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
                     this.isInputTypeRange = $elem.is('input[type=range]');
-                    this.hasRuler = opts.ruler.visible || opts.ruler.onDraw;
+                    this.isAutoFocusable = (this.isInputTypeRange || $elem.attr('tabindex') !== undefined) && $elem.attr('autofocus') !== undefined;
+                    this.hasRuler = opts.ruler.visible || opts.ruler.onCustom;
                     if (util.isAlmostZero(opts.handle.zoom)) {
                         opts.handle.zoom = 1;
                     }
@@ -997,14 +953,25 @@
                     }
                 },
                 checkLimits: function (value) {
-                    var limit = info.isRangeFromToDefined ? info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) : opts.min;
+                    var limit = opts.min;
+                    if (info.isRangeFromToDefined) {
+                        limit = info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]);
+                        if (info.isStepDefined) {
+                            limit = Math.ceil((limit - opts.min)/opts.step)*opts.step + opts.min;
+                        }
+                    }
                     if (value < limit) {
                         return limit;
-                    } else {
-                        limit = info.isRangeFromToDefined ? info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) : opts.max;
-                        if (value > limit) {
-                            return limit;
+                    }
+                    limit = opts.max;
+                    if (info.isRangeFromToDefined) {
+                        limit = info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]);
+                        if (info.isStepDefined) {
+                            limit = Math.trunc((limit - opts.min)/opts.step)*opts.step + opts.min;
                         }
+                    }
+                    if (value > limit) {
+                        return limit;
                     }
                     return value;
                 },
@@ -1026,16 +993,18 @@
 
                     if (info.isStepDefined) {
                         valueNoMin = Math.round(valueNoMin/opts.step)*opts.step;
-                        if (info.isRangeFromToDefined) {
-                            // make sure the handle is within range limits
-                            var rangeBoundary = info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min;
-                            if (valueNoMin < rangeBoundary) {
-                                valueNoMin = checkOffLimits ? rangeBoundary : (valueNoMin + opts.step);
-                            } else {
-                                rangeBoundary = info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) - opts.min;
-                                if (valueNoMin > rangeBoundary) {
-                                    valueNoMin = checkOffLimits ? rangeBoundary : (valueNoMin - opts.step);
-                                }
+                    }
+                    if (info.isRangeFromToDefined) {
+                        // make sure the handle is within range limits
+                        var rangeBoundary = info.getCurrValue(opts.range.type[opts.flipped ? 1 : 0]) - opts.min;
+                        rangeBoundary = Math.ceil(rangeBoundary/opts.step)*opts.step;
+                        if (valueNoMin < rangeBoundary) {
+                            valueNoMin = checkOffLimits ? rangeBoundary : (valueNoMin + opts.step);
+                        } else {
+                            rangeBoundary = info.getCurrValue(opts.range.type[opts.flipped ? 0 : 1]) - opts.min;
+                            rangeBoundary = Math.trunc(rangeBoundary/opts.step)*opts.step;
+                            if (valueNoMin > rangeBoundary) {
+                                valueNoMin = checkOffLimits ? rangeBoundary : (valueNoMin - opts.step);
                             }
                         }
                     }
@@ -1053,13 +1022,13 @@
                     
                     var valueRelative = valueNoMinPx/(opts.min - opts.max)*100,
                         isFirstHandle = $handleElem === elemHandle.$elem1st,
-                        onlyOneHandle = isFirstHandle || info.isFixedHandle,
                         padStart = opts.flipped ? opts.paddingEnd : opts.paddingStart,
                         padEnd = opts.flipped ? opts.paddingStart : opts.paddingEnd,
                         pos = valueRelative*(1 - padStart - padEnd) - padStart*100,
-                        translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)');
+                        translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)'),
+                        translateRange = 'translate(' + (info.isHoriz ? valueRelative + '%, -50%)' : '-50%, ' + valueRelative + '%)');
 
-                    info.currValue[onlyOneHandle ? 0 : 1] = valueNoMin + opts.min;
+                    info.currValue[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                     if (info.isFixedHandle) {
                         if (info.hasRuler) {
                             elemMagnif.$elem1st.css('transform', translate);
@@ -1073,18 +1042,21 @@
                                 $elem.css('transform', 'translate(-50%, ' + (pos + elemHandle.fixedHandleRelPos*100) + '%)');
                             }
                         }
+                        elemRange.$rangeWrapper.css('transform', translateRange);
+                        elemMagnif.$elemRange1st.css('transform', translateRange);
                     } else {
                         $handleElem.css(info.isHoriz ? 'left' : 'top', (-pos) + '%');
                         (isFirstHandle ? elemMagnif.$elem1st : elemMagnif.$elem2nd).css('transform', info.hasRuler ? translate : 'scale(' + opts.handle.zoom + ') ' + translate);
                         elemHandle.stopPosition[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
+                        (isFirstHandle ? elemMagnif.$elemRange1st : elemMagnif.$elemRange2nd).css('transform', translateRange);
                     }
-                    elemRange.update(-pos, isFirstHandle);
-                    elemMagnif.updateRanges(-pos, isFirstHandle);
+                    elemRange.update(- valueRelative, isFirstHandle);
+                    elemMagnif.updateRanges(- valueRelative, isFirstHandle);
 
-                    if (info.isInputTypeRange && onlyOneHandle) {
+                    if (info.isInputTypeRange && isFirstHandle) {
                         $elem.attr('value', info.getCurrValue(info.currValue[0]));
                     }
-                    $elem.triggerHandler('change.rsSliderLens', [info.getCurrValue(info.currValue[onlyOneHandle ? 0 : 1]), onlyOneHandle]);
+                    $elem.triggerHandler('change.rsSliderLens', [info.getCurrValue(info.currValue[isFirstHandle ? 0 : 1]), isFirstHandle]);
                 }
             },
 
@@ -1160,11 +1132,11 @@
                                             size: optsTicks[type].size*shortest
                                         } : null;
                                 },
-                                drawMark = function (step, pos, size) { // step is the X coordinate for horizontal sliders or the Y coordinate for verticanl sliders
+                                drawMark = function (step, pos, size) { // step is the X coordinate for horizontal sliders or the Y coordinate for vertical sliders
                                     if (info.isHoriz) {
-                                        path += 'M' + step + ' ' + pos + ' v' + size + ' ';
+                                        path += 'M' + Math.round(step*100)/100 + ' ' + Math.round(pos*100)/100 + ' v' + Math.round(size*100)/100 + ' ';
                                     } else {
-                                        path += 'M' + pos + ' ' + step + ' h' + size + ' ';
+                                        path += 'M' + Math.round(pos*100)/100 + ' ' + Math.round(step*100)/100 + ' h' + Math.round(size*100)/100 + ' ';
                                     }
                                 },
                                 short = createObj('short'),
@@ -1204,7 +1176,9 @@
                         };
                     generateTicks();
 
-                    if ((opts.ruler.labels.values === 'step' || opts.ruler.labels.values === true) && opts.step > 0 || opts.ruler.labels.values instanceof Array) {
+                    if (opts.ruler.labels.visible &&
+                            ((opts.ruler.labels.values === 'step' || opts.ruler.labels.values === true) && opts.step > 0 ||
+                             opts.ruler.labels.values instanceof Array)) {
                         var gAttrs = {
                                 'dominant-baseline': 'central',
                                 'text-anchor': 'middle'
@@ -1221,30 +1195,33 @@
                                     s = opts.ruler.labels.pos*shortest/(doScale ? opts.handle.zoom : 1),
                                     textAttrs;
                                 w = w/range*usableArea/(doScale ? opts.handle.zoom : 1) + (doScale ? padStart/opts.handle.zoom : padStart);
-                                pntX = info.isHoriz ? w : s;
-                                pntY = info.isHoriz ? s : w;
-                                textAttrs = opts.ruler.labels.onCustomAttrs ? opts.ruler.labels.onCustomAttrs(value, pntX, pntY) : undefined;
+                                pntX = Math.round((info.isHoriz ? w : s)*100)/100;
+                                pntY = Math.round((info.isHoriz ? s : w)*100)/100;
+                                textAttrs = $elem.triggerHandler('customLabelAttrs.rsSliderLens', [value, pntX, pntY]);
                                 if (Object.prototype.toString.call(textAttrs) !== '[object Object]') {
                                     textAttrs = {};
                                 }
                                 textAttrs.x = pntX;
                                 textAttrs.y = pntY;
+                                value = $elem.triggerHandler('customLabel.rsSliderLens', [value]);
                                 $allText.append(util.createSvgDom('text', textAttrs).append(value));
-                            };
+                            },
+                            x;
                         if (doScale) {
                             gAttrs.transform = 'scale(' + opts.handle.zoom + ')';
                         }
                         $allText = util.createSvgDom('g', gAttrs);
                         if (opts.ruler.labels.values instanceof Array) {
                             opts.ruler.labels.values.sort(function (a, b) { return a - b; });
-                            for (var x in opts.ruler.labels.values) {
-                                if (opts.ruler.labels.values)
-                                if (withinBounds(opts.ruler.labels.values[x])) {
-                                    renderText(opts.ruler.labels.values[x]);
+                            for (x in opts.ruler.labels.values) {
+                                if (opts.ruler.labels.values) {
+                                    if (withinBounds(opts.ruler.labels.values[x])) {
+                                        renderText(opts.ruler.labels.values[x]);
+                                    }
                                 }
                             }
                         } else {
-                            for (var x = opts.min; x <= opts.max; x += opts.step) {
+                            for (x = opts.min; x <= opts.max; x += opts.step) {
                                 renderText(x);
                             }
                         }
@@ -1269,6 +1246,8 @@
             panUtil = {
                 doDrag: true,
                 firstClickWasOutsideHandle: false,
+                mouseBtnStillDown: false,
+                beingDraggedByKeyboard: false,
                 dragDelta: 0,
                 $handle: null, // handle currently being dragged
                 $animObj: null,
@@ -1305,8 +1284,12 @@
                     var $prevAnimHandle = $animHandle,
                         done = function () {
                             panUtil.animDone(util.value2Pixel(to), $prevAnimHandle);
-                            if (!noFinalChange) {
+                            if (!noFinalChange || noFinalChange === 'key' && !panUtil.beingDraggedByKeyboard) {
                                 events.processFinalChange($animHandle === elemHandle.$elem1st);
+                            } else {
+                                if (noFinalChange === 'key') {
+                                    panUtil.beingDraggedByKeyboard = false;
+                                }
                             }
                             if (doneCallback) {
                                 doneCallback();
@@ -1359,14 +1342,10 @@
                         toPx = util.value2Pixel(toValue);
                     panUtil.dragDelta = 0;
                     panUtil.doDrag = false;
-                    if ($animHandle) {
-                        panUtil.anim(null, fromPx, toPx, duration, easingFunc, $animHandle, undefined, false);
+                    if (panUtil.beingDraggedByKeyboard) {
+                        panUtil.anim(null, fromPx, toPx, duration, easingFunc, $animHandle, undefined, 'key');
                     } else {
-                        if (animDuration === 0) {
-                            panUtil.anim(null, fromPx, toPx, duration, easingFunc, undefined, undefined, false);
-                        } else {
-                            panUtil.anim(null, fromPx, toPx, duration, easingFunc);
-                        }
+                        panUtil.anim(null, fromPx, toPx, duration, easingFunc, $animHandle);
                     }
                 },
                 startDrag: function (event) {
@@ -1379,7 +1358,6 @@
                         panUtil.disableTextSelection();
                         panRangeUtil.dragged = false;
                         panUtil.doDrag = true;
-                        panUtil.dragging = true;
                         if (info.isFixedHandle) {
                             panUtil.$handle = elemHandle.$elem1st;
                             panUtil.fixedHandleStartDragPos = info.isHoriz ? event.pageX : event.pageY;
@@ -1388,13 +1366,19 @@
                             $(document).
                                 bind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
                                 bind('mouseup.rsSliderLens', panUtil.stopDragFromDoc);
+                            setTimeout(function () {
+                                panUtil.$handle.focus();
+                            });
                         } else {
-                            panUtil.firstClickWasOutsideHandle = true;
+                            panUtil.mouseBtnStillDown = panUtil.firstClickWasOutsideHandle = true;
                             var initialValues = [info.currValue[0], info.currValue[1]];
                             panUtil.anim(event, undefined, undefined, undefined, undefined, undefined, function () {
                                 panUtil.$handle.focus();
                                 info.uncommitedValue[0] = initialValues[0];
                                 info.uncommitedValue[1] = initialValues[1];
+                                if (!panUtil.mouseBtnStillDown) {
+                                    panUtil.stopDrag(true);
+                                }
                             }, true);
                         }
                     }
@@ -1435,6 +1419,7 @@
                     }
                 },
                 dragHorizVert: function (event, attr) {
+                    panUtil.dragging = true;
                     if (info.isFixedHandle) {
                         info.setValue(util.pixel2Value(- event[attr] + panUtil.fixedHandleStartDragPos), panUtil.$handle, opts.snapOnDrag);
                     } else {
@@ -1448,8 +1433,8 @@
                 dragVert: function (event) {
                     panUtil.dragHorizVert(event, 'pageY');
                 },
-                stopDrag: function () {
-                    if (panUtil.dragging) {
+                stopDrag: function (force) {
+                    if (panUtil.dragging || panUtil.mouseBtnStillDown || force === true) {
                         if (panRangeUtil.dragged) {
                             panRangeUtil.stopDrag();
                             panRangeUtil.dragged = false;
@@ -1460,7 +1445,7 @@
                                 panUtil.firstClickWasOutsideHandle = false;
                                 $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
                                 
-                                // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
+                                // if step is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
                                 if (info.isStepDefined && !panUtil.$animObj) {
                                     info.setValue(info.currValue[panUtil.$handle === elemHandle.$elem1st ? 0 : 1], panUtil.$handle, true);
                                 }
@@ -1471,13 +1456,17 @@
                         }
                         panUtil.dragging = false;
                     }
+                    panUtil.mouseBtnStillDown = false;
                 },
                 stopDragFromDoc: function () {
                     panUtil.stopDrag();
                 },
                 gotFocus: function () {
+                    elemOrig.$wrapper.addClass(opts.style.classFocused);
                     if (!info.isDocumentEventsBound) {
-                        $(document).bind('keydown.rsSliderLens', elemHandle.keydown);
+                        $(document).
+                            bind('keydown.rsSliderLens', elemHandle.keydown).
+                            bind('keyup.rsSliderLens', elemHandle.keyup);
                         info.isDocumentEventsBound = true;
 
                         // save current values and range. If user presses ESC, then data rollsback to these values
@@ -1498,6 +1487,7 @@
                     }
                 },
                 loseFocus: function () {
+                    elemOrig.$wrapper.removeClass(opts.style.classFocused);
                     if (panUtil.$animObj) {
                         // lost focus while a focused handle was still moving, so restore the focus back to the moving handle
                         if (panUtil.$handle) {
@@ -1509,6 +1499,7 @@
                         setTimeout(function() {
                             var $allElems = $elem.
                                     add(elemOrig.$canvas).
+                                    add(elemRange.$rangeWrapper).
                                     add(elemRange.$range).
                                     add(elemMagnif.$elem1st).add(elemMagnif.$elem1st.parent()).add(elemMagnif.$elem1st.parent().parent()).
                                     add(elemMagnif.$elemRange1st).
@@ -1522,7 +1513,9 @@
                             }
 
                             if (!$(currFocusedElem).is($allElems)) { // did focus moved outside this slider?
-                                $(document).unbind('keydown.rsSliderLens', elemHandle.keydown);
+                                $(document).
+                                    unbind('keydown.rsSliderLens', elemHandle.keydown).
+                                    unbind('keyup.rsSliderLens', elemHandle.keyup);
                                 info.isDocumentEventsBound = false;
                             }
                         });
@@ -1540,7 +1533,11 @@
                         info.updateTicksStep();
                         panUtil.disableTextSelection();
                         panRangeUtil.origin = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top;
-                        panRangeUtil.deltaRange = opts.range.type[1] - opts.range.type[0];
+                        if (info.canDragRange && info.doubleHandles && (opts.range.type === true || opts.range.type === 'between')) {
+                            panRangeUtil.deltaRange = info.currValue[1] - info.currValue[0];
+                        } else {
+                            panRangeUtil.deltaRange = opts.range.type[1] - opts.range.type[0];
+                        }
                         panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemRange.$range.offset().left : event.pageY - elemRange.$range.offset().top;
                         panRangeUtil.dragged = false;
                         $(document).
@@ -1549,20 +1546,65 @@
                     }
                 },
                 drag: function (event) {
+                    var firstDrag = !panRangeUtil.dragged;
                     panRangeUtil.dragged = true;
-                    if (info.isRangeFromToDefined) {
+                    if (info.isRangeFromToDefined || info.canDragRange && info.doubleHandles && (opts.range.type === true || opts.range.type === 'between')) {
+                        if (firstDrag) {
+                            elemRange.$rangeWrapper.
+                                add(elemMagnif.$elemRange1st).
+                                add(elemMagnif.$elemRange2nd).addClass(opts.style.classDragging);
+                        }
+
                         var candidateLeft = util.pixel2Value((info.isHoriz ? event.pageX : event.pageY) - panRangeUtil.dragDelta - panRangeUtil.origin),
-                            candidateRight = candidateLeft + panRangeUtil.deltaRange;
+                            candidateRight = candidateLeft + panRangeUtil.deltaRange,
+                            aux;
                         candidateLeft = info.getCurrValue(candidateLeft);
                         candidateRight = info.getCurrValue(candidateRight);
-                        if (opts.flipped && candidateRight >= opts.min && candidateLeft <= opts.max ||
-                            !opts.flipped && candidateLeft >= opts.min && candidateRight <= opts.max) {
-                            opts.range.type[opts.flipped ? 1 : 0] = candidateLeft;
-                            opts.range.type[opts.flipped ? 0 : 1] = candidateRight;
+                        if (opts.flipped) {
+                            aux = candidateLeft;
+                            candidateLeft = candidateRight;
+                            candidateRight = aux;
                         }
-                        var css = {};
-                        elemRange.nonFixedHandleSetFromToRangePosition(css);
-                        elemRange.$range.css(css);
+                        aux = candidateRight - opts.max;
+                        if (aux > 0 && aux < info.ticksStep) {
+                            candidateRight = opts.max;
+                            candidateLeft -= aux;
+                        }
+                        aux = opts.min - candidateLeft;
+                        if (aux > 0 && aux < info.ticksStep) {
+                            candidateLeft = opts.min;
+                            candidateRight += aux;
+                        }
+                        if (candidateLeft >= opts.min && candidateRight <= opts.max) {
+                            if (opts.range.type === true || opts.range.type === 'between') {
+                                info.currValue[opts.flipped ? 1 : 0] = info.getCurrValue(candidateLeft);
+                                if (info.doubleHandles) {
+                                    info.currValue[opts.flipped ? 0 : 1] = info.getCurrValue(candidateRight);
+                                }
+                            } else {
+                                opts.range.type[0] = candidateLeft;
+                                opts.range.type[1] = candidateRight;
+                                info.currValue[0] = info.getCurrValue(Math.min(Math.max(candidateLeft, info.getCurrValue(info.currValue[0])), candidateRight));
+                                if (info.doubleHandles) {
+                                    info.currValue[1] = info.getCurrValue(Math.min(Math.max(candidateLeft, info.getCurrValue(info.currValue[1])), candidateRight));
+                                }
+                            }
+                            if (info.doubleHandles) {
+                                elemHandle.stopPosition[0] = info.currValue[0];
+                                elemHandle.stopPosition[1] = info.currValue[1];
+                            }
+
+                            elemRange.$range.
+                                add(elemMagnif.$elemRange1st.children()).
+                                add(elemMagnif.$elemRange2nd ? elemMagnif.$elemRange2nd.children() : null).
+                                css(elemRange.getPropMin(), (candidateLeft - opts.min)/(opts.max - opts.min)*100 + '%').
+                                css(elemRange.getPropMax(), (opts.max - candidateRight)/(opts.max - opts.min)*100 + '%');
+
+                            info.setValue(info.currValue[0], elemHandle.$elem1st, true);
+                            if (info.doubleHandles) {
+                                info.setValue(info.currValue[1], elemHandle.$elem2nd, true);
+                            }
+                        }
                     }
                 },
                 stopDrag: function () {
@@ -1570,19 +1612,21 @@
                         panUtil.enableTextSelection();
                         $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
 
-                        // if snap is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
-                        if (info.isStepDefined) {
+                        if (panRangeUtil.dragged) {
                             info.setValue(info.currValue[0], elemHandle.$elem1st, true);
                             if (info.doubleHandles) {
                                 info.setValue(info.currValue[1], elemHandle.$elem2nd, true);
                             }
                         }
                         if (info.doubleHandles) {
-                            events.processFinalChange(0, true);
-                            events.processFinalChange(0, false);
+                            events.processFinalChange(true);
+                            events.processFinalChange(false);
                         } else {
-                            events.processFinalChange();
+                            events.processFinalChange(true);
                         }
+                        elemRange.$rangeWrapper.
+                            add(elemMagnif.$elemRange1st).
+                            add(elemMagnif.$elemRange2nd).removeClass(opts.style.classDragging);
                     }
                 }
             },
@@ -1591,6 +1635,10 @@
                 if (elem) { elem[0].ondragstart = elem[0].onselectstart = function () { return false; }; }
             };
 
+        $elem
+            .bind('customRuler.rsSliderLens', events.onCustomRuler)
+            .bind('customLabel.rsSliderLens', events.onCustomLabel)
+            .bind('customLabelAttrs.rsSliderLens', events.onCustomLabelAttrs);
         info.initVars();
         elemOrig.init();
         elemMagnif.init();
@@ -1600,9 +1648,7 @@
         elemHandle.init();
 
         // insert into DOM
-        if (elemRange.$range) {
-            elemRange.$range.appendTo(elemOrig.$wrapper);
-        }
+        elemRange.$rangeWrapper.appendTo(elemOrig.$wrapper);
         if (elemMagnif.$elemRange1st) {
             elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
         }
@@ -1623,7 +1669,7 @@
         if (Math.abs(opts.handle.mousewheel) > 0.5) {
             $elem.
                 add(elemOrig.$canvas).
-                add(elemRange.$range).
+                add(elemRange.$rangeWrapper).
                 add(elemHandle.$elem1st).
                 add(elemHandle.$elem2nd).bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
         }
@@ -1649,6 +1695,7 @@
         noIEdrag(elemMagnif.$elem1st);
         noIEdrag(elemHandle.$elem1st);
         noIEdrag(elemOrig.$canvas);
+        noIEdrag(elemRange.$rangeWrapper);
         noIEdrag(elemRange.$range);
         noIEdrag(elemMagnif.$elemRange1st);
         
@@ -1669,9 +1716,14 @@
     $.fn.rsSliderLens = function (options) {
         var option = function () {
                 if (typeof arguments[0] === 'string') {
-                    var op = arguments.length == 1 ? 'getter' : (arguments.length == 2 ? 'setter' : null);
-                    if (op) {
-                        return this.eq(0).triggerHandler(op + '.rsSliderLens', arguments);
+                    switch (arguments.length) {
+                        case 1:
+                            return this.eq(0).triggerHandler('getter.rsSliderLens', arguments);
+                        case 2:
+                            for (var last = this.length - 1; last > -1; --last) {
+                                this.eq(last).triggerHandler('setter.rsSliderLens', arguments);
+                            }
+                            return this;
                     }
                 }
             },
@@ -1710,7 +1762,7 @@
                     return isNaN(value) ? 0.0 : value;
                 };
             if ($this.is('input[type=range]')) {
-                var attrValue = $this.attr('value'),
+                var attrValue = $this.val(),
                     doubleHandles = opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
                     
                 if (attrValue !== undefined && !doubleHandles) {
@@ -1747,6 +1799,14 @@
                              //   'horiz' - horizontal slider.
                              //   'vert' - vertical slider.
                              //   'auto' - horizontal if the content's width >= height; vertical if the content's width < height.
+        width: 'auto',       // Slider width: Type: String or positive integer greater than zero.
+                             //   'auto'  - The plug-in retrieves the width from the element to which the plug-in is bounded.
+                             //             If retrieving the width is impossible (because the element is hidden), then 150 is used.
+                             //   integer - The plug-in uses this given width instead.
+        height: 'auto',      // Slider height: Type: String or positive integer greater than zero.
+                             //   'auto'  - The plug-in retrieves the height from the element to which the plug-in is bounded.
+                             //             If retrieving the height is impossible (because the element is hidden), then 50 is used.
+                             //   integer - The plug-in uses this given height instead.
         fixedHandle: false, // Determines whether handle is movable. Type: boolean or floating point number between 0 and 1.
                             //           false - the user can move the handle left/right (horizontal sliders) or move up/down (vertical sliders).
                             //            true - the handle is in a fixed position (in the middle of the slider) and does not move. Instead, only the ruler moves.
@@ -1783,9 +1843,12 @@
             classHandle: 'handle',          // Class added to the handle div created at run-time, for single handle sliders.
             classHandle1: 'handle1',        // Class added to the first handle div created at run-time (only applicable to double handle sliders).
             classHandle2: 'handle2',        // Class added to the second handle div created at run-time (only applicable to double handle sliders).
-            classDragging: 'dragging',      // Class added to the handle currently being dragged by the mouse. Also added to the wrapper div.
-            classHighlightRange: 'range',   // Class added to the range bars.
-            classHighlightRangeDraggable: 'drag'  // Class added to the range bars the moment the user drags them.
+            classDragging: 'dragging',      // Class added to the handle currently being dragged by the mouse. Also added to the wrapper div and to the range element.
+            classRange: 'range',            // Class added to the range bars.
+            classRangeDraggable: 'drag',    // Class added to the range bars the moment the user drags them.
+            classFocused: 'focus'           // Class added to the wrapper div created at run-time, when handle receives keyboard focus.
+                                            // The keyboard focus is possible only when the plug-in is bounded to a focusable element, that is,
+                                            // an <input> element or any other element with a tabindex attribute.
         },
 
         // handle is the cursor that the user can drag around to select values
@@ -1795,7 +1858,7 @@
                         // if slider width is 500px and handle size is .3, then handle size becomes (500px * 30%) = 150px in width.
                         // For vertical sliders, it is the handle height relative to the slider height.
                         // If two handles are used, then this is the size of both handles together, which means each handle has a size of size/2.
-            zoom: 1.25, // Magnification factor applied inside the handle. Type: positive floating point number.
+            zoom: 1.5,  // Magnification factor applied inside the handle. Type: positive floating point number.
                         // If greater than 1, the content is magnified.
                         // If 1, the content remains the same size.
                         // If smaller than 1, the content is shrinked.
@@ -1811,7 +1874,7 @@
                                // e.g. if the handle.zoom is 1.25, then the otherSize is also 1.25 (125% of the slider size).
                                // If set to a floating point number, it represents a relative size, e.g. if set to 1, then handle size will have
                                // the same size (100%) of the slider element.
-            animation: 150,    // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
+            animation: 100,    // Duration (ms or jQuery string alias) of animation that happens when handle needs to move to a different location (triggered by a mouse click on the slider).
                                // Use 0 to disable animation. Type: positive integer or string.
             easing: 'swing',   // Easing function used for the handle animation (@see http://api.jquery.com/animate/#easing). Type: string.
             mousewheel: 1  // Threshold factor applied to the handle when using the mouse wheel. Type: floating point number.
@@ -1829,7 +1892,7 @@
                                 // false - the original markup content is displayed.
                                 // Note: If the plug-in is attached to a DOM element that contains no content at all (no children),
                                 //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
-                                // There is more to this, please see onDraw below.
+                                // There is more to this, please see onCustom below.
             size: 1.5,          // Specifies the relative width (for horizontal sliders) or height (for vertical sliders) of the svg ruler. Type: floating pointer number >= 0.
                                 // Only applicable to fixed handle sliders.
                                 // A value of 1, means that the ruler has the same (100%) width of the parent container (or height for vertical sliders).
@@ -1843,17 +1906,19 @@
                                         //           true - Same as 'step'.
                                         //          false - Values are not displayed.
                                         //   number array - Only the numbers in the array are displayed.
-                pos: 0.7,               // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+                pos: 0.75,              // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
-                onCustomAttrs: null     // Event called for each label. Type: function (value, x, y).
+                onCustomLabel: null,    // Event called for each label. Type: function (event, value).
+                                        // Use this event to return a string that replaces the default given value.
+                onCustomAttrs: null     // Event called for each label. Type: function (event, value, x, y).
                                         // This event should return an Javascript object with all the attributes that should be applied to a text label.
                                         // All three parameters are floating point numbers, and represent the current label value and the X and Y coordinates, respectively.
                                         /* Example: to rotate labels 45 degrees and left justified, use:
-                                            $(".myElement").rsSliderLens({
+                                            $('.myElement').rsSliderLens({
                                                 ruler: {
                                                     labels: {
-                                                        onCustomAttrs: function (value, x, y) {
+                                                        onCustomAttrs: function (event, value, x, y) {
                                                             return {
                                                                 transform: 'rotate(45 ' + x + ',' + y + ')',
                                                                 'text-anchor': 'start'
@@ -1868,10 +1933,10 @@
                 short: {
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
                     step: 2,            // Interval between each short tick mark. Type: floating number.
-                    pos: 0.25,          // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.25,           // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: 0.15          // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.1          // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 },
@@ -1881,24 +1946,29 @@
                     pos: 0.2,           // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: 0.2           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.15           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
             },
-            onDraw: null   // Event used for customized rulers. Type: function($svg, width, height, createSvgDomFunc)
-                           // If onDraw event is undefined and ruler.visible is true, then a custom ruler is generated.
-                           // If onDraw event is undefined and ruler.visible is false, then no ruler is displayed and the original content is shown.
-                           // If onDraw event is defined and ruler.visible is true, then onDraw is used to draw on top of the generated ruler.
-                           // If onDraw event is defined and ruler.visible is false, then use onDraw to create your own custom ruler from scratch.
-                           // $svg: <svg> element to be added later to the document. Any extra DOM elements created by your onDraw should be appended as children to $svg.
+            onCustom: null // Event used for customized rulers. Type: function(event, $svg, width, height, zoom, createSvgDomFunc)
+                           // If onCustom event is undefined and ruler.visible is true, then a custom ruler is generated.
+                           // If onCustom event is undefined and ruler.visible is false, then no ruler is displayed and the original content is shown.
+                           // If onCustom event is defined and ruler.visible is true, then onCustom is used to draw on top of the generated ruler.
+                           // If onCustom event is defined and ruler.visible is false, then use onCustom to create your own custom ruler from scratch.
+                           // This event is always called twice:
+                           //   - First time for the regular size ruler.
+                           //   - Second time for the magnified ruler inside the handle.
+                           // $svg: <svg> element to be added later to the document. Any extra DOM elements created by your onCustom should be appended as children to $svg.
                            // width: width in pixels of the $svg element.
                            // height: height in pixels of the $svg element.
+                           // zoom: Indicates whether this ruler should be magnified. The first time this event is called, zoom is 1.
+                           //       The second time this event is called, zoom matches the handle.zoom value.
                            // createSvgDomFunc: function(tag, attrs), where tag is a String and attrs a JS object.
                            //  A function provided to your convenience, that returns a new SVG element (without adding it to the DOM).
                            //  The returned element contains the given tag and attributes, if any.
                            //  For example, the following code
-                           //    var $line = createSvgDomFunc('line', {x1: 0, y1: 0, x2: 0.5, y2: 5, 'stroke-width': 1});
+                           //    var $line = createSvgDomFunc('line', {x1: 0, y1: 0, x2: 0.5, y2: 5, 'stroke-width': zoom});
                            //  sets $line to the element <line x1="0" y1="0" x2="0.5" y2="5" stroke-width="1"></line>
         },
         range: {
@@ -1910,15 +1980,15 @@
                               //   'max' - range between handle and max, or - when two handles are used - between second handle and max.
                               //   [from, to] - Defines a range that restricts the input to the interval [from, to].
                               //                For example, if min = 20 and max = 100 and range = [50, 70], then it is not possible to select values smaller than 50 or greater than 70
-                              //   The style of the range area is defined by classHighlightRange.
+                              //   The style of the range area is defined by classRange.
             draggable: false, // Determines whether the user can drag a range with the mouse. Type: boolean.
                               //   false - range cannot be dragged.
                               //    true - range can be dragged (only if type is 'between', true or [from, to])
                               // Not applicable for fixed handle sliders.
-            pos: 0.5,         // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
+            pos: 0.46,        // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the vertical position of the horizontal range, with 0 aligned to the top of the slider, and 1 to the bottom.
                               // For vertical sliders, represents the horizontal position of the vertical range, with 0 aligned to the left of the slider, and 1 to the right.
-            size: 0.25        // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
+            size: 0.075       // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the height of the horizontal range.
                               // For vertical sliders, represents the width of the vertical range.
         },

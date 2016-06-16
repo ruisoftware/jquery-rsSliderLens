@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>rsSliderLens plugin</title>
+    <link rel="stylesheet" href="../../dist/rsSliderLens.css" />
+    <link rel="stylesheet" href="test.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+    <script src="../jquery.rsSliderLens.js"></script>
+    <script>
+        $(document).ready(function () {
+          var opts = {
+            fixedHandle: false,
+            min: -30,
+            value: 5,
+            step: 10,
+            snapOnDrag: false,
+            enabled: true,
+            flipped: true,
+            paddingStart: .2,
+            paddingEnd: .1
+            //,  range: {  type: [20, 80], draggable: true }
+
+            //, ruler: {  }}
+            , onChange: function(e, value, firstHandle) {
+              $(e.currentTarget).closest("tr").children("td:first-child").children("div").eq(0).children("span").eq(firstHandle ? 0 : 1).text(value.toFixed(2));
+            }
+            , onFinalChange: function(e, value, firstHandle) {
+              $(e.currentTarget).closest("tr").children("td:first-child").children("div").eq(1).children("span").eq(firstHandle ? 0 : 1).text(value.toFixed(2));
+            }
+          };
+
+          $(".fixed.ruler").rsSliderLens($.extend({}, opts, {
+              fixedHandle: .3
+            })
+          );
+
+          $(".fixed.noruler").rsSliderLens($.extend({}, opts, {
+              fixedHandle: .3,
+              ruler: {
+                visible: false
+              }
+            })
+          );
+
+          $(".single.ruler").rsSliderLens(opts);
+          $(".single.noruler").rsSliderLens($.extend({}, opts, {
+              ruler: {
+                visible: false
+              }
+            })
+          );
+
+          $(".double.ruler").rsSliderLens($.extend({}, opts, {
+              value: [2,4]
+            })
+          );
+          $(".double.noruler").rsSliderLens($.extend({}, opts, {
+              value: [2,4],
+              ruler: {
+                visible: false
+              }
+            })
+          );
+        });
+    </script>
+  </head>
+  <body>
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th colspan="2">fixed handle</th>
+          <th colspan="2">single handle</th>
+          <th colspan="2">double handle</th>
+        </tr>
+        <tr>
+          <th></th>
+          <th>ruler</th>
+          <th>no ruler</th>
+          <th>ruler</th>
+          <th>no ruler</th>
+          <th>ruler</th>
+          <th>no ruler</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            type[range]<br>
+            horizontal
+            <div>[<span></span>, <span></span>]</div>
+            <div>[<span></span>, <span></span>]</div>
+          </td>
+          <td colspan="2"><input type="range" class="fixed h ruler"/></td>
+          <td colspan="2"><input type="range" class="single h ruler"/></td>
+          <td colspan="2"><input type="range" class="double h ruler"/></td>
+        </tr>
+        <tr>
+          <td>
+            type[range]<br>
+            vertical
+            <div>[<span></span>, <span></span>]</div>
+            <div>[<span></span>, <span></span>]</div>
+          </td>
+          <td colspan="2"><input type="range" class="fixed v ruler"/></td>
+          <td colspan="2"><input type="range" class="single v ruler"/></td>
+          <td colspan="2"><input type="range" class="double v ruler"/></td>
+        </tr>
+        <tr>
+          <td>
+            span<br>
+            horizontal
+            <div>[<span></span>, <span></span>]</div>
+            <div>[<span></span>, <span></span>]</div>
+          </td>
+          <td><span tabindex="2" class="fixed h ruler">contentandthisistheend</span></td>
+          <td><span class="fixed h noruler" id="test">contentandthisistheend</span></td>
+          <td><span class="single h ruler">contentandthisistheend</span></td>
+          <td><span class="single h noruler">contentandthisistheend</span></td>
+          <td><span class="double h ruler">contentandthisistheend</span></td>
+          <td><span class="double h noruler">contentandthisistheend</span></td>
+        </tr>
+        <tr>
+          <td>
+            span<br>
+            vertical
+            <div>[<span></span>, <span></span>]</div>
+            <div>[<span></span>, <span></span>]</div>
+          </td>
+          <td><span class="fixed v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td><span class="fixed v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td><span class="single v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td><span class="single v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td><span class="double v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td><span class="double v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </body>
+</html>
