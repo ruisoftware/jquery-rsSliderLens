@@ -44,6 +44,25 @@ body {
     @grad2: fade(lighten(@fromGradientInner, 10%), 25%);
     @grad3: fade(darken(@fromGradientInner, 15%), 25%);
     @grad4: fade(darken(@fromGradientInner, 15%), 95%);
+
+    .range {
+        background-color: @rangeWrapper;
+        border-width: @refScale*0.0625;
+        border-style: solid;
+        .borderlineargradient2grads(top, @fromGradientOuter, @toGradientOuter, to bottom);
+        > div {
+            background-color: @range;
+        }
+        &.drag {
+            > div {
+                cursor: ew-resize;
+            }
+            &.dragging > div {
+                cursor: none;
+            }
+        }
+    }
+
     > .handle,
     > .handle1,
     > .handle2 {
@@ -64,6 +83,9 @@ body {
         border-width: @refScale*0.0625 0;
         &.dragging {
             box-shadow: 0 0 @refScale*0.3125 -@refScale*0.0625 @borderColor;
+        }
+        .range {
+            .borderlineargradient2grads(top, @fromGradientOuter, lighten(@toGradientOuter, 35%), to bottom);
         }
     }
     > .handle {
@@ -98,7 +120,7 @@ body {
         }
         > g > text {
             fill: @text;
-            font-size: .6em;
+            font-size: .5em;
         }
     }
 
@@ -108,6 +130,9 @@ body {
         > .handle2 {
             cursor: ns-resize;
             border-radius: ~"3em/.75em";
+            .range {
+                .borderlineargradient2grads(top, @fromGradientOuter, @toGradientOuter, to bottom);
+            }
         }
         > .handle {
             &:before {
@@ -182,24 +207,6 @@ body {
         > .handle {
             border-radius: 0;
             border: none;
-        }
-    }
-
-    .range {
-        background-color: @rangeWrapper;
-        border-width: @refScale*0.0625;
-        border-style: solid;
-        .borderlineargradient2grads(top, @fromGradientOuter, @toGradientOuter, to bottom);
-        > div {
-            background-color: @range;
-        }
-        &.drag {
-            > div {
-                cursor: ew-resize;
-            }
-            &.dragging > div {
-                cursor: none;
-            }
         }
     }
 

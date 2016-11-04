@@ -9,15 +9,16 @@
     <script src="../jquery.rsSliderLens.js"></script>
 </head>
 <body>
-    
     <h1>jquery-rsSliderLens demonstration</h1>
     <p>With this plug-in, you can change the default input range, from this:</p>
     <pre>
 &lt;input type="range"&gt;
     </pre>
-    <!-- 0 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 0 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>to:</p>
     <pre>
@@ -26,9 +27,11 @@
     <span>$("input").rsSliderLens();</span>
 &lt;/script&gt;
     </pre>
-    <!-- 1 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 1 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>To use a step 25, you can add a <code>step</code> attribute to the <code>&lt;input&gt;</code> element or add a parameter to the plug-in constructor:</p>
     <pre>
@@ -39,9 +42,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 2 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 2 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>The 0 and 100 labels are cropped! No problem, just add a padding space equal to 10% of the slider width:</p>
     <pre>
@@ -54,9 +59,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 3 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 3 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>By default <code>&lt;input type="range"&gt;</code> has a range between 0 and 100.<br>
       For other ranges, you can add <code>min</code> and <code>max</code> attributes to the <code>&lt;input&gt;</code> element, or in the plug-in constructor:</p>
@@ -72,9 +79,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 4 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 4 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>Great, but now the labels overlap each other.<br>
       To fix this, you have some options: (click each one for a sample)</p>
@@ -104,9 +113,11 @@
     });
 &lt;/script&gt;
         </pre>
-        <!-- 5 -->
-        <input type="range">
-        <label></label>
+        <section>
+            <!-- 5 -->
+            <input type="range">
+            <label></label>
+        </section>
     </div>
 
     <div id="o2">
@@ -123,9 +134,11 @@
     });
 &lt;/script&gt;
         </pre>
-        <!-- 6 -->
-        <input type="range">
-        <label></label>
+        <section>
+            <!-- 6 -->
+            <input type="range">
+            <label></label>
+        </section>
     </div>
 
     <div id="o3">
@@ -147,9 +160,11 @@
     });
 &lt;/script&gt;
         </pre>
-        <!-- 7 -->
-        <input type="range">
-        <label></label>
+        <section>
+            <!-- 7 -->
+            <input type="range">
+            <label></label>
+        </section>
     </div>
 
     <div id="o4">
@@ -168,9 +183,11 @@
     });
 &lt;/script&gt;
         </pre>
-        <!-- 8 -->
-        <input type="range">
-        <label></label>
+        <section>
+            <!-- 8 -->
+            <input type="range">
+            <label></label>
+        </section>
     </div>
 
     <div id="o5">
@@ -190,9 +207,11 @@
     });
 &lt;/script&gt;
         </pre>
-        <!-- 9 -->
-        <input type="range">
-        <label></label>
+        <section>
+            <!-- 9 -->
+            <input type="range">
+            <label></label>
+        </section>
     </div>
 
     <p>Use a range to restrict input even further:</p>
@@ -212,9 +231,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 10 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 10 -->
+        <input type="range">
+        <label></label>
+    </section>
     <p class="small">Use your mouse to drag the range to other location</p>
 
     <p>If you want labels every 20 positions, but with a step of 1:</p>
@@ -233,9 +254,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 11 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 11 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>The same slider, but now with a fixed handle style with a min=0 and max=500:</p>
     <pre>
@@ -260,9 +283,11 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 12 -->
-    <input type="range">
-    <label></label>
+    <section>
+        <!-- 12 -->
+        <input type="range">
+        <label></label>
+    </section>
 
     <p>Using customized events to display current value inside the handle and to style labels:</p>
     <pre>
@@ -307,8 +332,10 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 13 -->
-    <input type="range" id="custom">
+    <section>
+        <!-- 13 -->
+        <input type="range" id="custom">
+    </section>
 
     <p>You have the choice of OnChange or OnFinalChange (recommended for computationally expensive tasks)</p>
     <pre>
@@ -324,12 +351,14 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 14 -->
-    <input type="range">
-    <aside id="changeLabels">
-        <label></label>
-        <label></label>
-    </aside>
+    <section>
+        <!-- 14 -->
+        <input type="range">
+        <aside id="changeLabels">
+            <label></label>
+            <label></label>
+        </aside>
+    </section>
 
     <p>Did I mention the support for double handle sliders?</p>
     <pre>
@@ -340,37 +369,126 @@
     });
 &lt;/script&gt;
     </pre>
-    <!-- 15 -->
-    <input type="range">
-    <aside id="doubleHandleLabels">
-        <label></label>
-        <label></label>
-    </aside>
+    <section>
+        <!-- 15 -->
+        <input type="range">
+        <aside id="doubleHandleLabels">
+            <label></label>
+            <label></label>
+        </aside>
+    </section>
 
     <p>You can bind the plug-in to any element, not only to an &lt;input type=range&gt;:</p>
     <pre>
 &lt;span&gt;Hello world&lt;/span&gt;
 &lt;script&gt;
+    $("span").rsSliderLens({ ruler: { visible: false } });
+&lt;/script&gt;
+    </pre>
+    <section class="bottommargin">
+        <!-- 16 -->
+        <span class="slider">Hello world</span>
+        <label></label>
+    </section>
+
+    <pre>
+&lt;span&gt;
+    &lt;img src="./pic1.jpg" width="60" height="40"&gt;
+    &lt;img src="./pic2.jpg" width="60" height="40"&gt;
+    &lt;img src="./pic3.jpg" width="60" height="40"&gt;
+&lt;/span&gt;
+&lt;script&gt;
+    $("span").rsSliderLens({ ruler: { visible: false } });
+&lt;/script&gt;
+    </pre>
+    <section>
+        <!-- 17 -->
+        <span class="slider">
+            <img src="./pic1.jpg" width="60" height="40">
+            <img src="./pic2.jpg" width="60" height="40">
+            <img src="./pic3.jpg" width="60" height="40">
+        </span>
+        <label></label>
+    </section>
+
+    <p class="small"><br>Or with a little more customization</p>
+    <pre>
+&lt;span tabindex="0"&gt;
+    &lt;img src="./pic1.jpg" width="60" height="40"&gt;
+    &lt;img src="./pic2.jpg" width="60" height="40"&gt;
+    &lt;img src="./pic3.jpg" width="60" height="40"&gt;
+&lt;/span&gt;
+&lt;script&gt;
+    $("span").rsSliderLens({
+        <span>max: 2,
+        step: 1,
+        paddingStart: .15,
+        paddingEnd: .15,</span>
+        ruler: { visible: false }
+    });
+&lt;/script&gt;
+    </pre>
+    <section class="bottommargin">
+        <!-- 18 -->
+        <span class="slider" tabindex="0">
+            <img src="./pic1.jpg" width="60" height="40">
+            <img src="./pic2.jpg" width="60" height="40">
+            <img src="./pic3.jpg" width="60" height="40">
+        </span>
+        <label class="imgs"></label>
+    </section>
+    <p class="small">The tabindex makes the slider keyboard focusable</p>
+
+    <p>Responsive design. Please, resize your browser window.</p>
+    <p class="small">This is possible with the use of relative CSS units.<br>Don't like the dark layout? You can recompile LESS files to generate the layout you like.</p><br>
+    <pre>
+&lt;input type="range"&gt;
+&lt;script&gt;
     $("span").rsSliderLens();
 &lt;/script&gt;
     </pre>
-    <!-- 16 -->
-    <span class="slider">Hello world</span>
-    <label></label>
-    <span class="slider">
-        <img src="http://loremflickr.com/120/80" width="60" height="40">
-        <img src="http://loremflickr.com/120/80" width="60" height="40">
-        <img src="http://loremflickr.com/120/80" width="60" height="40">
-    </span>
-    <label></label>
-    
+    <section class="resize">
+        <!-- 19 -->
+        <input class="horiz" type="range"><br>
+        <!-- 20 -->
+        <input class="horiz" type="range"><br>
+        <!-- 21 -->
+        <input class="vert" type="range">
+        <!-- 22 -->
+        <input class="vert" type="range">
+    </section>
+
+    <p>You have total flexibility over the style.</p>
+    <p class="small cssfun">Just change the CSS (not the javascript) to give wings to your imagination.</p>
+    <section id="cssfun1">
+        <label></label>
+        <!-- 23 -->
+        <input type="range">
+        <label></label>
+    </section>
+
+    <section id="cssfun2">
+        <!-- 24 -->
+        <span class="slider" tabindex="0"> <!-- tabindex to enable keyboard focus -->
+            <ul>
+                <li>
+                iPhone<br>SE</li><li>
+                iPhone<br>7</li><li>
+                LG<br>G5</li><li>
+                Samsung<br>S7</li><li>
+                OnePlus<br>3</li><li>
+                HTC<br>10</li><li>
+                Huawei<br>P9</li>
+            </ul>
+        </span>
+        <figure class="phone0"></figure>
+    </section>
 
     <script>
         var $inputs = $("input[type=range], span.slider"),
             change = function (event, value, isFirstHandle) {
                 $(event.currentTarget).parent("div").next("label").text(value);
             };
-
         $inputs.eq(0).change(function () {
             $(this).next("label").text(this.value);
         }).change();
@@ -437,11 +555,90 @@
             }
         });
         $inputs.slice(16, 18).rsSliderLens({ ruler: { visible: false }, onChange: change });
+        $inputs.eq(18).rsSliderLens({ max: 2, step: 1, paddingStart: .15, paddingEnd: .15, ruler: { visible: false }, onChange: change });
+
+        $inputs.eq(19).rsSliderLens({ paddingStart: .1, paddingEnd: .1, ruler: { labels: { values: [0, 20, 40, 60, 80, 100] }} });
+        $inputs.eq(20).rsSliderLens({ paddingStart: .1, paddingEnd: .1, fixedHandle: true, ruler: { labels: { values: [0, 20, 40, 60, 80, 100] }} });
+        $inputs.eq(21).rsSliderLens({ width: 50, paddingStart: .1, paddingEnd: .1, orientation: 'vert', ruler: { labels: { values: [0, 20, 40, 60, 80, 100] }} });
+        $inputs.eq(22).rsSliderLens({ width: 50, paddingStart: .1, paddingEnd: .1, orientation: 'vert', fixedHandle: true, ruler: { labels: { values: [0, 20, 40, 60, 80, 100] }} });
 
         $("aside input[type=radio]").change(function() { 
             $("aside").removeClass("opt1 opt2 opt3 opt4 opt5").addClass("opt" + this.value);
         });
         $("#o1, #o2, #o3, #o4, #o5").hide();
+
+        $inputs.eq(23).rsSliderLens({
+            paddingStart: .075,
+            paddingEnd: .075,
+            value: [20, 40],
+            width: 300,
+            step: 1,
+            min: -20,
+            max: 70,
+            handle: {
+                size: .15
+            },
+            range: {
+                type: 'between'
+            },
+            ruler: {
+                labels: {
+                    values: [-20, -10, 0, 10, 20, 30, 40, 50, 60, 70]
+                }
+            },
+            onChange: function (event, value, isFirstHandle) {
+                $("#cssfun1 > label").eq(isFirstHandle ? 0 : 1).text(value + ' ºC');
+            }
+        });
+
+        var animObj = {
+            $figure: $("#cssfun2 > figure")
+        };
+        $inputs.eq(24).rsSliderLens({
+            min: 0,
+            max: 7,
+            step: 1,
+            ruler: {
+                visible: false
+            },
+            range: {
+                type: [0, 6]
+            },
+            handle: {
+                zoom: 1.8
+            },
+            onChange: function (event, value, isFirstHandle) {
+                if (animObj.timeoutIdHide) {
+                    clearTimeout(animObj.timeoutIdHide);
+                }
+                animObj.timeoutIdHide = setTimeout(function () {
+                    animObj.$figure.removeClass('phone0 phone1 phone2 phone3 phone4 phone5 phone6');
+                    if (animObj.timeoutIdShow) {
+                        clearTimeout(animObj.timeoutIdShow);
+                    }
+                    animObj.timeoutIdShow = setTimeout(function() {
+                        animObj.$figure.addClass('phone' + value);
+                        delete animObj.timeoutIdShow;
+                    }, 100);
+                    delete animObj.timeoutIdHide;
+                }, 200);
+            }
+        });
+
+        var resizeObj = {
+            timeoutId: null,
+            doResize: function () {
+                $inputs.eq(19).add($inputs.eq(21)).rsSliderLens('resizeUpdate');
+                resizeObj.timeoutId = null;
+            },
+            resize: function () {
+                if (!resizeObj.timeoutId) {
+                    resizeObj.timeoutId = setTimeout(resizeObj.doResize, 100);
+                }
+            }
+        };
+        resizeObj.doResize();
+        $(window).bind('resize', resizeObj.resize);
     </script>
 </body>
 </html>

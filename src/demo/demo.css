@@ -3,7 +3,7 @@ body {
 }
 
 pre {
-    margin: 0 5em;
+    margin: 0 0 1em 5em;
     padding: 1em 1em 0;
     background-color: #ccc;
     display: inline-block;
@@ -19,6 +19,10 @@ aside label {
     cursor: pointer;
 }
 
+label.imgs:before {
+    content: 'image #';
+}
+
 p {
     margin-top: 3em;
     font-size: 1.25em;
@@ -30,14 +34,23 @@ p.small {
     color: #ccc;
 }
 
-pre + input[type=range],
-pre + div {
+pre + section {
     display: inline-block;
     vertical-align: top;
+    margin-left: 5em;
 }
 
-pre + input[type=range] + label,
-pre + div + label,
+pre + section.bottommargin {
+    margin-bottom: 1em;
+}
+
+pre + section input[type=range],
+pre + section div {
+    display: inline-block;
+}
+
+pre + section > input[type=range] + label,
+pre + section > div + label,
 #changeLabels,
 #doubleHandleLabels {
     display: inline-block;
@@ -65,6 +78,9 @@ pre + div + label,
     content: 'second handle:';
 }
 
+.slider img {
+    vertical-align: middle;
+}
 
 code {
     background-color: #555;
@@ -135,4 +151,198 @@ aside.opt5 ~ #o5 {
                  -0.0625em -0.0625em 0.0625em #777,
                  0.0625em -0.0625em 0.0625em #777,
                  -0.0625em 0.0625em 0.0625em #777;
+}
+
+.resize {
+    width: 50%;
+    height: 30vw;
+    position: relative;
+}
+
+.resize .sliderlens {
+    margin: 2% 0;
+    vertical-align: top;
+}
+
+.resize .sliderlens.horiz {
+    width: 100% !important;
+    height: 15% !important;
+}
+
+.resize .sliderlens.vert {
+    width: 3em;
+}
+
+.resize .sliderlens.vert.fixed {
+    margin-left: 4em;
+}
+
+.resize .vert {
+    width: 15% !important;
+    height: 40% !important;
+}
+
+#cssfun1,
+#cssfun2 {
+    display: inline-block;
+}
+
+#cssfun1:before {
+    display: block;
+    content: 'Temperature';
+    font-size: .8em;
+    font-family: 'monospace';
+    color: rgb(186, 186, 186);
+    margin-left: 7em;
+}
+
+#cssfun1 .sliderlens > .handle1:after,
+#cssfun1 .sliderlens > .handle2:after {
+    background: #525252;
+    content: 'min';
+    font-size: .4em;
+    line-height: 4em;
+    color: rgb(186, 186, 186);
+    width: 100%;
+    text-align: center;
+}
+
+#cssfun1 .sliderlens > .handle2:after {
+    content: 'max';
+    color: 'indianred';
+}
+
+#cssfun1 .sliderlens > .handle1 {
+    border-radius: 2em 0 0 2em;
+}
+
+#cssfun1 .sliderlens > .handle2 {
+    border-radius: 0 2em 2em 0;
+}
+
+#cssfun1 > label {
+    display: inline-block;
+    font-family: 'monospace';
+    width: 5em;
+    font-size: .8em;
+    margin: 0;
+}
+
+#cssfun1 > label:first-child {
+    text-align: right;
+}
+
+#cssfun1 > label:last-child {
+    text-align: left;
+}
+
+#cssfun1 .sliderlens > .handle1:after,
+#cssfun1 > label:first-child {
+    color: #7FB3D5;
+}
+
+#cssfun1 .sliderlens > .handle2:after,
+#cssfun1 > label:last-child {
+    color: #D98880;
+}
+
+#cssfun1 {
+    margin-bottom: 5em;
+}
+
+#cssfun2 {
+    margin: 0 0 7em 3em;
+}
+
+#cssfun2 .sliderlens > .handle {
+    border-radius: .5em;
+}
+
+#cssfun2 ul {
+    color: yellow;
+    display: inline-block;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    line-height: .8em;
+    text-align: center;
+}
+
+#cssfun2 ul li {
+    font-family: 'monospace';
+    font-size: .6em;
+    display: inline-block;
+    padding: .25em;
+    width: 5em;
+    -webkit-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+#cssfun2 figure {
+    display: block;
+    height: 204px;
+    opacity: 0;
+    -webkit-transform: scale(1.2);
+    -ms-transform: scale(1.2);
+    -moz-transform: scale(1.2);
+    -o-transform: scale(1.2);
+    transform: scale(1.2);
+    -webkit-transition: opacity 100ms, -webkit-transform 100ms;
+    -ms-transition: opacity 100ms, -ms-transform 100ms;
+    -moz-transition: opacity 100ms, -moz-transform 100ms;
+    -o-transition: opacity 100ms, -o-transform 100ms;
+    transition: opacity 100ms, transform 100ms;
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin: 0 2.5em 0 0;
+}
+
+#cssfun2 figure.phone0,
+#cssfun2 figure.phone1,
+#cssfun2 figure.phone2,
+#cssfun2 figure.phone3,
+#cssfun2 figure.phone4,
+#cssfun2 figure.phone5,
+#cssfun2 figure.phone6 {
+    -webkit-transform: scale(1);
+    -ms-transform: scale(1);
+    -moz-transform: scale(1);
+    -o-transform: scale(1);
+    transform: scale(1);
+    opacity: 1;
+}
+
+#cssfun2 figure.phone0 {
+    background-image: url('phone0.png');
+}
+
+#cssfun2 figure.phone1 {
+    background-image: url('phone1.png');
+}
+
+#cssfun2 figure.phone2 {
+    background-image: url('phone2.png');
+}
+
+#cssfun2 figure.phone3 {
+    background-image: url('phone3.png');
+}
+
+#cssfun2 figure.phone4 {
+    background-image: url('phone4.png');
+}
+
+#cssfun2 figure.phone5 {
+    background-image: url('phone5.png');
+}
+
+#cssfun2 figure.phone6 {
+    background-image: url('phone6.png');
+}
+
+p.cssfun {
+    margin: 0 0 3em 0;
 }

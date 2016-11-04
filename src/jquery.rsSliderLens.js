@@ -44,7 +44,7 @@
                         this.width = (opts.width === 'auto' ? $sizeElem.width() : opts.width) || 150;
                         this.height = (opts.height === 'auto' ? $sizeElem.height() : opts.height) || 50;
                     }
-                    
+
                     if ($sizeElem.width() === 0 || opts.width !== 'auto' || $e !== undefined && info.isHoriz) {
                         $sizeElem.width(this.width);
                     }
@@ -525,6 +525,9 @@
                     }
                 },
                 onMouseWheel: function (event) {
+                    if (util.isAlmostZero(opts.step)) {
+                        return;
+                    }
                     var delta = {x: 0, y: 0};
                     if (event.wheelDelta === undefined && event.originalEvent !== undefined && (event.originalEvent.wheelDelta !== undefined || event.originalEvent.detail !== undefined)) { 
                         event = event.originalEvent;
@@ -608,7 +611,7 @@
                                 } else {
                                     // user wants to set only the first handle
                                     if (values[0] > info.currValue[1]) { values[1] = values[0]; }
-                                }                                
+                                }
                             } else {
                                 if (values[1] !== null) {
                                     // user wants to set only the second handle
@@ -943,12 +946,12 @@
                 },
                 updateHandles: function (values) {
                     if (info.doubleHandles) {
-                        info.setValue(info.getCurrValue(values[0]), opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined);
-                        info.setValue(info.getCurrValue(values[1]), opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined);
+                        info.setValue(info.getCurrValue(values[0]), opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined, undefined, true);
+                        info.setValue(info.getCurrValue(values[1]), opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined, undefined, true);
                         events.processFinalChange(true);
                         events.processFinalChange(false);
                     } else {
-                        info.setValue(info.getCurrValue(values), elemHandle.$elem1st, info.isStepDefined);
+                        info.setValue(info.getCurrValue(values), elemHandle.$elem1st, info.isStepDefined, undefined, true);
                         events.processFinalChange(true);
                     }
                 },
@@ -975,7 +978,7 @@
                     }
                     return value;
                 },
-                setValue: function (value, $handleElem, doSnap, checkOffLimits) {
+                setValue: function (value, $handleElem, doSnap, checkOffLimits, forceOnChange) {
                     if (info.doubleHandles) {
                         if ($handleElem === elemHandle.$elem1st) {
                             if (value > elemHandle.stopPosition[1]) {
@@ -1026,7 +1029,8 @@
                         padEnd = opts.flipped ? opts.paddingStart : opts.paddingEnd,
                         pos = valueRelative*(1 - padStart - padEnd) - padStart*100,
                         translate = 'translate(' + (info.isHoriz ? pos + '%, -50%)' : '-50%, ' + pos + '%)'),
-                        translateRange = 'translate(' + (info.isHoriz ? valueRelative + '%, -50%)' : '-50%, ' + valueRelative + '%)');
+                        translateRange = 'translate(' + (info.isHoriz ? valueRelative + '%, -50%)' : '-50%, ' + valueRelative + '%)'),
+                        prevCurrValue = info.currValue[isFirstHandle ? 0 : 1];
 
                     info.currValue[isFirstHandle ? 0 : 1] = valueNoMin + opts.min;
                     if (info.isFixedHandle) {
@@ -1056,7 +1060,10 @@
                     if (info.isInputTypeRange && isFirstHandle) {
                         $elem.attr('value', info.getCurrValue(info.currValue[0]));
                     }
-                    $elem.triggerHandler('change.rsSliderLens', [info.getCurrValue(info.currValue[isFirstHandle ? 0 : 1]), isFirstHandle]);
+                    var currValue = info.getCurrValue(info.currValue[isFirstHandle ? 0 : 1]);
+                    if (forceOnChange || !util.areTheSame(prevCurrValue, currValue)) {
+                        $elem.triggerHandler('change.rsSliderLens', [currValue, isFirstHandle]);
+                    }
                 }
             },
 
@@ -1906,7 +1913,7 @@
                                         //           true - Same as 'step'.
                                         //          false - Values are not displayed.
                                         //   number array - Only the numbers in the array are displayed.
-                pos: 0.75,              // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
+                pos: 0.8,               // Indicates the label relative (0% - 100%) position. Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, a value of 0 aligns the labels to the top, 1 aligns it to the bottom. Labels are center justified in horizontal sliders.
                                         // For vertical sliders, a value of 0 aligns the labels to the left, 1 aligns it to the right. 
                 onCustomLabel: null,    // Event called for each label. Type: function (event, value).
@@ -1933,20 +1940,20 @@
                 short: {
                     visible: true,      // Determines whether short tick marks are visible. Type: boolean.
                     step: 2,            // Interval between each short tick mark. Type: floating number.
-                    pos: 0.25,           // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.2,           // Indicates the short tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: 0.1          // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.1           // Indicates the short tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 },
                 long: {
                     visible: true,      // Determines whether long tick marks are visible. Type: boolean.
                     step: 10,           // Interval between each long tick mark. Type: floating number.
-                    pos: 0.2,           // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    pos: 0.15,          // Indicates the long tick marks relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // For horizontal sliders, 0 means aligned to the top of the slider and 1 to the bottom.
                                         // For vertical sliders, 0 means aligned to the left of the slider and 1 to the right.
-                    size: 0.15           // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
+                    size: 0.15          // Indicates the long tick marks relative size (0% - 100%) Type: floating point number >= 0 and <= 1.
                                         // E.g. a value of .5 means the tick mark has a height equivalent to half of the slider height, for horizontal sliders.
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
@@ -1988,7 +1995,7 @@
             pos: 0.46,        // Relative position of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the vertical position of the horizontal range, with 0 aligned to the top of the slider, and 1 to the bottom.
                               // For vertical sliders, represents the horizontal position of the vertical range, with 0 aligned to the left of the slider, and 1 to the right.
-            size: 0.075       // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
+            size: 0.1       // Relative size of the range bar. Type: Floating number between 0 and 1, inclusive.
                               // For horizontal sliders, represents the height of the horizontal range.
                               // For vertical sliders, represents the width of the vertical range.
         },
