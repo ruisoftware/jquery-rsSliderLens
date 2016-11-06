@@ -44,15 +44,24 @@
                         this.width = (opts.width === 'auto' ? $sizeElem.width() : opts.width) || 150;
                         this.height = (opts.height === 'auto' ? $sizeElem.height() : opts.height) || 50;
                     }
-
-                    if ($sizeElem.width() === 0 || opts.width !== 'auto' || $e !== undefined && info.isHoriz) {
-                        $sizeElem.width(this.width);
-                    }
-                    if ($sizeElem.height() === 0 || opts.height !== 'auto' || $e !== undefined && !info.isHoriz) {
-                        $sizeElem.height(this.height);
+                    if ($e !== undefined || !info.isFixedHandle || info.hasRuler) {
+                        if ($sizeElem.width() === 0 || opts.width !== 'auto' || $e !== undefined && info.isHoriz) {
+                            $sizeElem.width(this.width);
+                        }
+                        if ($sizeElem.height() === 0 || opts.height !== 'auto' || $e !== undefined && !info.isHoriz) {
+                            $sizeElem.height(this.height);
+                        }
                     }
                     if ($e === undefined) {
                         info.isHoriz = opts.orientation === 'auto' ? this.width >= this.height : opts.orientation !== 'vert';
+                    } else {
+                        if (info.isFixedHandle && !info.hasRuler) {
+                            if (info.isHoriz) {
+                                $sizeElem.height(this.height*opts.handle.zoom);
+                            } else {
+                                $sizeElem.width(this.width*opts.handle.zoom);
+                            }
+                        }
                     }
                 },
                 init: function () {
@@ -101,11 +110,7 @@
                     }
 
                     // set again width and height, as css set above might change dimensions
-                    if (info.hasRuler) {
-                        this.initSize(this.$wrapper);
-                    } else {
-                        this.initSize($elem);
-                    }
+                    this.initSize(this.$wrapper);
                     if (info.hasRuler && info.isFixedHandle) {
                         this[info.isHoriz ? 'width' : 'height'] *= opts.ruler.size;
                     }
@@ -906,7 +911,7 @@
                     this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
                     this.isInputTypeRange = $elem.is('input[type=range]');
                     this.isAutoFocusable = (this.isInputTypeRange || $elem.attr('tabindex') !== undefined) && $elem.attr('autofocus') !== undefined;
-                    this.hasRuler = opts.ruler.visible || opts.ruler.onCustom;
+                    this.hasRuler = opts.ruler.visible || !!opts.ruler.onCustom;
                     if (util.isAlmostZero(opts.handle.zoom)) {
                         opts.handle.zoom = 1;
                     }
@@ -1043,7 +1048,7 @@
                                 $elem.css('transform', 'translate(' + pos + '%, ' + (opts.contentOffset*100 - 50) + '%)');
                             } else {
                                 elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
-                                $elem.css('transform', 'translate(-50%, ' + (pos + elemHandle.fixedHandleRelPos*100) + '%)');
+                                $elem.css('transform', 'translate(-50%, ' + pos + '%)');
                             }
                         }
                         elemRange.$rangeWrapper.css('transform', translateRange);
@@ -1870,13 +1875,13 @@
                         // If 1, the content remains the same size.
                         // If smaller than 1, the content is shrinked.
             pos: 0.5,   // Indicates the middle handle relative position (0% - 100%) Type: floating point number >= 0 and <= 1.
-                        // Not aplicable for fixed handled sliders.
+                        // Not applicable for fixed handled sliders.
                         // For horizontal sliders, a value of 0 aligns the middle of the handle to the top of the slider,
                         // 1 aligns the middle of the handle to the bottom of the slider.
                         // For vertical sliders, a value of 0 aligns the middle of the handle to the left of the slider,
                         // 1 aligns the middle of the handle to the right of the slider.
             otherSize: 'zoom', // Relative handle height (for horizontal sliders) or relative handle width (for vertical sliders). Type: string or floating point number >= 0.
-                               // NOT aplicable for fixed handled sliders.
+                               // Not applicable for fixed handled sliders.
                                // If set to string 'zoom' the otherSize is set according to the handle.zoom value,
                                // e.g. if the handle.zoom is 1.25, then the otherSize is also 1.25 (125% of the slider size).
                                // If set to a floating point number, it represents a relative size, e.g. if set to 1, then handle size will have
@@ -1901,7 +1906,7 @@
                                 //       then this property is set to true and a ruler is displayed instead (since there is nothing to display from the DOM element).
                                 // There is more to this, please see onCustom below.
             size: 1.5,          // Specifies the relative width (for horizontal sliders) or height (for vertical sliders) of the svg ruler. Type: floating pointer number >= 0.
-                                // Only applicable to fixed handle sliders.
+                                // Only applicable to fixed handle sliders with a visible ruler.
                                 // A value of 1, means that the ruler has the same (100%) width of the parent container (or height for vertical sliders).
                                 // A value of 1.7, means that the ruler is wider (or taller) 170% than the parent container.
 
