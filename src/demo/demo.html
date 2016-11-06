@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>rsSliderLens plugin</title>
+    <meta charset="UTF-8">
     <link rel="stylesheet" href="../../dist/rsSliderLens.css" />
-    <link rel="stylesheet" href="test.css" />
     <link rel="stylesheet" href="demo.css" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
     <script src="../jquery.rsSliderLens.js"></script>
@@ -463,11 +463,17 @@
     <section id="cssfun1">
         <label></label>
         <!-- 23 -->
+        <span class="slider" tabindex="0"></span>
+    </section>
+
+    <section id="cssfun2">
+        <label></label>
+        <!-- 23 -->
         <input type="range">
         <label></label>
     </section>
 
-    <section id="cssfun2">
+    <section id="cssfun3">
         <!-- 24 -->
         <span class="slider" tabindex="0"> <!-- tabindex to enable keyboard focus -->
             <ul>
@@ -485,6 +491,14 @@
     </section>
 
     <script>
+        $("#cssfun1 .slider").html(function() {
+            var str = "";
+            for(var speed = 0; speed <= 200; speed += 5) {
+                str += speed + "<br>";
+            }
+            return str;
+        });
+
         var $inputs = $("input[type=range], span.slider"),
             change = function (event, value, isFirstHandle) {
                 $(event.currentTarget).parent("div").next("label").text(value);
@@ -568,6 +582,25 @@
         $("#o1, #o2, #o3, #o4, #o5").hide();
 
         $inputs.eq(23).rsSliderLens({
+            min: 0,
+            max: 200,
+            height: 200,
+            fixedHandle: true,
+            step: 1,
+            paddingStart: .012,
+            paddingEnd: .012,
+            handle: {
+                zoom: 2
+            },
+            ruler: {
+                visible: false
+            },
+            onChange: function (event, value, isFirstHandle) {
+                $("#cssfun1 > label").text(value + " km/h");
+            }
+        });
+
+        $inputs.eq(24).rsSliderLens({
             paddingStart: .075,
             paddingEnd: .075,
             value: [20, 40],
@@ -587,25 +620,25 @@
                 }
             },
             onChange: function (event, value, isFirstHandle) {
-                $("#cssfun1 > label").eq(isFirstHandle ? 0 : 1).text(value + ' ºC');
+                $("#cssfun2 > label").eq(isFirstHandle ? 0 : 1).text(value + "°C");
             }
         });
 
         var animObj = {
-            $figure: $("#cssfun2 > figure")
+            $figure: $("#cssfun3 > figure")
         };
-        $inputs.eq(24).rsSliderLens({
+        $inputs.eq(25).rsSliderLens({
             min: 0,
-            max: 7,
+            max: 6,
             step: 1,
+            paddingStart: .07,
+            paddingEnd: .07,
             ruler: {
                 visible: false
             },
-            range: {
-                type: [0, 6]
-            },
             handle: {
-                zoom: 1.8
+                zoom: 1.8,
+                animation: 300
             },
             onChange: function (event, value, isFirstHandle) {
                 if (animObj.timeoutIdHide) {
