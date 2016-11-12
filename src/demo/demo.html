@@ -365,7 +365,7 @@
 &lt;input type="range"&gt;
 &lt;script&gt;
     $("input").rsSliderLens({
-        <span>value: [10, 18]</span>
+        <span>value: [10, 25]</span>
     });
 &lt;/script&gt;
     </pre>
@@ -488,6 +488,11 @@
             </ul>
         </span>
         <figure class="phone0"></figure>
+    </section>
+
+    <section id="cssfun4">
+        <!-- 25 -->
+        <input type="range">
     </section>
 
     <script>
@@ -655,6 +660,49 @@
                     }, 100);
                     delete animObj.timeoutIdHide;
                 }, 200);
+            }
+        });
+
+        $inputs.eq(26).rsSliderLens({
+            height: 211,
+            min: 0,
+            max: 4,
+            step: 1,
+            flipped: true,
+            paddingStart: .2,
+            paddingEnd: .2,
+            handle: {
+                pos: .2,
+                zoom: 1
+            },
+            ruler: {
+                labels: {
+                    pos: .4,
+                    onCustomLabel: function (event, value) {
+                        switch (value) {
+                            case 0: return 'very unhappy';
+                            case 1: return 'unhappy';
+                            case 2: return 'normal';
+                            case 3: return 'happy';
+                            case 4: return 'very happy';
+                        }
+                    },
+                    onCustomAttrs: function (event, value, x, y) {
+                        return {
+                            transform: 'rotate(-25 ' + x + ',' + y + ')',
+                            'text-anchor': 'start'
+                        };
+                    }
+                },
+                tickMarks: {
+                    short: { visible: false },
+                    long: { visible: false }
+                },
+                onCustom: function(event, $svg, width, height, zoom, magnifiedRuler, createSvgDomFunc) {
+                    if (magnifiedRuler) {
+                        $svg.append(createSvgDomFunc('image', { width: 30, height: 155, x: 38, y: 27, 'href': './emotions.png' }));
+                    }
+                }
             }
         });
 

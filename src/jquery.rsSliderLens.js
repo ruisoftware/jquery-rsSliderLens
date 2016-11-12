@@ -34,7 +34,7 @@
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$svg, this.width, this.height);
                     }
-                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$svg, this.width, this.height, 1, util.createSvgDom]);
+                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$svg, this.width, this.height, 1, false, util.createSvgDom]);
                     this.$svg.prependTo(this.$wrapper);
                     $elem.css('visibility', 'hidden'); // because the svg ruler is used instead of the original slider content
                 },
@@ -266,7 +266,7 @@
                     if (opts.ruler.visible) {
                         util.renderSvg(this.$elem1st, this.width, this.height, !util.areTheSame(opts.handle.zoom, 1));
                     }
-                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$elem1st, this.width, this.height, opts.handle.zoom, util.createSvgDom]);
+                    $elem.triggerHandler('customRuler.rsSliderLens', [this.$elem1st, this.width, this.height, opts.handle.zoom, true, util.createSvgDom]);
                     if (info.doubleHandles) {
                         this.$elem2nd = this.$elem1st.clone().css(info.isHoriz ? 'left' : 'top', '');
                     }
@@ -781,9 +781,9 @@
                         return opts.ruler.labels.onCustomAttrs(event, value, x, y);
                     }
                 },
-                onCustomRuler: function (event, $svg, width, height, zoom, createSvgDomFunc) {
+                onCustomRuler: function (event, $svg, width, height, zoom, magnifiedRuler, createSvgDomFunc) {
                     if (opts.ruler.onCustom) {
-                        return opts.ruler.onCustom(event, $svg, width, height, zoom, createSvgDomFunc);
+                        return opts.ruler.onCustom(event, $svg, width, height, zoom, magnifiedRuler, createSvgDomFunc);
                     }
                 },
                 finalChangeValueFirst: null,
@@ -1934,7 +1934,7 @@
                                                             return {
                                                                 transform: 'rotate(45 ' + x + ',' + y + ')',
                                                                 'text-anchor': 'start'
-                                                            }
+                                                            };
                                                         }
                                                     }
                                                 }
@@ -1963,7 +1963,7 @@
                                         // For vertical sliders, a value of 0.5 means the tick mark has a width equivalent to half of the slider width.
                 }
             },
-            onCustom: null // Event used for customized rulers. Type: function(event, $svg, width, height, zoom, createSvgDomFunc)
+            onCustom: null // Event used for customized rulers. Type: function(event, $svg, width, height, zoom, magnifiedRuler, createSvgDomFunc)
                            // If onCustom event is undefined and ruler.visible is true, then a custom ruler is generated.
                            // If onCustom event is undefined and ruler.visible is false, then no ruler is displayed and the original content is shown.
                            // If onCustom event is defined and ruler.visible is true, then onCustom is used to draw on top of the generated ruler.
@@ -1971,11 +1971,13 @@
                            // This event is always called twice:
                            //   - First time for the regular size ruler.
                            //   - Second time for the magnified ruler inside the handle.
-                           // $svg: <svg> element to be added later to the document. Any extra DOM elements created by your onCustom should be appended as children to $svg.
+                           // $svg: <svg> element to be added later to the document. Any extra DOM elements created by your onCustom should be appended as children to this $svg.
                            // width: width in pixels of the $svg element.
                            // height: height in pixels of the $svg element.
                            // zoom: Indicates whether this ruler should be magnified. The first time this event is called, zoom is 1.
                            //       The second time this event is called, zoom matches the handle.zoom value.
+                           // magnifiedRuler: boolean. It is false when onCustom is invoked for the regular size ruler.
+                           //                          If is true when onCustom is invoked for the magnified ruler inside the handle.
                            // createSvgDomFunc: function(tag, attrs), where tag is a String and attrs a JS object.
                            //  A function provided to your convenience, that returns a new SVG element (without adding it to the DOM).
                            //  The returned element contains the given tag and attributes, if any.
