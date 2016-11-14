@@ -1073,6 +1073,18 @@
             },
 
             util = {
+                getEventPageX: function (event) {
+                    if (event.originalEvent && event.originalEvent.touches && event.originalEvent.touches.length > 0) {
+                        return event.originalEvent.touches[0].pageX;
+                    }
+                    return event.pageX;
+                },
+                getEventPageY: function (event) {
+                    if (event.originalEvent && event.originalEvent.touches && event.originalEvent.touches.length > 0) {
+                        return event.originalEvent.touches[0].pageY;
+                    }
+                    return event.pageY;
+                },
                 pixel2Value: function (pixel) {
                     return (pixel - info.startPixel)/info.ticksStep + opts.min;
                 },
@@ -1315,7 +1327,7 @@
                         from = util.value2Pixel(panUtil.$animObj[0].n);
                     }
                     if (to === undefined) {
-                        to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
+                        to = (info.isHoriz ? util.getEventPageX(event) : util.getEventPageY(event)) - refPnt;
                     }
                     if (from === undefined) {
                         if (!info.doubleHandles || to <= util.value2Pixel((info.currValue[0] + info.currValue[1])/2)) {
@@ -1372,7 +1384,7 @@
                         panUtil.doDrag = true;
                         if (info.isFixedHandle) {
                             panUtil.$handle = elemHandle.$elem1st;
-                            panUtil.fixedHandleStartDragPos = info.isHoriz ? event.pageX : event.pageY;
+                            panUtil.fixedHandleStartDragPos = info.isHoriz ? util.getEventPageX(event) : util.getEventPageY(event);
                             panUtil.fixedHandleStartDragPos += util.value2Pixel(info.currValue[0]);
                             elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                             $(document).
@@ -1405,7 +1417,7 @@
                         $elemHandle.add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                         var refPnt = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top,
                             from = util.value2Pixel(info.currValue[$elemHandle === elemHandle.$elem1st ? 0 : 1]),
-                            to = (info.isHoriz ? event.pageX : event.pageY) - refPnt;
+                            to = (info.isHoriz ? util.getEventPageX(event) : util.getEventPageY(event)) - refPnt;
                         panUtil.doDrag = true;
                         panUtil.dragging = true;
                         panUtil.dragDelta = from - to;
@@ -1430,20 +1442,20 @@
                         panUtil.dragDelta = info.isHoriz ? elemOrig.$wrapper.offset().left : elemOrig.$wrapper.offset().top;
                     }
                 },
-                dragHorizVert: function (event, attr) {
+                dragHorizVert: function (page) {
                     panUtil.dragging = true;
                     if (info.isFixedHandle) {
-                        info.setValue(util.pixel2Value(- event[attr] + panUtil.fixedHandleStartDragPos), panUtil.$handle, opts.snapOnDrag);
+                        info.setValue(util.pixel2Value(- page + panUtil.fixedHandleStartDragPos), panUtil.$handle, opts.snapOnDrag);
                     } else {
                         panUtil.handleStartsToMoveWhen1stClickWasOutsideHandle();
-                        info.setValue(util.pixel2Value(event[attr] - panUtil.dragDelta), panUtil.$handle, opts.snapOnDrag);
+                        info.setValue(util.pixel2Value(page - panUtil.dragDelta), panUtil.$handle, opts.snapOnDrag);
                     }
                 },
                 dragHoriz: function (event) {
-                    panUtil.dragHorizVert(event, 'pageX');
+                    panUtil.dragHorizVert(util.getEventPageX(event));
                 },
                 dragVert: function (event) {
-                    panUtil.dragHorizVert(event, 'pageY');
+                    panUtil.dragHorizVert(util.getEventPageY(event));
                 },
                 stopDrag: function (force) {
                     if (panUtil.dragging || panUtil.mouseBtnStillDown || force === true) {
@@ -1550,7 +1562,7 @@
                         } else {
                             panRangeUtil.deltaRange = opts.range.type[1] - opts.range.type[0];
                         }
-                        panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemRange.$range.offset().left : event.pageY - elemRange.$range.offset().top;
+                        panRangeUtil.dragDelta = info.isHoriz ? util.getEventPageX(event) - elemRange.$range.offset().left : util.getEventPageY(event) - elemRange.$range.offset().top;
                         panRangeUtil.dragged = false;
                         $(document).
                             bind('mousemove.rsSliderLens touchmove.rsSliderLens', panRangeUtil.drag).
@@ -1567,7 +1579,7 @@
                                 add(elemMagnif.$elemRange2nd).addClass(opts.style.classDragging);
                         }
 
-                        var candidateLeft = util.pixel2Value((info.isHoriz ? event.pageX : event.pageY) - panRangeUtil.dragDelta - panRangeUtil.origin),
+                        var candidateLeft = util.pixel2Value((info.isHoriz ? util.getEventPageX(event) : util.getEventPageY(event)) - panRangeUtil.dragDelta - panRangeUtil.origin),
                             candidateRight = candidateLeft + panRangeUtil.deltaRange,
                             aux;
                         candidateLeft = info.getCurrValue(candidateLeft);
