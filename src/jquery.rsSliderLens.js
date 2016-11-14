@@ -1,5 +1,5 @@
 /**
-* jQuery SliderLens - Slider with magnification
+* jQuery SliderLens - Range slider with magnification
 * ====================================================
 *
 * Licensed under The MIT License
