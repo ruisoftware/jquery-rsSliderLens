@@ -678,7 +678,7 @@
                                         elemMagnif.$elemRange2nd = null;
                                     }
                                     if (value === false && elemRange.$range) {
-                                        elemRange.$rangeWrapper.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown mouseup click').remove();
+                                        elemRange.$rangeWrapper.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown touchstart mouseup touchend click').remove();
                                         elemRange.$rangeWrapper = elemRange.$range = null;
                                     }
                                 }
@@ -717,35 +717,35 @@
                         unbind('customRuler.rsSliderLens', events.onCustomRuler);
 
                     elemOrig.$wrapper.
-                        unbind('mousedown.rsSliderLens', panUtil.startDrag).
-                        unbind('mouseup.rsSliderLens', panUtil.stopDrag);
+                        unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDrag).
+                        unbind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDrag);
 
                     elemRange.$rangeWrapper.
-                        unbind('mousedown.rsSliderLens', panUtil.startDrag);
+                        unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDrag);
 
                     if (elemRange.$range) {
                         elemRange.$range.
-                            unbind('mousedown.rsSliderLens', panRangeUtil.startDrag);
+                            unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panRangeUtil.startDrag);
                     }
 
                     $(document).
                         unbind('keydown.rsSliderLens', elemHandle.keydown).
                         unbind('keyup.rsSliderLens', elemHandle.keyup).
-                        unbind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
-                        unbind('mouseup.rsSliderLens', panUtil.stopDragFromDoc).
-                        unbind('mousemove.rsSliderLens', panRangeUtil.drag);
+                        unbind('mousemove.rsSliderLens touchmove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
+                        unbind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDragFromDoc).
+                        unbind('mousemove.rsSliderLens touchmove.rsSliderLens', panRangeUtil.drag);
 
                     elemHandle.$elem1st.
                         unbind('focusin.rsSliderLens', panUtil.gotFocus1st).
                         unbind('focusout.rsSliderLens', panUtil.loseFocus).
-                        unbind('mousedown.rsSliderLens', panUtil.startDrag).
-                        unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
+                        unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDrag).
+                        unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDragFromHandle1st);
 
                     if (elemHandle.$elem2nd) {
                         elemHandle.$elem2nd.
                             unbind('focusin.rsSliderLens', panUtil.gotFocus2nd).
                             unbind('focusout.rsSliderLens', panUtil.loseFocus).
-                            unbind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
+                            unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDragFromHandle2nd);
                     }
 
                     if (info.isFixedHandle) {
@@ -1287,8 +1287,8 @@
                     info.setValue(util.pixel2Value(value + panUtil.dragDelta), $animHandle === undefined ? panUtil.$handle : $animHandle, undefined, !!$animHandle);
                     if (panUtil.doDrag) {
                         $(document).
-                            bind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
-                            bind('mouseup.rsSliderLens', panUtil.stopDragFromDoc);
+                            bind('mousemove.rsSliderLens touchmove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
+                            bind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDragFromDoc);
                     }
                     panUtil.$animObj = null;
                 },
@@ -1376,8 +1376,8 @@
                             panUtil.fixedHandleStartDragPos += util.value2Pixel(info.currValue[0]);
                             elemMagnif.$elem1st.parent().add(elemOrig.$wrapper).addClass(opts.style.classDragging);
                             $(document).
-                                bind('mousemove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
-                                bind('mouseup.rsSliderLens', panUtil.stopDragFromDoc);
+                                bind('mousemove.rsSliderLens touchmove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
+                                bind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDragFromDoc);
                             setTimeout(function () {
                                 panUtil.$handle.focus();
                             });
@@ -1455,7 +1455,7 @@
                                 panUtil.enableTextSelection();
                                 panUtil.doDrag = false;
                                 panUtil.firstClickWasOutsideHandle = false;
-                                $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                                $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens touchmove.rsSliderLens touchend.rsSliderLens');
                                 
                                 // if step is being used and snapOnDrag is false, then need to adjust final handle position ou mouse up
                                 if (info.isStepDefined && !panUtil.$animObj) {
@@ -1553,8 +1553,8 @@
                         panRangeUtil.dragDelta = info.isHoriz ? event.pageX - elemRange.$range.offset().left : event.pageY - elemRange.$range.offset().top;
                         panRangeUtil.dragged = false;
                         $(document).
-                            bind('mousemove.rsSliderLens', panRangeUtil.drag).
-                            bind('mouseup.rsSliderLens', panRangeUtil.stopDrag);
+                            bind('mousemove.rsSliderLens touchmove.rsSliderLens', panRangeUtil.drag).
+                            bind('mouseup.rsSliderLens touchend.rsSliderLens', panRangeUtil.stopDrag);
                     }
                 },
                 drag: function (event) {
@@ -1622,7 +1622,7 @@
                 stopDrag: function () {
                     if (opts.enabled) {
                         panUtil.enableTextSelection();
-                        $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens');
+                        $(document).unbind('mousemove.rsSliderLens mouseup.rsSliderLens touchmove.rsSliderLens touchend.rsSliderLens');
 
                         if (panRangeUtil.dragged) {
                             info.setValue(info.currValue[0], elemHandle.$elem1st, true);
@@ -1688,18 +1688,18 @@
 
         if (info.canDragRange) {
             elemRange.$range.
-                bind('mousedown.rsSliderLens', panRangeUtil.startDrag);
+                bind('mousedown.rsSliderLens touchstart.rsSliderLens', panRangeUtil.startDrag);
         }
         if (info.isFixedHandle) {
             elemOrig.$wrapper.
-                bind('mousedown.rsSliderLens', panUtil.startDrag).
-                bind('mouseup.rsSliderLens', panUtil.stopDrag);
+                bind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDrag).
+                bind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDrag);
         } else {
             elemOrig.$wrapper.
-                bind('mousedown.rsSliderLens', panUtil.startDrag).
-                bind('mouseup.rsSliderLens', panUtil.stopDrag);
+                bind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDrag).
+                bind('mouseup.rsSliderLens touchend.rsSliderLens', panUtil.stopDrag);
             elemHandle.$elem1st.
-                bind('mousedown.rsSliderLens', panUtil.startDragFromHandle1st);
+                bind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDragFromHandle1st);
         }
 
         // to prevent the default behaviour in IE when dragging an element
@@ -1716,7 +1716,7 @@
             noIEdrag(elemHandle.$elem2nd);
             noIEdrag(elemMagnif.$elemRange2nd);
             elemHandle.$elem2nd.
-                bind('mousedown.rsSliderLens', panUtil.startDragFromHandle2nd);
+                bind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDragFromHandle2nd);
         }
         if (opts.enabled && info.isAutoFocusable) {
             elemHandle.$elem1st.focus();
