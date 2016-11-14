@@ -52,7 +52,7 @@ First, you must run `grunt`. Grunt among other tasks, compiles LESS file into CS
 
 Create the following file in the `src` folder (or you can try it [live here](https://codepen.io/ruisoftware/pen/XNdNZL)).
 
-````javascript
+````html
 <!DOCTYPE html>
 <html>
 <head>
