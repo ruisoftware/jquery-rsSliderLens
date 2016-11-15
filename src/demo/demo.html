@@ -495,6 +495,24 @@
         <input type="range">
     </section>
 
+    <section id="cssfun5">
+        <!-- 25 -->
+        <span class="slider" tabindex="0">
+            January<br>
+            February<br>
+            March<br>
+            April<br>
+            May<br>
+            June<br>
+            July<br>
+            August<br>
+            September<br>
+            October<br>
+            November<br>
+            December
+        </span>
+    </section>
+
     <script>
         $("#cssfun1 .slider").html(function() {
             var str = "";
@@ -703,6 +721,22 @@
                         $svg.append(createSvgDomFunc('image', { width: 30, height: 155, x: 38, y: 27, 'href': './emotions.png' }));
                     }
                 }
+            }
+        });
+
+        $inputs.eq(27).rsSliderLens({
+            min: 1,
+            max: 12,
+            height: 200,
+            fixedHandle: true,
+            step: 1,
+            paddingStart: .04,
+            paddingEnd: .04,
+            handle: {
+                size: .12
+            },
+            ruler: {
+                visible: false
             }
         });
 

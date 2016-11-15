@@ -8,7 +8,7 @@ Using this plugin, the same markup is rendered by default as:
 ![sample1](https://cloud.githubusercontent.com/assets/428736/20031939/2a682e2c-a391-11e6-961d-47d5f3a95969.png)
 
 or pretty much any style your imagination takes you:  
-![sample2](https://cloud.githubusercontent.com/assets/428736/20239024/996dca94-a908-11e6-9e8f-f00fb7f37069.png)
+![sample2](https://cloud.githubusercontent.com/assets/428736/20301845/1cf9c8c0-ab36-11e6-9cf4-7f80a53b94c1.png)
 
 Check out a [demo](https://codepen.io/ruisoftware/pen/mOEeOp).
 Also available at `src/demo/demo.html`

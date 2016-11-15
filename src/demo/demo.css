@@ -185,8 +185,11 @@ aside.opt5 ~ #o5 {
 #cssfun1,
 #cssfun2,
 #cssfun3,
-#cssfun4 {
+#cssfun4,
+#cssfun5 {
     display: inline-block;
+    margin: 0 0 5em 4em;
+    vertical-align: top;
 }
 
 #cssfun1 .slider {
@@ -304,16 +307,7 @@ aside.opt5 ~ #o5 {
     color: #D98880;
 }
 
-#cssfun1,
-#cssfun2,
-#cssfun3,
-#cssfun4 {
-    margin: 0 0 5em 4em;
-    vertical-align: top;
-}
-
 #cssfun1 {
-    margin-left: 0;
     float: left;
     width: auto;
 }
@@ -438,4 +432,40 @@ aside.opt5 ~ #o5 {
 
 p.cssfun {
     margin: 0 0 3em 0;
+}
+
+#cssfun5 {
+    text-align: center;
+}
+
+#cssfun5 .sliderlens {
+    border: none;
+    background-color: inherit;
+}
+
+#cssfun5 .slider {
+    display: block !important;
+    color: #ddd;
+}
+
+#cssfun5 .handle .slider {
+    color: white;
+}
+
+#cssfun5 .sliderlens:before,
+#cssfun5 .sliderlens .handle:before {
+    display: none;
+}
+
+#cssfun5 .sliderlens:after {
+    box-shadow: inset 0 6em 4em -3em #454545, inset 0 -6em 4em -3em #454545;
+    border: none;
+}
+
+#cssfun5 .handle:after {
+    background: none;
+}
+
+#cssfun5 .handle {
+    box-shadow: 0 0 0.3125em -0.03125em #333;
 }
