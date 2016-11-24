@@ -13,6 +13,22 @@
     "type": "git",
     "url": "https://github.com/ruisoftware/jquery-rsSliderLens.git"
   },
+  "keywords": [
+    "jquery",
+    "javascript",
+    "plug-in",
+    "plugin",
+    "input",
+    "range",
+    "slider",
+    "single",
+    "double",
+    "zoom",
+    "magnification",
+    "svg",
+    "ruler",
+    "content"
+  ],
   "bugs": "https://github.com/ruisoftware/jquery-rsSliderLens/issues",
   "licenses": [
     {
