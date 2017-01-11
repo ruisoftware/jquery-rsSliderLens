@@ -36,7 +36,7 @@ Also available at `src/demo/demo.html`
 
 You can install from [npm](https://www.npmjs.com/):
 ````bash
-npm install jquery-rsSliderLens --save
+npm install jquery.rsSliderLens --save
 ````
 or directly from git:
 ````javascript
