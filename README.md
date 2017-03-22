@@ -13,7 +13,7 @@ or pretty much any style your imagination takes you:
 Check out a [demo](https://codepen.io/ruisoftware/pen/mOEeOp).
 Also available at `src/demo/demo.html`
 
-#Key Features
+# Key Features
  - Works for any markup. Although semantically the <code>&lt;input type="range" /&gt;</code> is the most appropriate markup, any other element can be used.
  - Keyboard and mouse navigation. For a markup other than <code>&lt;input type="range" /&gt;</code> to be focusable, it has to have a <code>[tabindex](https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex)</code> attribute;
  - Two types of slider:
@@ -32,7 +32,7 @@ Also available at `src/demo/demo.html`
  - Fast loading. No images used whatsoever;
  - Supports desktop and mobile events.
  
-#Installation
+# Installation
 
 You can install from [npm](https://www.npmjs.com/):
 ````bash
@@ -46,7 +46,7 @@ or you can download the Zip archive from github, clone or fork this repository a
 
 You also need to download jQuery. In the example below, jQuery is downloaded from Google cdn.
 
-#Usage
+# Usage
 
 First, you must run `grunt`. Grunt among other tasks, compiles LESS file into CSS, minimizes the js file and places all production files inside a new `dist` folder.<br>
 
