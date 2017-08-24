@@ -4,7 +4,6 @@
 *
 * Licensed under The MIT License
 * 
-* @version   2
 * @author    Jose Rui Santos
 *
 * 
@@ -1296,7 +1295,7 @@
                     panUtil.textSelection(true);
                 },
                 animDone: function (value, $animHandle) {
-                    info.setValue(util.pixel2Value(value + panUtil.dragDelta), $animHandle === undefined ? panUtil.$handle : $animHandle, undefined, !!$animHandle);
+                    info.setValue(util.pixel2Value(value + panUtil.dragDelta), $animHandle || panUtil.$handle || elemHandle.$elem1st, undefined, !!$animHandle);
                     if (panUtil.doDrag) {
                         $(document).
                             bind('mousemove.rsSliderLens touchmove.rsSliderLens', info.isHoriz ? panUtil.dragHoriz : panUtil.dragVert).
@@ -1341,9 +1340,7 @@
                     if (animDuration === undefined) {
                         animDuration = opts.handle.animation;
                     }
-                    if ($animHandle === undefined) {
-                        $animHandle = panUtil.$handle;
-                    }
+                    $animHandle = $animHandle || panUtil.$handle || elemHandle.$elem1st;
                     from = util.pixel2Value(from);
                     to = util.pixel2Value(to);
                     if (from !== to && animDuration > 0) {
