@@ -15,27 +15,24 @@
             step: 10,
             snapOnDrag: false,
             enabled: true,
-            flipped: true,
-            paddingStart: 0,//.2,
-            paddingEnd: 0//.1
-            //,  range: {  type: [20, 80], draggable: true }
-
-            //, ruler: {  }}
-            , onChange: function(e, value, firstHandle) {
-              $(e.currentTarget).closest("tr").children("td:first-child").children("div").eq(0).children("span").eq(firstHandle ? 0 : 1).text(value.toFixed(2));
-            }
-            , onFinalChange: function(e, value, firstHandle) {
-              $(e.currentTarget).closest("tr").children("td:first-child").children("div").eq(1).children("span").eq(firstHandle ? 0 : 1).text(value.toFixed(2));
+            flipped: false,
+            paddingStart: .1,
+            paddingEnd: .1,
+            onChange: function(e, value, firstHandle) {
+              $(e.currentTarget).closest("td").find("aside").eq(firstHandle ? 0 : 1).find("span").eq(0).text(value.toFixed(2));
+            },
+            onFinalChange: function(e, value, firstHandle) {
+              $(e.currentTarget).closest("td").find("aside").eq(firstHandle ? 0 : 1).find("span").eq(1).text(value.toFixed(2));
             }
           };
 
           $(".fixed.ruler").rsSliderLens($.extend({}, opts, {
-              fixedHandle: .3
+              fixedHandle: .5
             })
           );
 
           $(".fixed.noruler").rsSliderLens($.extend({}, opts, {
-              fixedHandle: .3,
+              fixedHandle: .5,
               ruler: {
                 visible: false
               }
@@ -61,10 +58,66 @@
               }
             })
           );
+
+          // set range buttons
+          $("#hidden").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'range', { type: 'hidden', draggable: true });
+          });
+          $("#min").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'range', { type: 'min', draggable: true });
+          });
+          $("#max").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'range', { type: 'max', draggable: true });
+          });
+          $("#interval30_80").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'range', { type: [30, 80], draggable: true });
+          });
+          $("#interval_20_0").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'range', { type: [-20, 0], draggable: true });
+          });
+          $("#between").click(function() {
+            $(".single, .fixed").rsSliderLens('option', 'range', { type: 'hidden', draggable: true });
+            $(".double").rsSliderLens('option', 'range', { type: 'between', draggable: true });
+          });
+
+          // set value buttons
+          $("#v10").click(function() {
+            $(".single, .fixed").rsSliderLens('option', 'value', 10);
+          });
+          $("#v40").click(function() {
+            $(".single, .fixed").rsSliderLens('option', 'value', 40);
+          });
+          $("#v_30").click(function() {
+            $(".single, .fixed").rsSliderLens('option', 'value', -30);
+          });
+          $("#v10_40").click(function() {
+            $(".double").rsSliderLens('option', 'value', [10, 40]);
+          });
+          $("#v20_100").click(function() {
+            $(".double").rsSliderLens('option', 'value', [20, 100]);
+          });
+          $("#v_20_20").click(function() {
+            $(".double").rsSliderLens('option', 'value', [-20, -20]);
+          });
+
+          // enable/disable buttons
+          $("#enableAll").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'enabled', true);
+          });
+          $("#disableAll").click(function() {
+            $(".single, .double, .fixed").rsSliderLens('option', 'enabled', false);
+          });
         });
     </script>
   </head>
   <body>
+    <h2>The following table is a testbed for some possible combinations of sliders.</h2>
+    <p>The first two rows contains horizontal and vertical sliders created out of an <code>&lt;input type="range"&gt;</code> markup, so they accept keyboard input.<br>
+       A slider made out of an <code>input</code> element, can only display a rendered ruler.</p>
+    <p>In the last two rows you can see horizontal and vertical sliders created out of a <code>&lt;span&gt;</code> markup, so they do not accept keyboard input by default. However, you can add a <code><a href="https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/tabindex" target="help">tabindex</a></code> attribute to the <code>span</code>, to make it keyboard friendly.<br>
+      A slider made out of a non <code>input</code> element can either display a ruler or the original html content.</p>
+      <p>All of these sliders a range from -30 to 100.</p>
+      <div>Scroll down below to test all sliders.</div>
     <table>
       <thead>
         <tr>
@@ -76,65 +129,138 @@
         <tr>
           <th></th>
           <th>ruler</th>
-          <th>no ruler</th>
+          <th>html content</th>
           <th>ruler</th>
-          <th>no ruler</th>
+          <th>html content</th>
           <th>ruler</th>
-          <th>no ruler</th>
+          <th>html content</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td>
-            type[range]<br>
-            horizontal
-            <div>[<span></span>, <span></span>]</div>
-            <div>[<span></span>, <span></span>]</div>
+          <td>type[range] horizontal</td>
+          <td colspan="2">
+            <input type="range" class="fixed h ruler norange"/>
+            <aside>[<span></span>, <span></span>]</aside>
           </td>
-          <td colspan="2"><input type="range" class="fixed h ruler"/></td>
-          <td colspan="2"><input type="range" class="single h ruler"/></td>
-          <td colspan="2"><input type="range" class="double h ruler"/></td>
+          <td colspan="2">
+            <input type="range" class="single h ruler"/>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td colspan="2">
+            <input type="range" class="double h ruler"/>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
         </tr>
         <tr>
-          <td>
-            type[range]<br>
-            vertical
-            <div>[<span></span>, <span></span>]</div>
-            <div>[<span></span>, <span></span>]</div>
+          <td>type[range] vertical</td>
+          <td colspan="2">
+            <input type="range" class="fixed v ruler"/>
+            <aside>[<span></span>, <span></span>]</aside>
           </td>
-          <td colspan="2"><input type="range" class="fixed v ruler"/></td>
-          <td colspan="2"><input type="range" class="single v ruler"/></td>
-          <td colspan="2"><input type="range" class="double v ruler"/></td>
+          <td colspan="2">
+            <input id="abc" type="range" class="single v ruler"/>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          </td>
+          <td colspan="2">
+            <input type="range" class="double v ruler"/>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
         </tr>
         <tr>
+          <td>span horizontal</td>
           <td>
-            span<br>
-            horizontal
-            <div>[<span></span>, <span></span>]</div>
-            <div>[<span></span>, <span></span>]</div>
+            <span tabindex="2" class="fixed h ruler">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
           </td>
-          <td><span tabindex="2" class="fixed h ruler">contentandthisistheend</span></td>
-          <td><span class="fixed h noruler" id="test">contentandthisistheend</span></td>
-          <td><span class="single h ruler">contentandthisistheend</span></td>
-          <td><span class="single h noruler">contentandthisistheend</span></td>
-          <td><span class="double h ruler">contentandthisistheend</span></td>
-          <td><span class="double h noruler">contentandthisistheend</span></td>
+          <td>
+            <span class="fixed h noruler" id="test">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          <td>
+            <span class="single h ruler">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="single h noruler">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="double h ruler">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="double h noruler">this is the original HTML content</span>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
         </tr>
         <tr>
+          <td>span vertical</td>
           <td>
-            span<br>
-            vertical
-            <div>[<span></span>, <span></span>]</div>
-            <div>[<span></span>, <span></span>]</div>
+            <span class="fixed v ruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
           </td>
-          <td><span class="fixed v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
-          <td><span class="fixed v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
-          <td><span class="single v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
-          <td><span class="single v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
-          <td><span class="double v ruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
-          <td><span class="double v noruler">conc<br>t<br>e<br>n<br>t<br>a<br>n<br>d<br>t<br>h<br>i<br>s<br>v<br>i<br>v<br>s<br>t<br>h<br>e<br>e<br>n<br>d</span></td>
+          <td>
+            <span class="fixed v noruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="single v ruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="single v noruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="double v ruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
+          <td>
+            <span class="double v noruler">0<br>1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9</span>
+            <aside>[<span></span>, <span></span>]</aside>
+            <aside>[<span></span>, <span></span>]</aside>
+          </td>
         </tr>
       </tbody>
     </table>
+
+    <section>
+      Apply the range
+      <button id="hidden">hidden</button>
+      <button id="min">min</button>
+      <button id="max">max</button>
+      <button id="interval30_80">[30, 80]</button>
+      <button id="interval_20_0">[-20, 0]</button>
+      <button id="between">between</button>
+      to all sliders with rulers
+      <div>Note that the sliders with html content also have ranges defined. They don't appear simply because they are hidden by css. You can remove the <code>display: none</code> if you need to show them.</div>
+      <div>The "between" range is only applicable to double sliders.</div>
+      <div>You can drag the [30, 80], [-20, 0] and "between" ranges to a different location (only applicable to the single and double handle sliders).</div>
+    </section>
+
+    <section>
+      Set the value of 
+      <button id="v10">10</button>
+      <button id="v40">40</button>
+      <button id="v_30">-30</button>
+      to all fixed and single handle sliders
+    </section>
+    <section>
+      Set the value of 
+      <button id="v10_40">10 and 40</button>
+      <button id="v20_100">20 and 100</button>
+      <button id="v_20_20">-20 and -20</button>
+      to all double handle sliders
+    </section>
+
+    <section>
+      You can<button id="disableAll">disable</button>and<button id="enableAll">enable</button>all sliders
+    </section>
   </body>
 </html>

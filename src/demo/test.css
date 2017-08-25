@@ -1,36 +1,116 @@
+body {
+    color: #ddd;
+}
+h2 {
+    color: white;
+}
+a {
+    color: #ccc;
+}
 table {
     font-size: .75em;
+    margin-bottom: 3em;
+}
+
+table thead {
+    font-size: 1.2em;
+    font-style: italic;
 }
 
 table td {
     padding: .5em;
+    text-align: center;
+    position: relative;
+}
+
+table td aside {
+    color: #aaa;
+    position: absolute;
+    bottom: 1em;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%);
+}
+
+table td aside:last-of-type {
+    bottom: 0;
 }
 
 table tbody tr td + td {
     padding: 2em;
 }
 
-
 table th, table td {
     border: 1px dotted grey;
 }
 
 input[type=range].h {
-    width: 200px;
+    width: 400px;
+    height: 25px;
 }
 
 input[type=range].v {
     width: 40px;
-    height: 150px;
+    height: 230px;
 }
 
 span.h {
     width: 250px;
-    height: 30px;
-    line-height: 30px;
+    height: 25px;
+    line-height: 25px;
 }
 
 span.v {
     height: 230px;
     line-height: 30px;
+    width: 40px;
+    display: inline-block;
+    text-align: center;
+}
+
+section {
+    margin-top: 1em;
+    padding-bottom: 1em;
+    border-bottom: 1px dotted #aaa;
+}
+
+section button {
+    margin: 0 .5em;
+}
+
+section div {
+    font-size: .9em;
+    color: #aaa;
+    font-style: italic;
+}
+
+section div:first-of-type {
+    margin-top: .5em;
+}
+
+.sliderlens svg {
+    font-size: 2em;
+}
+
+.sliderlens .range > div {
+    background-color: green;
+}
+
+.sliderlens.disabled {
+    opacity: .5;
+}
+
+.sliderlens.disabled,
+.sliderlens.disabled.horiz > .handle,
+.sliderlens.disabled.horiz > .handle1,
+.sliderlens.disabled.horiz > .handle2,
+.sliderlens.disabled.vert > .handle,
+.sliderlens.disabled.vert > .handle1,
+.sliderlens.disabled.vert > .handle2,
+.sliderlens.disabled.fixed.horiz,
+.sliderlens.disabled.fixed.vert {
+    cursor: not-allowed;
 }

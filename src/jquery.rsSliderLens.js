@@ -40,6 +40,9 @@
                 initSize: function ($e) {
                     var $sizeElem = $e || $elem;
                     if ($e === undefined) {
+                        if ((opts.width === 'auto' || opts.height === 'auto') && $sizeElem.css('display') === 'inline') {
+                            $sizeElem.css('display', 'inline-block'); // in order to retrieve the correct dimensions
+                        }
                         this.width = (opts.width === 'auto' ? $sizeElem.width() : opts.width) || 150;
                         this.height = (opts.height === 'auto' ? $sizeElem.height() : opts.height) || 50;
                     }
@@ -76,6 +79,13 @@
                     if (!info.hasRuler) {
                         $elem.css(info.isHoriz ? 'width' : 'height', 'auto');
                         this.initSize();
+                        if (info.isFixedHandle) {
+                            if (info.isHoriz) {
+                                $elem.css('line-height', this.height*opts.handle.zoom + 'px');
+                            } else {
+                                $elem.css('width', this.width*opts.handle.zoom + 'px');
+                            }
+                        }
                     }
 
                     var elemPosition = $elem.css('position'),
@@ -147,7 +157,9 @@
                             display: 'inline-block',
                             position: 'absolute'
                         },
-                        cssWrapper = {},
+                        cssWrapper = {
+                            overflow: 'hidden'
+                        },
                         cssInner = {},
                         value;
 
@@ -196,6 +208,19 @@
                     }
                     if (info.canDragRange) {
                         this.$rangeWrapper.addClass(opts.style.classRangeDraggable);
+                    }
+                },
+                appendToDOM: function (beforeHandle) {
+                    if (beforeHandle) {
+                        elemRange.$rangeWrapper.insertBefore(elemHandle.$elem1st);
+                    } else {
+                        elemRange.$rangeWrapper.appendTo(elemOrig.$wrapper);
+                    }
+                    if (elemMagnif.$elemRange1st) {
+                        elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
+                    }
+                    if (elemMagnif.$elemRange2nd) {
+                        elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
                     }
                 },
                 doUpdate: function (pos, isFirstHandle, $range, minCond, maxCond) {
@@ -251,8 +276,17 @@
                 initClone: function () {
                     this.$elem1st = $elem.clone().css('transform-origin', '0 0').
                         css(this.getRelativePosition()).removeAttr('tabindex autofocus id');
-                    if (info.isHoriz && info.isFixedHandle) {
-                        this.$elem1st.css('top', '');
+                    if (info.isHoriz) {
+                        if (info.isFixedHandle) {
+                            this.$elem1st.css('top', '');
+                            if (!info.hasRuler) {
+                                this.$elem1st.css('line-height', elemOrig.height + 'px');
+                            }
+                        }
+                    } else {
+                        if (!info.isFixedHandle && !info.hasRuler) {
+                            this.$elem1st.css('width', elemOrig.width*opts.handle.zoom + 'px');
+                        }
                     }
 
                     if (info.doubleHandles) {
@@ -529,7 +563,7 @@
                     }
                 },
                 onMouseWheel: function (event) {
-                    if (util.isAlmostZero(opts.step)) {
+                    if (!opts.enabled || util.isAlmostZero(opts.step)) {
                         return;
                     }
                     var delta = {x: 0, y: 0};
@@ -663,11 +697,8 @@
                             }
                             break;
                         case 'range':
-                            if (info.doubleHandles || value !== true && value !== 'between') { // single handles with range = true are ignored, since range true is only supported for double handle sliders
-                                var newRangeNeeded = value && (typeof value === 'object') && value.length === 2;
-                                // do not need a new range?
-                                if (value !== 'min' && value !== 'max' && !newRangeNeeded) {
-                                    // if currently ranges are being used, then delete them
+                            if (value) {
+                                if (info.doubleHandles || value.type !== true && value.type !== 'between') { // single handles with range = true are ignored, since range true is only supported for double handle sliders
                                     if (elemMagnif.$elemRange1st) {
                                         elemMagnif.$elemRange1st.remove();
                                         elemMagnif.$elemRange1st = null;
@@ -676,12 +707,26 @@
                                         elemMagnif.$elemRange2nd.remove();
                                         elemMagnif.$elemRange2nd = null;
                                     }
-                                    if (value === false && elemRange.$range) {
-                                        elemRange.$rangeWrapper.unbind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens mousedown touchstart mouseup touchend click').remove();
-                                        elemRange.$rangeWrapper = elemRange.$range = null;
+                                    elemRange.$rangeWrapper.remove();
+
+                                    opts.range = $.extend({}, opts.range, value);
+                                    info.initRangeVars();
+                                    elemRange.init();
+                                    elemMagnif.initRanges();
+                                    elemRange.appendToDOM(true);
+                                    if (Math.abs(opts.handle.mousewheel) > 0.5) {
+                                        elemRange.$rangeWrapper.bind('DOMMouseScroll.rsSliderLens mousewheel.rsSliderLens', elemHandle.onMouseWheel);
                                     }
+                                    if (info.canDragRange) {
+                                        elemRange.$range.bind('mousedown.rsSliderLens touchstart.rsSliderLens', panRangeUtil.startDrag);
+                                    }
+                                    noIEdrag(elemRange.$rangeWrapper);
+                                    noIEdrag(elemMagnif.$elemRange1st);
+                                    if (info.doubleHandles) {
+                                        noIEdrag(elemMagnif.$elemRange2nd);
+                                    }
+                                    info.updateHandles(opts.value);
                                 }
-                                opts.range = value;
                             }
                     }
                     return events.onGetter(event, field);
@@ -897,17 +942,20 @@
                         info.currValue[0] = opts.value;
                     }
                 },
+                initRangeVars: function () {
+                    this.isRangeFromToDefined = (typeof opts.range.type === 'object') && opts.range.type.length === 2;
+                    this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
+                },
                 initVars: function () {
+                    this.initRangeVars();
                     // if fixed handle and two values are provided, then the second is discarded, as double handlers are not supported when a fixedHandle is used
                     if (opts.fixedHandle !== false && opts.value && (typeof opts.value === 'object') && opts.value.length === 2) {
                         opts.value = opts.value[0];
                     }
                     this.doubleHandles = !!opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
-                    this.isRangeFromToDefined = (typeof opts.range.type === 'object') && opts.range.type.length === 2;
                     var delta = opts.max - opts.min;
                     opts.step = opts.step < 0 ? 0 : (opts.step > delta ? delta : opts.step);
                     this.isStepDefined = opts.step > 0.00005;
-                    this.canDragRange = opts.range.draggable && opts.fixedHandle === false && (this.doubleHandles && (opts.range.type === true || opts.range.type === 'between') || this.isRangeFromToDefined);
                     this.isInputTypeRange = $elem.is('input[type=range]');
                     this.isAutoFocusable = (this.isInputTypeRange || $elem.attr('tabindex') !== undefined) && $elem.attr('autofocus') !== undefined;
                     this.hasRuler = opts.ruler.visible || !!opts.ruler.onCustom;
@@ -1043,7 +1091,7 @@
                             elemOrig.$svg.css('transform', translate);
                         } else {
                             if (info.isHoriz) {
-                                elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate.replace(/-50%\)$/, (opts.contentOffset*100/opts.handle.zoom - 50) + '%)'));
+                                elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate.replace(/-50%\)$/, '0)'));
                                 $elem.css('transform', 'translate(' + pos + '%, ' + (opts.contentOffset*100 - 50) + '%)');
                             } else {
                                 elemMagnif.$elem1st.css('transform', 'scale(' + opts.handle.zoom + ') ' + translate);
@@ -1669,13 +1717,7 @@
         elemHandle.init();
 
         // insert into DOM
-        elemRange.$rangeWrapper.appendTo(elemOrig.$wrapper);
-        if (elemMagnif.$elemRange1st) {
-            elemMagnif.$elemRange1st.appendTo(elemHandle.$elem1st);
-        }
-        if (elemMagnif.$elemRange2nd) {
-            elemMagnif.$elemRange2nd.appendTo(elemHandle.$elem2nd);
-        }
+        elemRange.appendToDOM();
         elemHandle.$elem1st.add(elemHandle.$elem2nd).appendTo(elemOrig.$wrapper);
 
         $elem.
