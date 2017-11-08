@@ -676,7 +676,6 @@
                                     }
                                 }
                             }
-                            
                             break;
                         case 'value':
                             var twoValues = value && (typeof value === 'object') && value.length === 2;
@@ -725,7 +724,7 @@
                                     if (info.doubleHandles) {
                                         noIEdrag(elemMagnif.$elemRange2nd);
                                     }
-                                    info.updateHandles(opts.value);
+                                    info.updateHandles(info.currValue);
                                 }
                             }
                     }
@@ -996,17 +995,28 @@
                         this.toPixel = Math.round((opts.max - opts.min)*this.ticksStep);
                     }
                 },
-                updateHandles: function (values) {
+                doSetHandles: function (values) {
                     if (info.doubleHandles) {
-                        info.setValue(info.getCurrValue(values[0]), opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined, undefined, true);
-                        info.setValue(info.getCurrValue(values[1]), opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined, undefined, true);
+                        info.setValue(values[0], opts.flipped ? elemHandle.$elem2nd : elemHandle.$elem1st, info.isStepDefined, undefined, true);
+                        info.setValue(values[1], opts.flipped ? elemHandle.$elem1st : elemHandle.$elem2nd, info.isStepDefined, undefined, true);
                         events.processFinalChange(true);
                         events.processFinalChange(false);
                     } else {
-                        info.setValue(info.getCurrValue(values), elemHandle.$elem1st, info.isStepDefined, undefined, true);
+                        info.setValue(values[0], elemHandle.$elem1st, info.isStepDefined, undefined, true);
                         events.processFinalChange(true);
                     }
                 },
+                initHandles: function () {
+                    if (info.doubleHandles) {
+                        this.doSetHandles([info.getCurrValue(opts.value[0]), info.getCurrValue(opts.value[1])]);
+                    } else {
+                        this.doSetHandles([info.getCurrValue(opts.value)]);
+                    }
+                },
+                updateHandles: function (values) {
+                    this.doSetHandles(values);
+                },
+
                 checkLimits: function (value) {
                     var limit = opts.min;
                     if (info.isRangeFromToDefined) {
@@ -1773,7 +1783,7 @@
             elemHandle.$elem1st.focus();
         }
         $elem.triggerHandler('create.rsSliderLens');
-        info.updateHandles(opts.value);
+        info.initHandles();
     };
     
     $.fn.rsSliderLens = function (options) {
