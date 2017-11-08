@@ -2,7 +2,7 @@
   "name": "jquery.rsSliderLens",
   "title": "UI range slider",
   "description": "UI range slider control that magnifies the current value",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "homepage": "https://github.com/ruisoftware/jquery-rsSliderLens",
   "author": {
     "name": "Jose Rui Santos",
