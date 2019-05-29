@@ -69,6 +69,7 @@
                 init: function () {
                     this.tabindexAttr = $elem.attr('tabindex');
                     this.autofocusable = $elem.attr('autofocus');
+                    this.style = $elem.attr('style');
                     info.isFixedHandle = opts.fixedHandle !== false;
                     if (info.isFixedHandle) {
                         elemHandle.fixedHandleRelPos = opts.fixedHandle === true ? 0.5 : (opts.flipped ? 1 - opts.fixedHandle : opts.fixedHandle);
@@ -791,9 +792,6 @@
                             unbind('mousedown.rsSliderLens touchstart.rsSliderLens', panUtil.startDragFromHandle2nd);
                     }
 
-                    if (info.isFixedHandle) {
-                        $elem.unwrap();
-                    }
                     if (elemOrig.$canvas) {
                         elemOrig.$canvas.remove();
                     }
@@ -802,16 +800,18 @@
                     if (elemHandle.$elem2nd) {
                         elemHandle.$elem2nd.remove();
                     }
-                    $elem.css({
-                        'position': '',
-                        'display': ''
-                    });
-                    if ($elem.attr('style') === '') { 
+                    if (elemOrig.$svg) {
+                        elemOrig.$svg.remove();
+                    }
+                    if (elemOrig.style) {
+                        $elem.attr('style', elemOrig.style);
+                    } else {
                         $elem.removeAttr('style');
                     }
                     if (elemOrig.tabindexAttr) {
                         $elem.attr('tabindex', elemOrig.tabindexAttr);
                     }
+                    $elem.unwrap();
                 },
                 onCustomLabel: function (event, value) {
                     if (opts.ruler.labels.onCustomLabel) {
