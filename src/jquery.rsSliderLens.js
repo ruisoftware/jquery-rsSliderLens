@@ -1835,7 +1835,7 @@
                     return isNaN(value) ? 0.0 : value;
                 };
             if ($this.is('input[type=range]')) {
-                var attrValue = $this.val(),
+                var attrValue = $this.attr('value'),
                     doubleHandles = opts.value && (typeof opts.value === 'object') && opts.value.length === 2;
                     
                 if (attrValue !== undefined && !doubleHandles) {
